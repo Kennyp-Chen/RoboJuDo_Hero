@@ -119,15 +119,41 @@ class PolicyInterpManager(PolicyManager):
             self.interp_state = self.InterpState.END
 
     def toggle_mimic_policy(self, delta: int):
-        # only switch mimic policy if current policy is locomotion
+        """Toggle to next/previous mimic policy (only in LOCO mode)"""
         if self.current_policy_id != self.policy_loco_id:
-            logger.warning("Cannot switch mimic policy when policy is mimic.")
+            logger.warning("Cannot switch mimic policy when in MIMIC mode. Switch to LOCO first.")
             return
 
         self.policy_mimic_idx = (self.policy_mimic_idx + delta) % self.policy_mimic_num
         policy_id = self.policy_mimic_ids[self.policy_mimic_idx]
         policy_name = self.policy_by_id(policy_id).name
         logger.info(f"Switch mimic policy to {self.policy_mimic_idx}: {policy_name}")
+
+    def set_mimic_policy_index(self, index: int):
+        """Set mimic policy by index and switch to it"""
+        if index < 0 or index >= self.policy_mimic_num:
+            logger.warning(f"Invalid mimic policy index: {index}. Valid range: 0-{self.policy_mimic_num-1}")
+            return
+        
+        self.policy_mimic_idx = index
+        policy_id = self.policy_mimic_ids[self.policy_mimic_idx]
+        policy_name = self.policy_by_id(policy_id).name
+        logger.info(f"Set mimic policy to {self.policy_mimic_idx}: {policy_name}")
+        
+        # If currently in MIMIC mode, switch to the new policy immediately
+        if self.current_policy_id != self.policy_loco_id:
+            logger.info(f"Switching to new mimic policy: {policy_name}")
+            self.policy_by_id(policy_id).reset()
+            self.warmup_policy_indices.add(policy_id)
+            self._interpolate_init(
+                get_target_pos=lambda: self.policy_by_id(policy_id).get_init_dof_pos(),
+                durations=self.DURATIONS_LOCO_MIMIC,
+                callback_end=lambda: self.set_policy(policy_id),
+            )
+        # If in LOCO mode, just update the index (will be used when switching to MIMIC)
+        else:
+            logger.info(f"Mimic policy index updated. Press '[' or 'X' to activate.")
+
 
     def switch_to_loco(self):
         if self.current_policy_id == self.policy_loco_id and self.interp_state == self.InterpState.IDLE:
@@ -204,6 +230,56 @@ class RlLocoMimicPipeline(RlMultiPolicyPipeline):
         self.dt = 1.0 / self.freq
 
         self.policy_locomotion_mimic_flag = 0  # 0: locomotion, 1: mimic
+        self.waiting_for_command = True  # True: waiting for command, False: executing policy
+        self.current_pose = "sitting"  # "sitting" or "standing"
+
+        # Prepare configuration - DEBUG
+        self.prepare_pos = None
+        # Sitting pose configuration
+        self.sitting_pos = None
+        # Standing pose configuration
+        self.standing_pos = None
+        
+        # Check if cfg has sitting_pos
+        if hasattr(self.cfg, 'sitting_pos'):
+            logger.info(f"Found sitting_pos in cfg: {self.cfg.sitting_pos[:5]}...")
+            self.sitting_pos = np.array(self.cfg.sitting_pos)
+        # Check if cfg.env has sitting_pos
+        elif hasattr(self.cfg.env, 'sitting_pos'):
+            logger.info(f"Found sitting_pos in cfg.env: {self.cfg.env.sitting_pos[:5]}...")
+            self.sitting_pos = np.array(self.cfg.env.sitting_pos)
+        else:
+            logger.info("No sitting_pos found in cfg or cfg.env")
+        
+        # Check if cfg has standing_pos
+        if hasattr(self.cfg, 'standing_pos'):
+            logger.info(f"Found standing_pos in cfg: {self.cfg.standing_pos[:5]}...")
+            self.standing_pos = np.array(self.cfg.standing_pos)
+        # Check if cfg.env has standing_pos
+        elif hasattr(self.cfg.env, 'standing_pos'):
+            logger.info(f"Found standing_pos in cfg.env: {self.cfg.env.standing_pos[:5]}...")
+            self.standing_pos = np.array(self.cfg.env.standing_pos)
+        else:
+            logger.info("No standing_pos found in cfg or cfg.env, using loco_dof_pos")
+            self.standing_pos = self.loco_dof_pos.copy()
+        
+        # Check if cfg.env has prepare_pos configuration
+        logger.info(f"Environment type: {type(self.env)}")
+        logger.info(f"cfg.env type: {type(self.cfg.env)}")
+        logger.info(f"cfg.env attributes: {[attr for attr in dir(self.cfg.env) if not attr.startswith('_')]}")
+        
+        # Check if cfg.env has prepare_pos
+        if hasattr(self.cfg.env, 'prepare_pos'):
+            logger.info(f"Found prepare_pos in cfg.env: {self.cfg.env.prepare_pos[:5]}...")
+            self.prepare_pos = np.array(self.cfg.env.prepare_pos)
+            logger.info("Using custom prepare position from environment configuration")
+        # Check if sitting_pos is available for prepare
+        elif self.sitting_pos is not None:
+            logger.info(f"Using sitting_pos for prepare: {self.sitting_pos[:5]}...")
+            self.prepare_pos = self.sitting_pos.copy()
+            logger.info("Using sitting position for prepare (no custom prepare_pos found)")
+        else:
+            logger.info(f"No prepare_pos or sitting_pos found. Using loco_dof_pos: {self.loco_dof_pos[:5]}...")
 
         self.self_check()
         self.reset()
@@ -231,17 +307,50 @@ class RlLocoMimicPipeline(RlMultiPolicyPipeline):
                         logger.warning("Simulation Env reborn!")
                         self.env.reborn()  # pyright: ignore[reportAttributeAccessIssue]
                 case cmd if cmd.startswith("[POLICY_SWITCH]"):
+                    # Only allow policy switch when in standing pose
+                    if self.current_pose != "standing":
+                        logger.warning(f"Cannot switch policy when in {self.current_pose} pose. Switch to standing pose first.")
+                        continue
                     switch_target = cmd.split(",")[1]
                     if switch_target == "NEXT":
                         self.policy_manager.toggle_mimic_policy(1)
                     elif switch_target == "LAST":
                         self.policy_manager.toggle_mimic_policy(-1)
+                    else:
+                        # Direct index switch (e.g., "[POLICY_SWITCH],0")
+                        try:
+                            index = int(switch_target)
+                            self.policy_manager.set_mimic_policy_index(index)
+                        except ValueError:
+                            logger.warning(f"Invalid policy switch target: {switch_target}")
+                    self.waiting_for_command = False
+                    logger.info("Waiting for command cleared, executing switched policy")
                 case "[POLICY_LOCO]":
+                    # Only allow LOCO policy when in standing pose
+                    if self.current_pose != "standing":
+                        logger.warning(f"Cannot execute LOCO policy when in {self.current_pose} pose. Switch to standing pose first.")
+                        continue
                     self.policy_locomotion_mimic_flag = 0
                     self.policy_manager.switch_to_loco()
+                    self.waiting_for_command = False
+                    logger.info("Waiting for command cleared, executing LOCO policy")
                 case "[POLICY_MIMIC]":
+                    # Only allow MIMIC policy when in standing pose
+                    if self.current_pose != "standing":
+                        logger.warning(f"Cannot execute MIMIC policy when in {self.current_pose} pose. Switch to standing pose first.")
+                        continue
                     self.policy_locomotion_mimic_flag = 1
                     self.policy_manager.switch_to_mimic()
+                    self.waiting_for_command = False
+                    logger.info("Waiting for command cleared, executing MIMIC policy")
+                case "[SITTING_POSE]":
+                    # Only allow switching to sitting pose when in standing pose
+                    if self.current_pose != "standing":
+                        logger.warning(f"Cannot switch to sitting pose when in {self.current_pose} pose. Already in sitting pose.")
+                        continue
+                    self.switch_to_sitting()
+                case "[STANDING_POSE]":
+                    self.switch_to_standing()
 
         self.ctrl_manager.post_step_callback(ctrl_data)
 
@@ -271,6 +380,17 @@ class RlLocoMimicPipeline(RlMultiPolicyPipeline):
         if len(commands) > 0:
             logger.info(f"{'=' * 10} COMMANDS {'=' * 10}\n{commands}")
 
+        # If waiting for command, only update environment without executing policy
+        if self.waiting_for_command:
+            self.post_step_callback(env_data, ctrl_data, {}, None)
+            return
+
+        # Only execute policy when in standing pose
+        if self.current_pose != "standing":
+            logger.info(f"Current pose is {self.current_pose}, waiting for standing pose to execute policy")
+            self.post_step_callback(env_data, ctrl_data, {}, None)
+            return
+
         if self.policy_manager.current_policy_id == self.policy_manager.policy_loco_id:
             ctrl_data["ref_dof_pos"] = self.policy.obs_adapter.fit(self.policy_manager.override_dof_pos)
 
@@ -287,9 +407,47 @@ class RlLocoMimicPipeline(RlMultiPolicyPipeline):
 
         self.post_step_callback(env_data, ctrl_data, extras, pd_target)
 
+    def switch_to_sitting(self):
+        """
+        Switch robot to sitting pose
+        """
+        if self.sitting_pos is None:
+            logger.warning("No sitting_pos configured, cannot switch to sitting pose")
+            return
+        
+        logger.info(f"Switching to sitting pose: {self.sitting_pos[:5]}...")
+        # Use move_to_pose to smoothly move to sitting pose without resetting policy
+        super().move_to_pose(target_pos=self.sitting_pos.copy(), traj_len=500, blend_steps=150)
+        self.current_pose = "sitting"
+        logger.info("Successfully switched to sitting pose")
+
+    def switch_to_standing(self):
+        """
+        Switch robot to standing pose
+        """
+        if self.standing_pos is None:
+            logger.warning("No standing_pos configured, cannot switch to standing pose")
+            return
+        
+        logger.info(f"Switching to standing pose: {self.standing_pos[:5]}...")
+        # Use move_to_pose to smoothly move to standing pose without resetting policy
+        super().move_to_pose(target_pos=self.standing_pos.copy(), traj_len=500, blend_steps=150)
+        self.current_pose = "standing"
+        logger.info("Successfully switched to standing pose")
+
     def prepare(self):
-        init_motor_angle = self.loco_dof_pos.copy()
+        logger.info(f"=== PREPARE METHOD CALLED ===")
+        logger.info(f"prepare_pos is None: {self.prepare_pos is None}")
+        # Use custom prepare position if available, otherwise use loco position
+        if self.prepare_pos is not None:
+            init_motor_angle = self.prepare_pos.copy()
+            logger.info(f"Preparing with custom position (sitting pose): {init_motor_angle[:5]}...")
+        else:
+            init_motor_angle = self.loco_dof_pos.copy()
+            logger.info(f"Preparing with locomotion position (default): {init_motor_angle[:5]}...")
+        logger.info(f"Calling super().prepare() with init_motor_angle")
         super().prepare(init_motor_angle=init_motor_angle)
+        logger.info(f"=== PREPARE METHOD COMPLETED ===")
 
 
 if __name__ == "__main__":

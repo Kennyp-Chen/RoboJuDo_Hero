@@ -64,10 +64,10 @@ class G1BeyondMimicPolicyCfg(BeyondMimicPolicyCfg):
     robot: str = "g1"
 
     # policy_name: str = "Jump_wose"
-    policy_name: str = "Dance_wose"
-    # policy_name: str = "Violin"
+    # policy_name: str = "Dance_wose"
+    policy_name: str = "Violin"
     # policy_name: str = "Waltz"
-
+        # Dance102_sar_wose.onnx
     obs_dof: DoFConfig = G1BeyondMimicDoF()
     action_dof: DoFConfig = obs_dof
 

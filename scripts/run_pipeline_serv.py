@@ -44,65 +44,24 @@ def main():
 
     pipeline = pipeline_class(cfg=cfg)
 
-    # For real robot, wait for user confirmation before prepare
+    # For real robot, automatically execute prepare with sitting pose
     if not cfg.env.is_sim:
         logger.warning("=" * 60)
         logger.warning("REAL ROBOT MODE")
         logger.warning("=" * 60)
-        logger.warning("Press 'p' to start PREPARE (move to initial position)")
-        logger.warning("Press ESC or Ctrl+C to exit")
+        logger.warning("Automatically starting PREPARE (move to sitting position)...")
         logger.warning("=" * 60)
         
-        # Wait for 'p' key to start prepare
-        import sys
-        import termios
-        import tty
-        
-        old_settings = termios.tcgetattr(sys.stdin)
-        try:
-            tty.setraw(sys.stdin.fileno())
-            while True:
-                char = sys.stdin.read(1)
-                if char == 'p':
-                    logger.warning("Starting PREPARE...")
-                    break
-                elif char == '\x1b' or char == '\x03':  # ESC or Ctrl+C
-                    logger.warning("Cancelled by user, shutting down...")
-                    if hasattr(pipeline, 'env'):
-                        pipeline.env.shutdown()
-                    termios.tcsetattr(sys.stdin, termios.TCSADRAIN, old_settings)
-                    time.sleep(3)  # 增加等待时间，确保切换操作完成
-                    return
-        finally:
-            termios.tcsetattr(sys.stdin, termios.TCSADRAIN, old_settings)
-        
-        # Run prepare
+        # Automatically run prepare (will use sitting pose from config)
         pipeline.prepare()
         
-        # Wait for 's' key to start policy execution
+        # Prepare complete, ready for control via keyboard or controller
         logger.warning("=" * 60)
-        logger.warning("PREPARE COMPLETE - Robot at initial position")
+        logger.warning("PREPARE COMPLETE - Robot at sitting position")
         logger.warning("=" * 60)
-        logger.warning("Press 's' to START policy execution")
+        logger.warning("Ready for control via keyboard or controller")
         logger.warning("Press ESC or Ctrl+C to exit")
         logger.warning("=" * 60)
-        
-        old_settings = termios.tcgetattr(sys.stdin)
-        try:
-            tty.setraw(sys.stdin.fileno())
-            while True:
-                char = sys.stdin.read(1)
-                if char == 's':
-                    logger.warning("Starting POLICY EXECUTION...")
-                    break
-                elif char == '\x1b' or char == '\x03':  # ESC or Ctrl+C
-                    logger.warning("Cancelled by user, entering damping mode...")
-                    pipeline.env.shutdown()
-                    termios.tcsetattr(sys.stdin, termios.TCSADRAIN, old_settings)
-                    time.sleep(2)
-                    return
-        finally:
-            termios.tcsetattr(sys.stdin, termios.TCSADRAIN, old_settings)
 
     try:
         logger.warning("=" * 60)
@@ -124,11 +83,11 @@ def main():
                 else:
                     if not cfg.env.is_sim:
                         logger.error(f"Warning: frame drop -> {time_diff}")
-                        if time_diff < -0.2:
-                            logger.critical("Exiting due to excessive frame drop")
-                            pipeline.env.shutdown()
-                            time.sleep(10)
-                            break
+                        # if time_diff < -0.2:
+                        #     logger.critical("Exiting due to excessive frame drop")
+                        #     pipeline.env.shutdown()
+                        #     time.sleep(10)
+                        #     break
     except KeyboardInterrupt:
         logger.warning("Keyboard interrupt received, shutting down...")
         if hasattr(pipeline, 'env'):

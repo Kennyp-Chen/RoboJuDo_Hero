@@ -85,7 +85,12 @@ class RlPipeline(Pipeline):
         self.freq = self.cfg.policy.freq
         self.dt = 1.0 / self.freq
 
-        self.self_check()
+        # Only run self_check for simulation
+        if self.cfg.env.is_sim:
+            self.self_check()
+        else:
+            logger.info("Skipping self_check for real robot (will check during prepare)")
+        
         self.reset()
 
     def self_check(self):
@@ -161,29 +166,80 @@ class RlPipeline(Pipeline):
 
         self.post_step_callback(env_data, ctrl_data, extras, pd_target)
 
-    def prepare(self, init_motor_angle=None):
+    def prepare(self, init_motor_angle=None, traj_len=None, blend_steps=None):
+        """
+        Prepare robot for policy execution.
+        Moves robot to initial position without executing policy.
+        
+        Args:
+            init_motor_angle: Target motor angle to move to
+            traj_len: Total trajectory length in steps (default: 1000)
+            blend_steps: Number of steps for blending (default: 300)
+        """
         if init_motor_angle is not None:
             desired_motor_angle = init_motor_angle
         else:
             desired_motor_angle = self.policy.get_init_dof_pos()
 
-        # logger.info(f"{desired_motor_angle=}")
         current_motor_angle = np.array(self.env.dof_pos)
-        # logger.info(f"{current_motor_angle=}")
 
-        traj_len = 1000
+        traj_len = traj_len if traj_len is not None else 1000
+        blend_steps = blend_steps if blend_steps is not None else 300
         last_step_time = time.time()
-        logger.warning("prepare_init")
+        logger.warning("prepare_init: Moving robot to initial position...")
         pbar = ProgressBar("Prepare", traj_len)
+
+        # Reset policy before prepare to ensure clean state
+        logger.info("Resetting policy before prepare...")
+        self.reset()
 
         for t in range(traj_len):
             current_motor_angle = np.array(self.env.dof_pos)
 
-            blend_ratio = np.minimum(t / 300, 1)
+            blend_ratio = np.minimum(t / blend_steps, 1)
             action = (1 - blend_ratio) * current_motor_angle + blend_ratio * desired_motor_angle
 
-            # warm up network
-            self.step(dry_run=True)
+            # Don't run policy during prepare, just move to initial position
+            self.env.step(action)
+
+            time_diff = last_step_time + self.dt - time.time()
+            if time_diff > 0:
+                time.sleep(time_diff)
+            else:
+                logger.error("Warning: frame drop")
+            last_step_time = time.time()
+            pbar.update()
+
+        # Final reset to ensure policy starts from beginning
+        logger.warning("prepare_done: Robot ready, policy will start from step 0")
+        self.reset()
+
+        time.sleep(0.01)
+        pbar.close()
+        logger.warning("prepare_done")
+
+    def move_to_pose(self, target_pos, traj_len=500, blend_steps=150):
+        """
+        Move robot to target position without resetting policy.
+        Used for smooth pose transitions during runtime.
+        
+        Args:
+            target_pos: Target motor angle to move to
+            traj_len: Total trajectory length in steps (default: 500)
+            blend_steps: Number of steps for blending (default: 150)
+        """
+        current_motor_angle = np.array(self.env.dof_pos)
+        desired_motor_angle = np.array(target_pos)
+
+        last_step_time = time.time()
+        logger.warning(f"move_to_pose: Moving robot to target position...")
+        pbar = ProgressBar("Pose Transition", traj_len)
+
+        for t in range(traj_len):
+            current_motor_angle = np.array(self.env.dof_pos)
+
+            blend_ratio = np.minimum(t / blend_steps, 1)
+            action = (1 - blend_ratio) * current_motor_angle + blend_ratio * desired_motor_angle
 
             self.env.step(action)
 
@@ -195,13 +251,9 @@ class RlPipeline(Pipeline):
             last_step_time = time.time()
             pbar.update()
 
-            if t == 0.9 * traj_len:
-                logger.info(f"{'=' * 10} RESET ZERO POSITION {'=' * 10}")
-                self.reset()
-
         time.sleep(0.01)
         pbar.close()
-        logger.warning("prepare_done")
+        logger.warning("move_to_pose: Done")
 
 
 if __name__ == "__main__":

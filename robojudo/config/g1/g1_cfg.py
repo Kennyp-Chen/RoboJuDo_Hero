@@ -45,8 +45,8 @@ class g1(RlPipelineCfg):
     # env: G1_12MujocoEnvCfg = G1_12MujocoEnvCfg()
 
     ctrl: list[JoystickCtrlCfg | KeyboardCtrlCfg] = [  # note: the ranking of controllers matters
-        JoystickCtrlCfg(),
-        # KeyboardCtrlCfg(),
+        # JoystickCtrlCfg(),
+        KeyboardCtrlCfg(),
     ]
 
     policy: G1UnitreePolicyCfg = G1UnitreePolicyCfg()
@@ -72,8 +72,9 @@ class g1_real(g1):
         ),
     )
 
-    ctrl: list[UnitreeCtrlCfg] = [
-        UnitreeCtrlCfg(),
+    ctrl: list[UnitreeCtrlCfg | KeyboardCtrlCfg] = [
+        KeyboardCtrlCfg(ctrl_type="KeyboardStdinCtrl"),  # SSH 键盘控制（通过 stdin）
+        UnitreeCtrlCfg(),   # Unitree 手柄控制
     ]
 
     do_safety_check: bool = True  # enable safety check for real robot
@@ -169,11 +170,15 @@ class g1_beyondmimic(RlPipelineCfg):
     env: G1MujocoEnvCfg = G1MujocoEnvCfg()
     ctrl: list[KeyboardCtrlCfg] = [
         KeyboardCtrlCfg(),
+
     ]
 
     policy: G1BeyondMimicPolicyCfg = G1BeyondMimicPolicyCfg(
-        policy_name="Jump_wose",
-        without_state_estimator=True,
+        # policy_name="Jump_wose",
+        # policy_name = "Dance_wose" , # 舞蹈
+        policy_name = "Violin"   ,   # 拉小提琴
+        # policy_name = "Waltz"    ,   # 华尔兹
+        without_state_estimator=False,  # Violin is SE version
         use_modelmeta_config=True,  # use robot dof config from modelmeta
         use_motion_from_model=True,  # use motion from onnx model
         max_timestep=140,
@@ -199,6 +204,209 @@ class g1_beyondmimic_with_ctrl(RlPipelineCfg):
         policy_name="Dance_wose",
         use_motion_from_model=False,  # use motion from BeyondmimicCtrl instead of the onnx
     )
+
+
+@cfg_registry.register
+class g1_beyondmimic_real(RlPipelineCfg):
+    """
+    BeyondMimic Policy on Real G1 Robot.
+    Deploy BeyondMimic motion tracking on real hardware.
+    
+    Usage:
+        python scripts/run_pipeline.py -c g1_beyondmimic_real
+    
+    Controls:
+        - ESC: Emergency stop (enter damping mode)
+        - Shift + <: Start/resume motion playback
+        - Shift + >: Pause motion playback
+        - Shift + |: Reset motion progress
+    
+    Available motions (change policy_name):
+        - "Jump_wose": Jumping motion
+        - "Dance_wose": Dancing motion
+        - "Violin": Violin playing motion
+        - "Waltz": Waltz dancing motion
+    """
+
+    robot: str = "g1"
+    
+    # Real robot environment
+    env: G1RealEnvCfg = G1RealEnvCfg(
+        env_type="UnitreeCppEnv",  # For unitree_cpp
+        unitree=G1UnitreeCfg(
+            net_if="eth0",  # note: change to your network interface
+        ),
+    )
+
+    # Keyboard control for motion playback (SSH stdin, works over SSH)
+    ctrl: list[KeyboardCtrlCfg] = [
+        KeyboardCtrlCfg(ctrl_type="KeyboardStdinCtrl"),
+    ]
+
+    # BeyondMimic policy configuration
+    policy: G1BeyondMimicPolicyCfg = G1BeyondMimicPolicyCfg(
+        # Choose one motion (wose = without state estimator):
+        # policy_name="Jump_wose",      # Jumping (default, safer for testing)
+        policy_name="Dance_wose",   # Dancing
+        
+        without_state_estimator=True,  # WOSE version (matches Jump_wose, Dance_wose)
+        use_modelmeta_config=True,
+        use_motion_from_model=True,
+        max_timestep=140,  # Motion duration (adjust based on motion)
+    )
+
+    # Enable safety check for real robot
+    do_safety_check: bool = True
+
+
+@cfg_registry.register
+class g1_real_locomimic(RlLocoMimicPipelineCfg):
+    """
+    Real G1 Robot with Loco-Mimic switching.
+    Switch between locomotion (WASD control) and mimic (BeyondMimic/...) policies.
+    
+    Usage:
+        python scripts/run_pipeline.py -c g1_real_locomimic
+    
+    Controls (Keyboard via SSH):
+        - WASD/QE: Movement control (when in LOCO mode)
+        - ]: Switch to LOCO mode
+        - [: Switch to current MIMIC policy
+        - 1: Switch to Dance motion
+        - 2: Switch to xxxx motion
+        - 5: Switch to sitting pose
+        - 6: Switch to standing pose
+        - ESC: Emergency stop
+    
+    Controls (Unitree Controller):
+        - Left/Right Stick: Movement control (when in LOCO mode)
+        - Y: Switch to LOCO mode
+        - X: Switch to current MIMIC policy
+        - up: Switch to Dance motion
+        - down: Switch to xxxx motion
+        - A: Emergency stop
+        - B: Switch to sitting pose
+        - L2+Up: Switch to standing pose
+    """
+
+    robot: str = "g1"
+    
+    # Real robot environment
+    env: G1RealEnvCfg = G1RealEnvCfg(
+        env_type="UnitreeCppEnv",
+        unitree=G1UnitreeCfg(
+            net_if="eth0",
+        ),
+    )
+
+    # Sitting pose configuration
+    sitting_pos: list[float] = [
+        *[-1.2, 0.0, 0.0, 1.5, -0.2, 0.0],  # 左腿
+        *[-1.2, 0.0, 0.0, 1.5, -0.2, 0.0],  # 右腿
+        *[0, 0, 0],  # 腰部
+        *[-0.4, 0, 0, 0, -1.5, 0, 0],# 左臂
+        *[-0.4, 0, 0, 0, 1.5, 0, 0], # 右臂
+    ]
+
+    # Standing pose configuration
+    standing_pos: list[float] = [
+        *[-0.1, 0.0, 0.0, 0.3, -0.2, 0.0],  # 左腿
+        *[-0.1, 0.0, 0.0, 0.3, -0.2, 0.0],  # 右腿
+        *[0, 0, 0],  # 腰部
+        *[0, 0, 0, 0, 0, 0, 0],  # 左臂
+        *[0, 0, 0, 0, 0, 0, 0],  # 右臂
+    ]
+
+    # Keyboard and controller with policy switching
+    ctrl: list[KeyboardCtrlCfg | UnitreeCtrlCfg] = [
+        KeyboardCtrlCfg(
+            ctrl_type="KeyboardStdinCtrl",
+            triggers_extra={
+                "]": "[POLICY_LOCO]",       # Switch to LOCO
+                "[": "[POLICY_MIMIC]",      # Switch to current MIMIC
+                # "Key.tab": "[POLICY_TOGGLE]",
+
+                "1": "[POLICY_SWITCH],0",   #  Index0 motion
+                "2": "[POLICY_SWITCH],1",   #  Index1 motion
+                "3": "[POLICY_SWITCH],2",   #  Index2 motion
+                "4": "[POLICY_SWITCH],3",   #  Index3 motion
+                "5": "[SITTING_POSE]",      # Switch to sitting pose
+                "6": "[STANDING_POSE]",      # Switch to standing pose
+
+            }
+        ),
+        UnitreeCtrlCfg(
+            combination_init_buttons=["L1", "R1", "L2"],  # Add L2 for combination keys
+            triggers_extra={
+                "Y": "[POLICY_LOCO]",       # Y button -> LOCO
+                "X": "[POLICY_MIMIC]",      # X button -> MIMIC
+                "Up": "[POLICY_SWITCH],0",     # Up -> Index0 motion
+                "Down": "[POLICY_SWITCH],1",   # Down -> Index1 motion
+                "Left": "[POLICY_SWITCH],2",    # Left -> Index2 motion
+                "Right": "[POLICY_SWITCH],3",   # Right -> Index3 motion
+                "B": "[SITTING_POSE]",         # B button -> Switch to sitting pose
+                "L2+Up": "[STANDING_POSE]",    # L2+Up -> Switch to standing pose
+            }
+        ),
+    ]
+
+    # Locomotion policy (WASD control)
+    loco_policy: G1UnitreePolicyCfg = G1UnitreePolicyCfg()
+    
+    '''
+        policies: list[G1UnitreePolicyCfg | G1AmoPolicyCfg] = [
+        G1UnitreePolicyCfg(),
+        G1AmoPolicyCfg(),
+    ]
+
+    '''
+    # Mimic policies: Dance + ASAP CR7
+    mimic_policies: list[G1BeyondMimicPolicyCfg | G1AmoPolicyCfg] = [
+        # Index 0: Dance motion
+        G1AmoPolicyCfg(),
+
+        G1BeyondMimicPolicyCfg(
+            # policy_name="Dance204_wose",
+            policy_name="Jump_wose",
+
+            without_state_estimator=True,
+            use_modelmeta_config=True,
+            use_motion_from_model=True,
+            max_timestep=2000,
+        ),
+
+        # Index 1： 
+        G1BeyondMimicPolicyCfg(
+            # policy_name="Dance102_sar_wose",
+            policy_name="Walk105_wose",
+            
+            without_state_estimator=True,
+            use_modelmeta_config=True,
+            use_motion_from_model=True,
+            max_timestep=2000,
+        ),
+        # Index 2: 
+        G1BeyondMimicPolicyCfg(
+            policy_name="Gangnanstyle_wose",
+            without_state_estimator=True,
+            use_modelmeta_config=True,
+            use_motion_from_model=True,
+            max_timestep=2000,
+        ),
+        # Index 3:
+        G1BeyondMimicPolicyCfg(
+            # policy_name="Dance101_wose",
+            policy_name="Dance_wose",
+
+            without_state_estimator=True,
+            use_modelmeta_config=True,
+            use_motion_from_model=True,
+            max_timestep=2000,
+        ),
+    ]
+
+    # Enable safety check for real robot
+    do_safety_check: bool = True
 
 
 @cfg_registry.register
@@ -296,43 +504,105 @@ class g1_twist(RlPipelineCfg):
     policy: G1TwistPolicyCfg = G1TwistPolicyCfg()
 
 
-# ======================== Fancy Example Configs ======================== #
+
+# ======================== Custom Multi-Policy Examples ======================== #
 
 
 @cfg_registry.register
-class g1_switch_beyondmimic(RlMultiPolicyPipelineCfg):
+class g1_real_locomimic_multi(RlLocoMimicPipelineCfg):
     """
-    Switch between multiple BeyondMimic policies. Withour Interpolation.
+    Real G1 Robot with multiple Mimic policies.
+    Example configuration showing how to add multiple mimic policies and switch between them.
+    
+    Usage:
+        python scripts/run_pipeline.py -c g1_real_locomimic_multi
+    
+    Controls (Keyboard via SSH):
+        - WASD/QE: Movement control (when in LOCO mode)
+        - ]: Switch to LOCO mode
+        - [: Switch to current MIMIC policy
+        - 1: Switch to Jump motion (index 0)
+        - 2: Switch to Dance motion (index 1)
+        - 3: Switch to ASAP CR7 motion (index 2)
+        - ESC: Emergency stop
+    
+    Controls (Unitree Controller):
+        - Left/Right Stick: Movement control (when in LOCO mode)
+        - Y: Switch to LOCO mode
+        - X: Switch to current MIMIC policy
+        - up: Switch to Jump motion
+        - down: Switch to Dance motion
+        - left: Switch to ASAP CR7 motion
+        - right: Next MIMIC policy
+        - A: Emergency stop
+    
+    Note: You can only switch between mimic policies when in LOCO mode.
+          See docs/G1_REAL_LOCOMIMIC_GUIDE.md for more details.
     """
 
     robot: str = "g1"
-    env: G1MujocoEnvCfg = G1MujocoEnvCfg()
-    ctrl: list[KeyboardCtrlCfg | JoystickCtrlCfg] = [
+    
+    env: G1RealEnvCfg = G1RealEnvCfg(
+        env_type="UnitreeCppEnv",
+        unitree=G1UnitreeCfg(net_if="eth0"),
+    )
+
+    ctrl: list[KeyboardCtrlCfg | UnitreeCtrlCfg] = [
+        # SSH keyboard control
         KeyboardCtrlCfg(
+            ctrl_type="KeyboardStdinCtrl",
             triggers_extra={
-                "Key.tab": "[POLICY_TOGGLE]",
-                "!": "[POLICY_SWITCH],0",  # note: with shift
-                "@": "[POLICY_SWITCH],1",  # note: with shift
-                "#": "[POLICY_SWITCH],2",  # note: with shift
-                "$": "[POLICY_SWITCH],3",  # note: with shift
+                "]": "[POLICY_LOCO]",       # Switch to LOCO
+                "[": "[POLICY_MIMIC]",      # Switch to current MIMIC
+                "1": "[POLICY_SWITCH],0",   # Jump
+                "2": "[POLICY_SWITCH],1",   # Dance
+                "3": "[POLICY_SWITCH],2",   # ASAP CR7
             }
         ),
-        JoystickCtrlCfg(
+        # Unitree controller
+        UnitreeCtrlCfg(
             triggers_extra={
-                "RB+Down": "[POLICY_SWITCH],0",
-                "RB+Left": "[POLICY_SWITCH],1",
-                "RB+Up": "[POLICY_SWITCH],2",
-                "RB+Right": "[POLICY_SWITCH],3",
+                "Y": "[POLICY_LOCO]",       # Y button -> LOCO
+                "X": "[POLICY_MIMIC]",      # X button -> MIMIC
+                "Up": "[POLICY_SWITCH],0",     # Up -> Jump
+                "Down": "[POLICY_SWITCH],1",   # Down -> Dance
+                "Left": "[POLICY_SWITCH],2",   # Left -> ASAP
+                "Right": "[POLICY_SWITCH],NEXT",  # Right -> Next policy
             }
         ),
     ]
 
-    policies: list[G1AmoPolicyCfg | G1BeyondMimicPolicyCfg] = [
-        G1AmoPolicyCfg(),
-        G1BeyondMimicPolicyCfg(policy_name="Violin", without_state_estimator=False, max_timestep=500),
-        G1BeyondMimicPolicyCfg(policy_name="Waltz", without_state_estimator=False, max_timestep=850),
-        G1BeyondMimicPolicyCfg(policy_name="Dance_wose", without_state_estimator=True),
+    loco_policy: G1UnitreePolicyCfg = G1UnitreePolicyCfg()
+    
+    # Multiple mimic policies
+    mimic_policies: list[G1BeyondMimicPolicyCfg | G1AsapPolicyCfg] = [
+        # Index 0: Jump motion
+        G1BeyondMimicPolicyCfg(
+            policy_name="Jump_wose",
+            without_state_estimator=True,
+            use_modelmeta_config=True,
+            use_motion_from_model=True,
+            max_timestep=140,
+        ),
+        # Index 1: Dance motion
+        G1BeyondMimicPolicyCfg(
+            policy_name="Dance_wose",
+            without_state_estimator=True,
+            use_modelmeta_config=True,
+            use_motion_from_model=True,
+            max_timestep=200,
+        ),
+        # Index 2: ASAP CR7 motion
+        G1AsapPolicyCfg(
+            policy_name="CR7_level1",
+            relative_path="model_191500.onnx",
+            motion_length_s=3.967,
+        ),
     ]
 
+    do_safety_check: bool = True
 
-# TIPS: check g1_loco_mimic_cfg.py for more complex examples
+
+from .g1_real_servmimic_cfg import g1_real_servmimic  # noqa: F401
+
+

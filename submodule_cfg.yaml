@@ -5,7 +5,7 @@
 # For MujocoEnv and Kinematics Visualization
 # can be skipped on real robot
 mujoco_viewer: 
-  install: true
+  install: false
   path: third_party/mujoco_viewer
   patches: 
     # Patch for visualization draw
@@ -15,7 +15,7 @@ mujoco_viewer:
 # Python binding for Unitree SDK2, https://github.com/HansZ8/unitree_cpp
 # need to install Unitree SDK2 first
 unitree_cpp:
-  install: false
+  install: True
   path: packages/unitree_cpp
 
 

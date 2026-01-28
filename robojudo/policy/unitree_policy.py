@@ -34,6 +34,8 @@ class UnitreePolicy(Policy):
 
     def _get_commands(self, ctrl_data):
         commands = np.zeros(3)
+        
+        # Priority 1: Check for joystick/controller input (UnitreeCtrl, JoystickCtrl)
         for key in ctrl_data.keys():
             if key in ["JoystickCtrl", "UnitreeCtrl"]:
                 axes = ctrl_data[key]["axes"]
@@ -42,9 +44,17 @@ class UnitreePolicy(Policy):
                 commands[0] = command_remap(ly, self.commands_map[0])
                 commands[1] = command_remap(lx, self.commands_map[1])
                 commands[2] = command_remap(rx, self.commands_map[2])
-                break
-            if key in ["KeyboardCtrl"]:
+                return commands  # Return immediately if joystick found
+        
+        # Priority 2: Check for keyboard input (only if no joystick)
+        for key in ctrl_data.keys():
+            # Support all keyboard controllers (KeyboardCtrl, KeyboardStdinCtrl, etc.)
+            if key.startswith("Keyboard"):
                 keys = ctrl_data[key]["keyboard_event"]
+                if keys:  # Debug: log when keys are received
+                    import logging
+                    logger = logging.getLogger(__name__)
+                    logger.debug(f"Received keyboard events: {keys}")
                 for event in keys:
                     if event["type"] == "keyboard":
                         value = event["pressed"] * 1.5
@@ -61,7 +71,8 @@ class UnitreePolicy(Policy):
                                 commands[2] = command_remap(value, self.commands_map[2])
                             case "q":
                                 commands[2] = command_remap(-value, self.commands_map[2])
-                break
+                return commands  # Return after processing keyboard
+        
         return commands
 
     def get_observation(self, env_data, ctrl_data):
