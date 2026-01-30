@@ -317,6 +317,52 @@ void UnitreeController::shutdown() {
     std::cout << "Shutting down UnitreeController..." << std::endl;
     set_gains(std::vector<double>(num_dofs_, 0.0), std::vector<double>(num_dofs_, 5.0));
     step(std::vector<double>(num_dofs_, 0.0));
+    std::cout << "Robot set to damping mode." << std::endl;
+    
+    // Switch back to internal control (public version) using MotionSwitcherClient
+    try {
+        std::cout << "Switching back to internal control (public version) using MotionSwitcherClient..." << std::endl;
+        
+        // 使用已经初始化的 MotionSwitcherClient
+        if (msc_) {
+            std::cout << "Using existing MotionSwitcherClient..." << std::endl;
+            
+            // 尝试多次切换
+            int max_attempts = 3;
+            int attempt = 0;
+            bool success = false;
+            
+            while (attempt < max_attempts && !success) {
+                attempt++;
+                std::cout << "Attempt " << attempt << "/" << max_attempts << ": Selecting 'ZeroTorque' mode ..." << std::endl;
+                int32_t ret = msc_->SelectMode("ai");
+                if (ret == 0) {
+                    std::cout << "Switched back to internal control successfully." << std::endl;
+                    success = true;
+                } else {
+                    std::cout << "Failed to switch back to internal control, error code: " << ret << std::endl;
+                    if (attempt < max_attempts) {
+                        std::cout << "Retrying in 2 seconds..." << std::endl;
+                        sleep(2);
+                    }
+                }
+            }
+            
+            if (!success) {
+                std::cout << "All attempts failed, robot remains in damping mode." << std::endl;
+            }
+        } else {
+            std::cout << "MotionSwitcherClient not initialized, cannot switch back to internal control." << std::endl;
+        }
+    } catch (const std::exception& e) {
+        std::cout << "Exception during mode switching: " << e.what() << std::endl;
+    } catch (...) {
+        std::cout << "Unknown exception during mode switching." << std::endl;
+    }
+    
+    // 增加等待时间，确保所有操作完成
+    std::cout << "Waiting for mode switching to complete..." << std::endl;
+    sleep(3);
 }
 
 RobotState UnitreeController::get_robot_state() {
