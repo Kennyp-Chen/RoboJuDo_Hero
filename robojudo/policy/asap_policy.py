@@ -205,7 +205,7 @@ class AsapLocoPolicy(Policy):
         self.ref_upper_dof_pos = self.ref_upper_dof_pos_default.copy()
         self.lin_vel_command = np.array([0.0, 0.0])
         self.ang_vel_command = np.array([0.0])
-        self.stand_command = np.array([0])
+        self.stand_command = np.array([1])# 0-》1
         self.base_height_command = self.base_height_command_default.copy()
 
         self.last_action = np.zeros(self.num_actions)
@@ -227,7 +227,7 @@ class AsapLocoPolicy(Policy):
         return np.concatenate(history_list, axis=0)
 
     def get_observation(self, env_data, ctrl_data):
-        self._update_commands(ctrl_data)
+        self._update_commands(ctrl_data, env_data)
 
         base_quat = env_data.base_quat  # [x, y, z, w]
         base_ang_vel = env_data.base_ang_vel
@@ -316,11 +316,13 @@ class AsapLocoPolicy(Policy):
         # return full_actions
         return processed_actions
 
-    def _update_commands(self, ctrl_data):
+    def _update_commands(self, ctrl_data, env_data=None):
         if (ref_dof_pos := ctrl_data.get("ref_dof_pos", None)) is not None:
             self.ref_upper_dof_pos = ref_dof_pos.copy()[-self.num_upper_dofs :]
+
+        # Axes-based commands (works for joystick/unitree/keyboard virtual axes)
         for key in ctrl_data.keys():
-            if key in ["JoystickCtrl", "UnitreeCtrl"]:
+            if key in ["JoystickCtrl", "UnitreeCtrl", "KeyboardCtrl"]:
                 axes = ctrl_data[key]["axes"]
                 lx, ly, rx, _ry = axes["LeftX"], axes["LeftY"], axes["RightX"], axes["RightY"]
 
@@ -343,36 +345,44 @@ class AsapLocoPolicy(Policy):
                             case "Down":
                                 self.base_height_command[0] -= 0.05
                 break
-            elif key == "KeyboardCtrl":
-                for event in ctrl_data[key]["keyboard_event"]:
-                    if event["type"] == "keyboard" and event["pressed"]:
-                        match event["name"]:
-                            case "w":
-                                self.lin_vel_command[0] += 0.1 if self.stand_command else 0.0
-                            case "s":
-                                self.lin_vel_command[0] -= 0.1 if self.stand_command else 0.0
-                            case "a":
-                                self.lin_vel_command[1] += 0.1 if self.stand_command else 0.0
-                            case "d":
-                                self.lin_vel_command[1] -= 0.1 if self.stand_command else 0.0
-                            case "q":
-                                self.ang_vel_command[0] -= 0.1
-                            case "e":
-                                self.ang_vel_command[0] += 0.1
-                            case "z":
+
+        # Keyboard-specific toggles / commands
+        if "KeyboardCtrl" in ctrl_data:
+            for event in ctrl_data["KeyboardCtrl"]["keyboard_event"]:
+                if event["type"] == "keyboard" and event["pressed"]:
+                    match event["name"]:
+                        case "z":
+                            self.ang_vel_command[0] = 0.0
+                            self.lin_vel_command[0] = 0.0
+                            self.lin_vel_command[1] = 0.0
+                        case "1":
+                            self.base_height_command += 0.05
+                        case "2":
+                            self.base_height_command -= 0.05
+                        case "=":
+                            self.stand_command = 1 - self.stand_command
+                            if self.stand_command == 0:
                                 self.ang_vel_command[0] = 0.0
                                 self.lin_vel_command[0] = 0.0
                                 self.lin_vel_command[1] = 0.0
-                            case "1":
-                                self.base_height_command += 0.05
-                            case "2":
-                                self.base_height_command -= 0.05
-                            case "=":
-                                self.stand_command = 1 - self.stand_command
-                                if self.stand_command == 0:
-                                    self.ang_vel_command[0] = 0.0
-                                    self.lin_vel_command[0] = 0.0
-                                    self.lin_vel_command[1] = 0.0
+        # 调节侧向漂移
+        # Engineering patch: small body-frame lateral velocity feedback to counteract right drift
+        if env_data is not None and self.stand_command[0] > 0:
+            # print(env_data)
+            # Only apply when standing and no explicit lateral command from axes
+            if abs(self.lin_vel_command[1]) < 0.01:  # near-zero user command
+                # lateral_vel_body = env_data.base_lin_vel[1] if env_data.base_lin_vel is not None else 0.0
+                # # Simple proportional feedback: if drifting right (+y), command left (-y)
+                # self.lin_vel_command[1] -= 1. * lateral_vel_body
+                # # Clip to reasonable limits
+                # self.lin_vel_command[1] = np.clip(self.lin_vel_command[1], -0.2, 0.2)
+                
+                # lateral_vel_body = env_data.base_lin_vel[1] if env_data.base_lin_vel is not None else 0.0
+                # print(lateral_vel_body)
+                # 手动调整 260203
+                self.lin_vel_command[1]=0.04
+            if abs(self.lin_vel_command[0]) < 0.01:
+                self.lin_vel_command[0]=0.02
 
     def debug_viz(self, visualizer: MujocoVisualizer, env_data, ctrl_data, extras):
         base_pos = env_data["base_pos"]

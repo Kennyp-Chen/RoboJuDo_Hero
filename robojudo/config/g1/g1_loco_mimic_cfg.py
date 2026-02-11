@@ -214,6 +214,16 @@ class g1_locomimic_asap_full(G1RlLocoMimicPipelineCfg):
                 "'": "[POLICY_SWITCH],LAST",
             }
         ),
+        # JoystickCtrlCfg(
+        #     combination_init_buttons=[],
+        #     triggers={
+        #         "A": "[SHUTDOWN]",
+        #         "Back": "[POLICY_LOCO]",
+        #         "Start": "[POLICY_MIMIC]",
+        #         "RB": "[POLICY_SWITCH],NEXT",
+        #         "LB": "[POLICY_SWITCH],LAST",
+        #     },
+        # ),
     ]
 
     loco_policy: G1AsapLocoPolicyCfg = G1AsapLocoPolicyCfg()

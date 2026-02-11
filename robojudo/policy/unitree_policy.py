@@ -35,7 +35,7 @@ class UnitreePolicy(Policy):
     def _get_commands(self, ctrl_data):
         commands = np.zeros(3)
         for key in ctrl_data.keys():
-            if key in ["JoystickCtrl", "UnitreeCtrl"]:
+            if key in ["JoystickCtrl", "UnitreeCtrl", "KeyboardCtrl"]:
                 axes = ctrl_data[key]["axes"]
                 lx, ly, rx, ry = axes["LeftX"], axes["LeftY"], axes["RightX"], axes["RightY"]
 
@@ -43,6 +43,7 @@ class UnitreePolicy(Policy):
                 commands[1] = command_remap(lx, self.commands_map[1])
                 commands[2] = command_remap(rx, self.commands_map[2])
                 break
+
             if key in ["KeyboardCtrl"]:
                 keys = ctrl_data[key]["keyboard_event"]
                 for event in keys:
@@ -62,11 +63,25 @@ class UnitreePolicy(Policy):
                             case "q":
                                 commands[2] = command_remap(-value, self.commands_map[2])
                 break
+
+
         return commands
 
     def get_observation(self, env_data, ctrl_data):
         phase = self._get_phase()
         commands = self._get_commands(ctrl_data)
+
+        # 手动调整步态漂移 260203
+        # if env_data is not None and __name__=='robojudo.policy.unitree_policy':
+        #     # lateral_vel_body = env_data.base_lin_vel[1] if env_data.base_lin_vel is not None else 0.0
+        #     # print(lateral_vel_body)  
+          
+        #     # comands.shape=3： 0前后 1左右横移 2左右转向 （+ -）
+        #     ##前后
+        #     if abs(commands[0]) < 0.01 and  abs(commands[1]) < 0.01 and abs(commands[2]) < 0.01:
+        #         commands[0]=-0.075 #向后
+        #         commands[1]=0.075
+        #         commands[2]=-0.05
 
         sin_pos = [np.sin(2 * np.pi * phase)]
         cos_pos = [np.cos(2 * np.pi * phase)]
@@ -153,6 +168,7 @@ class UnitreeWoGaitPolicy(UnitreePolicy):
             env_data.dof_vel * self.obs_scales.dof_vel,
             self.last_action,
         ]
+        # print(obs_current)
         self.history_buf.append(obs_current)
 
         history_list = [np.concatenate(items, axis=0) for items in zip(*self.history_buf, strict=True)]

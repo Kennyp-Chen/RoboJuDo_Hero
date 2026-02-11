@@ -17,9 +17,27 @@ class KeyboardCtrl(Controller):
         self.keyboard_thread = KeyboardThread(self.event_queue)
         self.keyboard_thread.start()
 
+        # Track pressed keys for continuous movement
+        self.pressed_keys = set()
+        
+        # Virtual axes for keyboard movement control
+        self.axes = {
+            "LeftX": 0.0,    # left/right movement (a/d)
+            "LeftY": 0.0,    # forward/backward movement (w/s)  
+            "RightX": 0.0,   # turning (q/e)
+            "RightY": 0.0,   # unused
+        }
+
         self.reset()
 
     def reset(self):
+        self.pressed_keys.clear()
+        self.axes = {
+            "LeftX": 0.0,
+            "LeftY": 0.0, 
+            "RightX": 0.0,
+            "RightY": 0.0,
+        }
         while not self.event_queue.empty():
             try:
                 self.event_queue.get_nowait()
@@ -36,8 +54,50 @@ class KeyboardCtrl(Controller):
                 break
         return events
 
+    def update_axes(self):
+        """Update virtual axes based on currently pressed keys"""
+        # Reset axes
+        self.axes["LeftX"] = 0.0
+        self.axes["LeftY"] = 0.0
+        self.axes["RightX"] = 0.0
+        
+        # Forward/backward (w/s)
+        if "w" in self.pressed_keys:
+            self.axes["LeftY"] = 1.0
+        elif "s" in self.pressed_keys:
+            self.axes["LeftY"] = -1.0
+            
+        # Left/right strafe (a/d)
+        if "a" in self.pressed_keys:
+            self.axes["LeftX"] = -1.0
+        elif "d" in self.pressed_keys:
+            self.axes["LeftX"] = 1.0
+            
+        # Turn left/right (q/e)
+        if "q" in self.pressed_keys:
+            self.axes["RightX"] = -1.0
+        elif "e" in self.pressed_keys:
+            self.axes["RightX"] = 1.0
+
     def get_data(self):
-        return {"keyboard_event": self.get_events()}
+        events = self.get_events()
+        
+        # Update pressed keys state
+        for event in events:
+            if event["type"] == "keyboard":
+                if event["pressed"]:
+                    self.pressed_keys.add(event["name"])
+                else:
+                    self.pressed_keys.discard(event["name"])
+        
+        # Update virtual axes
+        self.update_axes()
+        
+        return {
+            "keyboard_event": events,
+            "axes": self.axes.copy(),
+            "button_event": [],  # Empty for compatibility with joystick interface
+        }
 
     def process_triggers(self, ctrl_data):
         commands = []
@@ -72,4 +132,5 @@ if __name__ == "__main__":
                 print(e)
         if commands:
             print("Commands:", commands)
+        print("Axes:", ctrl_data["axes"])
         time.sleep(0.1)

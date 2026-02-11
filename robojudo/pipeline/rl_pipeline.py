@@ -52,7 +52,13 @@ class PolicyWrapper:
         action = self.policy.get_action(obs)
         pd_target = action + self.policy.default_pos
         return self.actions_adapter.fit(pd_target, template=self.env_dof_cfg.default_pos)
-
+    
+    # # get joint target_joint_pos
+    # def get_joint_target(self, obs):
+    #     action = self.policy.get_action(obs)
+    #     target_joint_pos = action * self.policy.joint_limits
+    #     return target_joint_pos
+    
     def get_init_dof_pos(self):
         return self.actions_adapter.fit(self.policy.get_init_dof_pos(), template=self.env_dof_cfg.default_pos)
 

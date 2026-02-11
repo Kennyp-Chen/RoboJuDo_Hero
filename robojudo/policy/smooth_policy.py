@@ -38,7 +38,7 @@ class SmoothPolicy(Policy):
         commands = np.array(self.commands_map)[:, 1].copy()  # default commands
 
         for key in ctrl_data.keys():
-            if key in ["JoystickCtrl", "UnitreeCtrl"]:
+            if key in ["JoystickCtrl", "UnitreeCtrl", "KeyboardCtrl"]:
                 axes = ctrl_data[key]["axes"]
                 lx, ly, rx, ry = axes["LeftX"], axes["LeftY"], axes["RightX"], axes["RightY"]
 

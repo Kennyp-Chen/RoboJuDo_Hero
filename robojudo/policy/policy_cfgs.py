@@ -114,6 +114,122 @@ class UnitreeWoGaitPolicyCfg(PolicyCfg):
         [1.0, 0.0, -1.0],
     ]
 
+class UnitreeMjlabVelocityPolicyCfg(PolicyCfg):
+    """
+    参考 UnitreeWoGaitPolicyCfg
+
+    """
+    class ObsScalesCfg(Config):
+        gravity: float = 1.0     # deploy.yaml: projected_gravity scale
+        dof_pos: float = 1.0     # deploy.yaml: joint_pos_rel scale
+        dof_vel: float = 1.0     # deploy.yaml: joint_vel_rel scale
+        ang_vel: float = 1.0     # deploy.yaml: base_ang_vel scale
+        command: float = 1.0     # deploy.yaml: velocity_commands scale
+        
+    
+    robot: str = "g1"
+    policy_type: str = "G1UnitreeMjlabVelocityPolicy"
+    model_dir: str = "policy_20000_29dof" 
+    # model_dir: str = "4900_23dof" 
+    # model_dir: str = "demo_29dof"  
+
+    @property
+    def policy_file(self) -> str:
+        """Override to point to ONNX model in unitree_mjlab_velocity directory."""
+        from robojudo.config.global_path import ASSETS_DIR
+        policy_file = ASSETS_DIR / f"models/{self.robot}/unitree_mjlab_velocity/{self.model_dir}/policy.onnx"
+        return policy_file.as_posix()
+    
+    action_scale: list[float] = [0.55, 0.35, 0.55, 0.35, 0.44, 0.44, 0.55, 0.35, 0.55, 0.35, 0.44, 0.44, 0.35, 0.44, 0.44,
+                     0.44, 0.44, 0.44, 0.44, 0.44, 0.07, 0.07, 0.44, 0.44, 0.44, 0.44, 0.44, 0.07, 0.07]
+    action_offset: list[float] = [-0.1,0,0,0.3,-0.2,0, -0.1,0,0,0.3,-0.2,0,  0,0,0,  0.35,0.18,0,0.87,0,0,0, 0.35,-0.18,0,0.87,0,0,0]
+    
+    history_length: int = 1  # number of history observations to use
+    history_obs_dims: dict[str, int] = {}
+    
+    obs_scales: ObsScalesCfg = ObsScalesCfg()
+    # From deploy.yaml: step_dt
+    dt: float = 0.02
+    # Velocity command ranges from deploy.yaml
+    # max_cmd: list[float] = [1.0, 0.5, 1.0]  # [lin_vel_x, lin_vel_y, ang_vel_z] from deploy.yaml
+    max_cmd: list[float] = [1.0, 0.5, 1.5]
+
+    # Command mapping from deploy.yaml（修复为3个值）
+    # commands_map: list[list[float]] = [
+    #     [-0.5, 0.0, 1.0],  # forward: [-0.5, 0.0, 1.0] from deploy.yaml
+    #     [0.5, 0.0, -0.5],  # lateral: [-0.5, 0.0, 0.5] from deploy.yaml  
+    #     [1.0, 0.0, -1.0],  # angular: [-1.0, 0.0, 1.0] from deploy.yaml
+    # ]
+    
+    commands_map: list[list[float]] = [
+        [-1.0, 0.0, 1.0],
+        [1.0, 0.0, -1.0],
+        [1.0, 0.0, -1.0],
+    ]
+
+class AmpWalkPolicyCfg(PolicyCfg):
+    """
+    Gmr Amp Legged Lab Policy
+    """
+    class ObsScalesCfg(Config):
+        gravity: float = 1.0     # deploy.yaml: projected_gravity scale
+        dof_pos: float = 1.0     # deploy.yaml: joint_pos_rel scale
+        dof_vel: float = 1.0     # deploy.yaml: joint_vel_rel scale
+        ang_vel: float = 1.0     # deploy.yaml: base_ang_vel scale
+        command: float = 1.0     # deploy.yaml: velocity_commands scale
+    
+    robot: str = "g1"
+    policy_type: str = "G1GmrAmpPolicy"
+    # model_dir: str = "gmramp/run_20000" 
+    # model_dir: str = "gmramp/run_18400" 
+    model_dir: str = "gmramp/walk_20000" 
+    # model_dir: str = "gmramp/walk_18000" 
+    # model_dir: str = "gmramp/runwalk_24000" 
+
+
+
+    @property
+    def policy_file(self) -> str:
+        """Override to point to ONNX model in unitree_mjlab_velocity directory."""
+        from robojudo.config.global_path import ASSETS_DIR
+        # policy_file = ASSETS_DIR / f"models/{self.robot}/{self.model_dir}/policy.onnx"
+        policy_file = ASSETS_DIR / f"models/{self.robot}/{self.model_dir}/policy.pt"
+
+        return policy_file.as_posix()
+    action_scale: float = 0.25
+
+    history_length: int = 1
+    history_obs_dims: dict[str, int] = {}
+    
+    obs_scales: ObsScalesCfg = ObsScalesCfg()
+    # self.decimation = 4
+
+    # dt: float = 0.005
+    dt: float = 0.02
+
+    max_cmd: list[float] = [1., 1., 2.5]
+    '''
+    self.commands.base_velocity.ranges.lin_vel_x = (0.0, 1.0)    # 前向速度: 0~1 m/s
+    self.commands.base_velocity.ranges.lin_vel_y = (-0.5, 0.5)   # 横向速度: ±0.5 m/s
+    self.commands.base_velocity.ranges.ang_vel_z = (-0.5, 0.5)   # 旋转速度: ±0.5 rad/s
+    self.commands.base_velocity.ranges.heading = (-math.pi, math.pi)  # 朝向: ±π rad
+    '''
+
+    ## run 
+    # if "run" in model_dir:
+    commands_map: list[list[float]] = [
+        [-1., 0.0, 2.5],
+        [-0., 0.0, 0.],
+        [-0., 0.0, 0.],
+    ]
+    ## walk
+    # elif "walk" in model_dir:
+        # commands_map: list[list[float]] = [
+        #     [-1., 0.0, 1.],
+        #     [0., 0.0, 0.],
+        #     [0., 0.0, 0.],
+        # ]
+
 
 class SmoothPolicyCfg(PolicyCfg):
     class ObsScalesCfg(Config):

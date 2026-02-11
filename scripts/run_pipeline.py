@@ -23,7 +23,10 @@ def parse_args():
         "-c",
         "--config",
         type=str,
-        default="g1",
+        # default="g1",
+        default="g1_locomimic",
+        # default="g1_unitree_velocity",
+
         help="Name of the config class to use",
     )
     args = parser.parse_args()

@@ -29,7 +29,8 @@ from .policy.g1_kungfubot_policy_cfg import G1KungfuBotGeneralPolicyCfg, G1Kungf
 from .policy.g1_smooth_policy_cfg import G1SmoothPolicyCfg  # noqa: F401
 from .policy.g1_twist_policy_cfg import G1TwistPolicyCfg  # noqa: F401
 from .policy.g1_unitree_policy_cfg import G1UnitreePolicyCfg, G1UnitreeWoGaitPolicyCfg  # noqa: F401
-
+from .policy.g1_unitree_velocity_policy_cfg import G1UnitreeMjlabVelocityPolicyCfg# G1UnitreeWoGaitVelocityPolicyCfg  # noqa: F401
+from .policy.g1_amp_policy_cfg import G1AmpWalkPolicyCfg
 
 # ======================== Basic Configs ======================== #
 @cfg_registry.register
@@ -46,12 +47,13 @@ class g1(RlPipelineCfg):
 
     ctrl: list[JoystickCtrlCfg | KeyboardCtrlCfg] = [  # note: the ranking of controllers matters
         JoystickCtrlCfg(),
-        # KeyboardCtrlCfg(),
+        KeyboardCtrlCfg(),
     ]
 
-    policy: G1UnitreePolicyCfg = G1UnitreePolicyCfg()
+    # policy: G1UnitreePolicyCfg = G1UnitreePolicyCfg()
     # policy: G1UnitreeWoGaitPolicyCfg = G1UnitreeWoGaitPolicyCfg()
     # policy: G1AmoPolicyCfg = G1AmoPolicyCfg()
+    policy: G1AmpWalkPolicyCfg = G1AmpWalkPolicyCfg()
 
     # run_fullspeed: bool = env.is_sim
 
@@ -89,11 +91,11 @@ class g1_switch(RlMultiPolicyPipelineCfg):
     env: G1MujocoEnvCfg = G1MujocoEnvCfg()
 
     ctrl: list[KeyboardCtrlCfg | JoystickCtrlCfg] = [
-        # KeyboardCtrlCfg(
-        #     triggers_extra={
-        #         "Key.tab": "[POLICY_TOGGLE]",
-        #     }
-        # ),
+        KeyboardCtrlCfg(
+            triggers_extra={
+                "Key.tab": "[POLICY_TOGGLE]",
+            }
+        ),
         JoystickCtrlCfg(
             triggers_extra={
                 "RB+Down": "[POLICY_SWITCH],0",
@@ -124,6 +126,10 @@ class g1_locomimic(RlLocoMimicPipelineCfg):
             triggers_extra={
                 "]": "[POLICY_LOCO]",
                 "[": "[POLICY_MIMIC]",
+                ";": "[POLICY_SWITCH],NEXT",
+                "'": "[POLICY_SWITCH],LAST",
+                # "Key.tab": "[POLICY_TOGGLE]",
+
             }
         ),
         JoystickCtrlCfg(
@@ -133,11 +139,137 @@ class g1_locomimic(RlLocoMimicPipelineCfg):
             }
         ),
     ]
+    # loco_policy: G1UnitreeMjlabVelocityPolicyCfg = G1UnitreeMjlabVelocityPolicyCfg()
 
+    # loco_policy: G1UnitreeWoGaitPolicyCfg = G1UnitreeWoGaitPolicyCfg()
     loco_policy: G1UnitreePolicyCfg = G1UnitreePolicyCfg()
-    mimic_policies: list[G1AsapPolicyCfg] = [
-        G1AsapPolicyCfg(),
+    # loco_policy: G1AsapLocoPolicyCfg = G1AsapLocoPolicyCfg()
+
+    # loco_policy: list[G1UnitreePolicyCfg|G1UnitreeWoGaitPolicyCfg|G1AsapLocoPolicyCfg] = [
+    #     G1UnitreePolicyCfg(),
+    #     G1UnitreeWoGaitPolicyCfg(),
+    #     G1AsapLocoPolicyCfg(),
+    # ]
+
+    mimic_policies: list[G1BeyondMimicPolicyCfg|G1AmoPolicyCfg|G1AmpWalkPolicyCfg] = [
+        # G1AsapPolicyCfg(),
+        G1AmoPolicyCfg(),
+        G1AmpWalkPolicyCfg(),
+
+        G1BeyondMimicPolicyCfg(
+        policy_name="Gangnan_wose_stable",
+        without_state_estimator=True,
+        use_modelmeta_config=True,  # use robot dof config from modelmeta
+        use_motion_from_model=True,  # use motion from onnx model
+        max_timestep=1500,
+        ),
+        # G1BeyondMimicPolicyCfg(
+        # policy_name="Gangnan_wose_robust",
+        # without_state_estimator=True,
+        # use_modelmeta_config=True,  # use robot dof config from modelmeta
+        # use_motion_from_model=True,  # use motion from onnx model
+        # max_timestep=1500,
+        # ),
+        # G1BeyondMimicPolicyCfg(
+        # policy_name="Gangnan_wose_bias",
+        # without_state_estimator=True,
+        # use_modelmeta_config=True,  # use robot dof config from modelmeta
+        # use_motion_from_model=True,  # use motion from onnx model
+        # max_timestep=1500,
+        # ),
+        # G1BeyondMimicPolicyCfg(
+        # policy_name="Gangnan_wose",
+        # without_state_estimator=True,
+        # use_modelmeta_config=True,  # use robot dof config from modelmeta
+        # use_motion_from_model=True,  # use motion from onnx model
+        # max_timestep=1500,
+        # ),
+
     ]
+
+
+@cfg_registry.register
+class g1_unitree_velocity(RlPipelineCfg):
+    """
+    Unitree Velocity policy from unitree_rl_mjlab.
+    
+    Uses WoGait policy for velocity control where the robot remains static
+    when velocity commands are zero, matching the unitree_rl_mjlab behavior.
+    
+    Features:
+    - WoGait policy for static standing
+    - Original unitree_rl_mjlab velocity control
+    - Keyboard-based velocity commands (WASD+QE)
+    - Training configuration compatibility
+    
+    Controls:
+    - Keyboard: WASD for movement, QE for rotation
+    - Joystick: Standard dual-stick control
+    """
+
+    robot: str = "g1"
+    env: G1MujocoEnvCfg = G1MujocoEnvCfg()
+
+    ctrl: list[KeyboardCtrlCfg | JoystickCtrlCfg] = [
+        KeyboardCtrlCfg(
+            triggers_extra={
+                # Velocity control keys (unitree_rl_mjlab style)
+                "w": "[VELOCITY_FORWARD]",
+                "s": "[VELOCITY_BACKWARD]", 
+                "a": "[VELOCITY_LEFT]",
+                "d": "[VELOCITY_RIGHT]",
+                "q": "[VELOCITY_TURN_LEFT]",
+                "e": "[VELOCITY_TURN_RIGHT]",
+            }
+        ),
+        JoystickCtrlCfg(
+            triggers_extra={
+                "RB+Down": "[POLICY_TOGGLE]",
+                "RB+Up": "[POLICY_TOGGLE]",
+            }
+        ),
+    ]
+    
+    # Use the Unitree Velocity MJLab policy
+    policy: G1UnitreeMjlabVelocityPolicyCfg = G1UnitreeMjlabVelocityPolicyCfg()
+    # Alternative: Use standard Unitree policy for comparison
+    # loco_policy: G1UnitreePolicyCfg = G1UnitreePolicyCfg()
+    # loco_policy: G1AsapLocoPolicyCfg = G1AsapLocoPolicyCfg()
+
+    # Keep the same mimic policies as the original g1_locomimic
+    # mimic_policies: list[G1BeyondMimicPolicyCfg|G1AmoPolicyCfg] = [
+    #     # G1AsapPolicyCfg(),
+    #     G1AmoPolicyCfg(),
+    #     G1BeyondMimicPolicyCfg(
+    #     policy_name="Gangnan_wose_stable",
+    #     without_state_estimator=True,
+    #     use_modelmeta_config=True,  # use robot dof config from modelmeta
+    #     use_motion_from_model=True,  # use motion from onnx model
+    #     max_timestep=1500,
+    #     ),
+    #     G1BeyondMimicPolicyCfg(
+    #     policy_name="Gangnan_wose_robust",
+    #     without_state_estimator=True,
+    #     use_modelmeta_config=True,  # use robot dof config from modelmeta
+    #     use_motion_from_model=True,  # use motion from onnx model
+    #     max_timestep=1500,
+    #     ),
+    #     G1BeyondMimicPolicyCfg(
+    #     policy_name="Gangnan_wose_bias",
+    #     without_state_estimator=True,
+    #     use_modelmeta_config=True,  # use robot dof config from modelmeta
+    #     use_motion_from_model=True,  # use motion from onnx model
+    #     max_timestep=1500,
+    #     ),
+    #     G1BeyondMimicPolicyCfg(
+    #     policy_name="Gangnan_wose",
+    #     without_state_estimator=True,
+    #     use_modelmeta_config=True,  # use robot dof config from modelmeta
+    #     use_motion_from_model=True,  # use motion from onnx model
+    #     max_timestep=1500,
+    #     ),
+
+    # ]
 
 
 # ======================== Configs for supported Policy ======================== #

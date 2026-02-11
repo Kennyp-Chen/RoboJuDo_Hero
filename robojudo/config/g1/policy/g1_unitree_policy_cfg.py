@@ -44,6 +44,18 @@ class G1UnitreeDoF(DoFConfig):
 
 
 class G1UnitreeWoGaitDoF(DoFConfig):
+    '''
+    [0, 6, 12,
+            1, 7, 13,
+            2, 8, 14,
+            3, 9, 15, 22,
+            4, 10, 16, 23,
+            5, 11, 17, 24,
+            18, 25,
+            19, 26,
+            20, 27,
+            21, 28]
+    '''
     joint_names: list[str] = [
         *[
             "left_hip_pitch_joint",
@@ -104,7 +116,8 @@ class G1UnitreeWoGaitDoF(DoFConfig):
 class G1UnitreePolicyCfg(UnitreePolicyCfg):
     robot: str = "g1"
     policy_name: str = "policy_lstm_1"
-
+    # policy_name: str = "policy_unitree_lab"
+    # policy_name: str = "model_mjlab_10000"
     obs_dof: DoFConfig = G1UnitreeDoF()
     action_dof: DoFConfig = obs_dof
 

@@ -59,7 +59,9 @@ class RlLocoMimicPipelineCfg(PipelineCfg):
     env: EnvCfg | Any
     ctrl: list[CtrlCfg | Any] = []
 
-    loco_policy: PolicyCfg | Any
+    # loco_policy: PolicyCfg | Any
+    loco_policy: list[PolicyCfg | Any] = []
+
     """LocoMotion policy, as init"""
     mimic_policies: list[PolicyCfg | Any] = []
     """MotionMimic policies, can be switched to"""

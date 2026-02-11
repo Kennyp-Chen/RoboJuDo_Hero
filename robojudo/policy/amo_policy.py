@@ -93,7 +93,7 @@ class AMOPolicy(Policy):
 
         commands = self.cmd.copy()
         for key in ctrl_data.keys():
-            if key in ["JoystickCtrl", "UnitreeCtrl"]:
+            if key in ["JoystickCtrl", "UnitreeCtrl", "KeyboardCtrl"]:
                 axes = ctrl_data[key]["axes"]
                 lx, ly, rx, ry = axes["LeftX"], axes["LeftY"], axes["RightX"], axes["RightY"]
 
