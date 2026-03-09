@@ -378,6 +378,16 @@ class g1_real_locomimic(RlLocoMimicPipelineCfg):
 
 
         ####23dof 65fps start####
+        G1BeyondMimicPolicyCfg( # 稳定
+            policy_name="23dof_65fps/GangnamStyle",           
+            start_timestep = 200,
+            max_timestep=-1,        
+        ),
+        G1BeyondMimicPolicyCfg( # 稳定
+            policy_name="23dof_65fps/Take102",           
+            start_timestep = 100,
+            max_timestep=-1,        
+        ),  
         G1BeyondMimicPolicyCfg( # 4
             policy_name="23dof_65fps/dance1_subject1",
             start_timestep = 3000,# 3400
@@ -404,36 +414,27 @@ class g1_real_locomimic(RlLocoMimicPipelineCfg):
         #     start_timestep = 9000,
         #     max_timestep=10600,       
         # ),
-        G1BeyondMimicPolicyCfg( # 1 不太稳定
-            policy_name="23dof_65fps/dance2_subject4",
-            start_timestep = 10100,
-            max_timestep=11300,      
-        ),
-        # G1BeyondMimicPolicyCfg(
+        # G1BeyondMimicPolicyCfg( # 1 不太稳定
         #     policy_name="23dof_65fps/dance2_subject4",
-        #     start_timestep = 6000,
-        #     max_timestep=6720,        
+        #     start_timestep = 10100,
+        #     max_timestep=11300,      
         # ),
-        G1BeyondMimicPolicyCfg( # 2
-            policy_name="23dof_65fps/dance2_subject4",
-            start_timestep = 4300, 
-            max_timestep=5700,        
-        ),
+        # # G1BeyondMimicPolicyCfg(
+        # #     policy_name="23dof_65fps/dance2_subject4",
+        # #     start_timestep = 6000,
+        # #     max_timestep=6720,        
+        # # ),
+        # G1BeyondMimicPolicyCfg( # 2
+        #     policy_name="23dof_65fps/dance2_subject4",
+        #     start_timestep = 4300, 
+        #     max_timestep=5700,        
+        # ),
         G1BeyondMimicPolicyCfg(# 3
             policy_name="23dof_65fps/dance2_subject4",
             start_timestep = 5990, # 在往前10 试试 5990
             max_timestep=7400,   # 6720   
         ),
-        G1BeyondMimicPolicyCfg( # 稳定
-            policy_name="23dof_65fps/GangnamStyle",           
-            start_timestep = 200,
-            max_timestep=-1,        
-        ),
-        G1BeyondMimicPolicyCfg( # 稳定
-            policy_name="23dof_65fps/Take102",           
-            start_timestep = 100,
-            max_timestep=-1,        
-        ),  
+
         ####23dof 65fps end####
 
 
