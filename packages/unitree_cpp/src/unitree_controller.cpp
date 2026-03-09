@@ -2,6 +2,8 @@
 #include <stdexcept>
 #include <cstddef>
 #include <iostream>
+#include <unistd.h>
+#include <termios.h>
 
 using std::size_t;
 
@@ -320,49 +322,45 @@ void UnitreeController::shutdown() {
     std::cout << "Robot set to damping mode." << std::endl;
     
     // Switch back to internal control (public version) using MotionSwitcherClient
-    try {
-        std::cout << "Switching back to internal control (public version) using MotionSwitcherClient..." << std::endl;
-        
-        // 使用已经初始化的 MotionSwitcherClient
-        if (msc_) {
-            std::cout << "Using existing MotionSwitcherClient..." << std::endl;
-            
-            // 尝试多次切换
-            int max_attempts = 3;
-            int attempt = 0;
-            bool success = false;
-            
-            while (attempt < max_attempts && !success) {
-                attempt++;
-                std::cout << "Attempt " << attempt << "/" << max_attempts << ": Selecting 'ZeroTorque' mode ..." << std::endl;
-                int32_t ret = msc_->SelectMode("ai");
-                if (ret == 0) {
-                    std::cout << "Switched back to internal control successfully." << std::endl;
-                    success = true;
-                } else {
-                    std::cout << "Failed to switch back to internal control, error code: " << ret << std::endl;
-                    if (attempt < max_attempts) {
-                        std::cout << "Retrying in 2 seconds..." << std::endl;
-                        sleep(2);
-                    }
-                }
-            }
-            
-            if (!success) {
-                std::cout << "All attempts failed, robot remains in damping mode." << std::endl;
-            }
+    std::cout << "Switching back to internal control (public version) using MotionSwitcherClient..." << std::endl;
+    
+    // 直接切换到公版控制模式
+    if (msc_) {
+        std::cout << "Using existing MotionSwitcherClient..." << std::endl;
+        int32_t ret = msc_->SelectMode("ai");
+        if (ret == 0) {
+            std::cout << "Switched back to internal control successfully." << std::endl;
         } else {
-            std::cout << "MotionSwitcherClient not initialized, cannot switch back to internal control." << std::endl;
+            std::cout << "Failed to switch back to internal control, error code: " << ret << std::endl;
         }
-    } catch (const std::exception& e) {
-        std::cout << "Exception during mode switching: " << e.what() << std::endl;
-    } catch (...) {
-        std::cout << "Unknown exception during mode switching." << std::endl;
+    } else {
+        std::cout << "MotionSwitcherClient not initialized, cannot switch back to internal control." << std::endl;
     }
     
-    // 增加等待时间，确保所有操作完成
+    // 等待模式切换完成
     std::cout << "Waiting for mode switching to complete..." << std::endl;
-    sleep(3);
+    sleep(2);
+    
+    // 恢复终端为cooked模式
+    std::cout << "Restoring terminal to cooked mode..." << std::endl;
+    struct termios term;
+    if (tcgetattr(STDIN_FILENO, &term) == 0) {
+        // 恢复所有必要的终端标志
+        term.c_lflag |= ICANON | ECHO | ISIG;
+        term.c_iflag |= ICRNL | IXON;
+        term.c_oflag |= OPOST | ONLCR;
+        tcsetattr(STDIN_FILENO, TCSANOW, &term);
+    }
+    
+    // 重置终端显示和光标位置
+    std::cout << "\033[2J\033[H\033[0m" << std::flush;  // 清屏、光标归位、重置样式
+    std::cout << "\n" << std::flush;  // 确保换行
+    
+    // 清空输入缓冲区
+    tcflush(STDIN_FILENO, TCIFLUSH);
+    
+    // 确保程序进程终止
+    exit(0);
 }
 
 RobotState UnitreeController::get_robot_state() {

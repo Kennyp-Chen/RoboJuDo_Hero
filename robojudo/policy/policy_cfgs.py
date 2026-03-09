@@ -186,7 +186,7 @@ class UnitreeMjlabVelocityPolicyCfg(PolicyCfg):
     # ]
 
     commands_map: list[list[float]] = [
-        [-0.5, 0.0, 1.0],
+        [-0.5, 0.0, 0.9],
         [1.0, 0.0, -1.0],
         [1.0, 0.0, -1.0],
     ]
