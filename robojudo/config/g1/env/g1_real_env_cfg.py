@@ -46,69 +46,74 @@ class G1WithHandRealEnvCfg(G1EnvCfg, UnitreeEnvCfg):
     joint2motor_idx: list[int] | None = None  # list(range(0, 29))
 
 
-class G1RealServEnvCfg(G1EnvCfg, UnitreeEnvCfg):
-    """
-    Real G1 Robot Environment for Serving-Mimic pipeline.
-    Supports multiple poses and interpolation between states.
-    """
+# class G1RealServEnvCfg(G1EnvCfg, UnitreeEnvCfg):
+#     """
+#     Real G1 Robot Environment for Serving-Mimic pipeline.
+#     Supports multiple poses and interpolation between states.
+#     """
     
-    env_type: str = "UnitreeCppEnv"
+#     env_type: str = "UnitreeCppEnv"
     
-    # ====== ENV CONFIGURATION ======
-    unitree: UnitreeEnvCfg.UnitreeCfg = G1UnitreeCfg(
-        net_if="eth0",
-    )
+#     # ====== ENV CONFIGURATION ======
+#     unitree: UnitreeEnvCfg.UnitreeCfg = G1UnitreeCfg(
+#         net_if="eth0",
+#     )
 
-    odometry_type: Literal["NONE", "DUMMY", "UNITREE", "ZED"] = "UNITREE"
+#     odometry_type: Literal["NONE", "DUMMY", "UNITREE", "ZED"] = "UNITREE"
 
-    joint2motor_idx: list[int] | None = None  # list(range(0, 29))
+#     joint2motor_idx: list[int] | None = None  # list(range(0, 29))
     
-    # ====== POSE CONFIGURATION ======
-    # Standing pose (default)
-    standing_pos: list[float] = [
-        *[-0.1, 0.0, 0.0, 0.3, -0.2, 0.0],  # Left leg
-        *[-0.1, 0.0, 0.0, 0.3, -0.2, 0.0],  # Right leg
-        *[0, 0, 0],  # Waist
-        *[0, 0, 0, 0, 0, 0, 0],  # Left arm
-        *[0, 0, 0, 0, 0, 0, 0],  # Right arm
-    ]
+#     # ====== POSE CONFIGURATION ======
+#     # Standing pose (default)
+#     standing_pos: list[float] = [
+#         *[-0.1, 0.0, 0.0, 0.3, -0.2, 0.0],  # Left leg
+#         *[-0.1, 0.0, 0.0, 0.3, -0.2, 0.0],  # Right leg
+#         *[0, 0, 0],  # Waist
+#         *[0, 0, 0, 0, 0, 0, 0],  # Left arm
+#         *[0, 0, 0, 0, 0, 0, 0],  # Right arm
+#     ]
     
-    # Sitting pose
-    sitting_pos: list[float] = [
-        *[-1.2, 0.0, 0.0, 1.5, -0.2, 0.0],  # Left leg
-        *[-1.2, 0.0, 0.0, 1.5, -0.2, 0.0],  # Right leg
-        *[0, 0, 0],  # Waist
-        *[-0.4, 0, 0, 0, -1.5, 0, 0],  # Left arm
-        *[-0.4, 0, 0, 0, 1.5, 0, 0],  # Right arm
-    ]
+#     # Sitting pose 端盘子
+#     sitting_pos: list[float] = [
+#         *[-1.2, 0.0, 0.0, 1.5, -0.2, 0.0],  # Left leg
+#         *[-1.2, 0.0, 0.0, 1.5, -0.2, 0.0],  # Right leg
+#         *[0, 0, 0],  # Waist
+#         # *[-0.4, 0, 0, 0, -1.5, 0, 0],  # Left arm
+#         # *[-0.4, 0, 0, 0, 1.5, 0, 0],  # Right arm
+#         *[0., 0, 0, 0, 0, 0, 0],  # Left arm
+#         *[0., 0, 0, 0, 0, 0, 0],  # Right arm
+#     ]
     
-    # Prepare pose (sitting instead of standing)
-    prepare_pos: list[float] = [
-        *[-1.2, 0.0, 0.0, 1.5, -0.2, 0.0],  # Left leg
-        *[-1.2, 0.0, 0.0, 1.5, -0.2, 0.0],  # Right leg
-        *[0, 0, 0],  # Waist
-        *[-0.4, 0, 0, 0, -1.5, 0, 0],  # Left arm
-        *[-0.4, 0, 0, 0, 1.5, 0, 0],  # Right arm
-    ]
+#     # Prepare pose (sitting instead of standing)
+#     prepare_pos: list[float] = [
+#         *[-1.2, 0.0, 0.0, 1.5, -0.2, 0.0],  # Left leg
+#         *[-1.2, 0.0, 0.0, 1.5, -0.2, 0.0],  # Right leg
+#         *[0, 0, 0],  # Waist
+#         # *[-0.4, 0, 0, 0, -1.5, 0, 0],  # Left arm
+#         # *[-0.4, 0, 0, 0, 1.5, 0, 0],  # Right arm
+#         *[0., 0, 0, 0, 0, 0, 0],  # Left arm
+#         *[0., 0, 0, 0, 0, 0, 0],  # Right arm
+
+#     ]
     
-    # Serving pose (hand changes, lower body default)
-    serving_pos: list[float] = [
-        *[-0.1, 0.0, 0.0, 0.3, -0.2, 0.0],  # Left leg (default)
-        *[-0.1, 0.0, 0.0, 0.3, -0.2, 0.0],  # Right leg (default)
-        *[0, 0, 0],  # Waist
-        *[-0.4, 0, 0, 0, -1.5, 0, 0],  # Left arm (hand changes)
-        *[-0.4, 0, 0, 0, 1.5, 0, 0],  # Right arm (hand changes)
-    ]
+#     # Serving pose (hand changes, lower body default)
+#     # serving_pos: list[float] = [
+#     #     *[-0.1, 0.0, 0.0, 0.3, -0.2, 0.0],  # Left leg (default)
+#     #     *[-0.1, 0.0, 0.0, 0.3, -0.2, 0.0],  # Right leg (default)
+#     #     *[0, 0, 0],  # Waist
+#     #     *[-0.4, 0, 0, 0, -1.5, 0, 0],  # Left arm (hand changes)
+#     #     *[-0.4, 0, 0, 0, 1.5, 0, 0],  # Right arm (hand changes)
+#     # ]
     
-    # ====== INTERPOLATION CONFIGURATION ======
-    # Default interpolation time (seconds)
-    interpolation_time: float = 2.0
+#     # ====== INTERPOLATION CONFIGURATION ======
+#     # Default interpolation time (seconds)
+#     interpolation_time: float = 2.0
     
-    # Prepare mode interpolation time (half of default)
-    prepare_interpolation_time: float = 1.0
+#     # Prepare mode interpolation time (half of default)
+#     prepare_interpolation_time: float = 1.0
     
-    # Enable smooth transitions between states
-    enable_smooth_transition: bool = True
+#     # Enable smooth transitions between states
+#     enable_smooth_transition: bool = True
     
-    # Transition speed factor (lower = slower, higher = faster)
-    transition_speed: float = 1.0
+#     # Transition speed factor (lower = slower, higher = faster)
+#     transition_speed: float = 1.0

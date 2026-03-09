@@ -23,7 +23,7 @@ def parse_args():
         "-c",
         "--config",
         type=str,
-        default="g1",
+        default="g1_real_locomimic",
         help="Name of the config class to use",
     )
     args = parser.parse_args()
@@ -53,7 +53,7 @@ def main():
         logger.warning("=" * 60)
         
         # Automatically run prepare (will use sitting pose from config)
-        pipeline.prepare()
+        pipeline.prepare(traj_len=300)
         
         # Prepare complete, ready for control via keyboard or controller
         logger.warning("=" * 60)
@@ -92,7 +92,7 @@ def main():
         logger.warning("Keyboard interrupt received, shutting down...")
         if hasattr(pipeline, 'env'):
             pipeline.env.shutdown()
-        time.sleep(2)
+        time.sleep(1)
 
 
 if __name__ == "__main__":

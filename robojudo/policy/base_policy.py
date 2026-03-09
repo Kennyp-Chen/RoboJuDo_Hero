@@ -34,9 +34,13 @@ class Policy(ABC):
             # self.model: torch.nn.Module | None = None # type: ignore
             pass
         else:
-            policy_file = self.cfg_policy.policy_file
-            logger.debug(f"Loading jit from {policy_file}...")
-            self.model = torch.jit.load(policy_file, map_location=self.device)
+            try:
+                policy_file = self.cfg_policy.policy_file
+                logger.debug(f"Loading jit from {policy_file}...")
+                self.model = torch.jit.load(policy_file, map_location=self.device)
+            except Exception as e:
+                logger.error(f"Failed to load pt policy: {e}, trying onnx policy later")
+                pass
 
         self.action_scale = self.cfg_policy.action_scale
         self.action_clip = self.cfg_policy.action_clip

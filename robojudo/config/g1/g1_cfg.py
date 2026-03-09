@@ -29,6 +29,8 @@ from .policy.g1_kungfubot_policy_cfg import G1KungfuBotGeneralPolicyCfg, G1Kungf
 from .policy.g1_smooth_policy_cfg import G1SmoothPolicyCfg  # noqa: F401
 from .policy.g1_twist_policy_cfg import G1TwistPolicyCfg  # noqa: F401
 from .policy.g1_unitree_policy_cfg import G1UnitreePolicyCfg, G1UnitreeWoGaitPolicyCfg  # noqa: F401
+from .policy.g1_unitree_velocity_policy_cfg import G1UnitreeMjlabVelocityPolicyCfg# G1UnitreeWoGaitVelocityPolicyCfg  # noqa: F401
+from .policy.g1_amp_policy_cfg import G1AmpWalkPolicyCfg
 
 
 # ======================== Basic Configs ======================== #
@@ -299,23 +301,25 @@ class g1_real_locomimic(RlLocoMimicPipelineCfg):
         ),
     )
 
-    # Sitting pose configuration
+    # # Sitting pose configuration
     sitting_pos: list[float] = [
         *[-1.2, 0.0, 0.0, 1.5, -0.2, 0.0],  # 左腿
         *[-1.2, 0.0, 0.0, 1.5, -0.2, 0.0],  # 右腿
         *[0, 0, 0],  # 腰部
-        *[-0.4, 0, 0, 0, -1.5, 0, 0],# 左臂
-        *[-0.4, 0, 0, 0, 1.5, 0, 0], # 右臂
+        # *[-0.4, 0, 0, 0, -1.5, 0, 0],# 左臂
+        # *[-0.4, 0, 0, 0, 1.5, 0, 0], # 右臂
+        *[0.35,0.18,0.,0.87,0.,0.,0.],
+        *[0.35,-0.18,0.,0.87,0.,0.,0.]
     ]
 
-    # Standing pose configuration
-    standing_pos: list[float] = [
-        *[-0.1, 0.0, 0.0, 0.3, -0.2, 0.0],  # 左腿
-        *[-0.1, 0.0, 0.0, 0.3, -0.2, 0.0],  # 右腿
-        *[0, 0, 0],  # 腰部
-        *[0, 0, 0, 0, 0, 0, 0],  # 左臂
-        *[0, 0, 0, 0, 0, 0, 0],  # 右臂
-    ]
+    # # Standing pose configuration
+    # standing_pos: list[float] = [
+    #     *[-0.1, 0.0, 0.0, 0.3, -0.2, 0.0],  # 左腿
+    #     *[-0.1, 0.0, 0.0, 0.3, -0.2, 0.0],  # 右腿
+    #     *[0, 0, 0],  # 腰部
+    #     *[0, 0, 0, 0, 0, 0, 0],  # 左臂
+    #     *[0, 0, 0, 0, 0, 0, 0],  # 右臂
+    # ]
 
     # Keyboard and controller with policy switching
     ctrl: list[KeyboardCtrlCfg | UnitreeCtrlCfg] = [
@@ -351,8 +355,14 @@ class g1_real_locomimic(RlLocoMimicPipelineCfg):
     ]
 
     # Locomotion policy (WASD control)
-    loco_policy: G1UnitreePolicyCfg = G1UnitreePolicyCfg()
-    
+    # loco_policy: G1UnitreeWoGaitPolicyCfg = G1UnitreeWoGaitPolicyCfg()
+    # loco_policy: G1UnitreePolicyCfg = G1UnitreePolicyCfg()
+    # loco_policy: G1AsapLocoPolicyCfg = G1AsapLocoPolicyCfg()
+    loco_policy: G1UnitreeMjlabVelocityPolicyCfg = G1UnitreeMjlabVelocityPolicyCfg()
+    # loco_policy: G1AmpWalkPolicyCfg = G1AmpWalkPolicyCfg()
+    # loco_policy: G1AmoPolicyCfg() = G1AmoPolicyCfg(),
+    # 
+
     '''
         policies: list[G1UnitreePolicyCfg | G1AmoPolicyCfg] = [
         G1UnitreePolicyCfg(),
@@ -361,48 +371,237 @@ class g1_real_locomimic(RlLocoMimicPipelineCfg):
 
     '''
     # Mimic policies: Dance + ASAP CR7
-    mimic_policies: list[G1BeyondMimicPolicyCfg | G1AmoPolicyCfg] = [
+    mimic_policies: list[G1BeyondMimicPolicyCfg | G1AmoPolicyCfg|G1AmpWalkPolicyCfg] = [
         # Index 0: Dance motion
-        G1AmoPolicyCfg(),
+        # G1AmoPolicyCfg(),
+        # G1AmpWalkPolicyCfg(),
 
-        G1BeyondMimicPolicyCfg(
-            # policy_name="Dance204_wose",
-            policy_name="Jump_wose",
 
-            without_state_estimator=True,
-            use_modelmeta_config=True,
-            use_motion_from_model=True,
-            max_timestep=2000,
+        ####23dof 65fps start####
+        # G1BeyondMimicPolicyCfg( # 4
+        #     policy_name="23dof_65fps/dance1_subject1",
+        #     start_timestep = 3000,# 3400
+        #     max_timestep=4300,        
+        # ),
+
+        # G1BeyondMimicPolicyCfg( # 5
+        #     policy_name="23dof_65fps/dance1_subject1",
+        #     start_timestep = 3380,
+        #     max_timestep=4158,        
+        # ),
+        # G1BeyondMimicPolicyCfg( # 6
+        #     policy_name="23dof_65fps/dance1_subject1",
+        #     start_timestep = 5800,# 适合运动开始
+        #     max_timestep=6400,        
+        # ),
+        # G1BeyondMimicPolicyCfg( # 6
+        #     policy_name="23dof_65fps/dance1_subject1",
+        #     start_timestep = 5950,# 适合静止开始 更好
+        #     max_timestep=6400,        
+        # ),
+        # G1BeyondMimicPolicyCfg( # 0
+        #     policy_name="23dof_65fps/dance2_subject4",
+        #     start_timestep = 9000,
+        #     max_timestep=10600,       
+        # ),
+        # G1BeyondMimicPolicyCfg( # 1 不太稳定
+        #     policy_name="23dof_65fps/dance2_subject4",
+        #     start_timestep = 10100,
+        #     max_timestep=11300,      
+        # ),
+        # # G1BeyondMimicPolicyCfg(
+        # #     policy_name="23dof_65fps/dance2_subject4",
+        # #     start_timestep = 6000,
+        # #     max_timestep=6720,        
+        # # ),
+        # G1BeyondMimicPolicyCfg( # 2
+        #     policy_name="23dof_65fps/dance2_subject4",
+        #     start_timestep = 4300, 
+        #     max_timestep=5700,        
+        # ),
+        G1BeyondMimicPolicyCfg(# 3
+            policy_name="23dof_65fps/dance2_subject4",
+            start_timestep = 5990, # 在往前10 试试 5990
+            max_timestep=7400,   # 6720   
         ),
+        G1BeyondMimicPolicyCfg( # 稳定
+            policy_name="23dof_65fps/GangnamStyle",           
+            start_timestep = 200,
+            max_timestep=-1,        
+        ),
+        G1BeyondMimicPolicyCfg( # 稳定
+            policy_name="23dof_65fps/Take102",           
+            start_timestep = 100,
+            max_timestep=-1,        
+        ),  
+        ####23dof 65fps end####
 
-        # Index 1： 
-        G1BeyondMimicPolicyCfg(
-            # policy_name="Dance102_sar_wose",
-            policy_name="Walk105_wose",
+
+
+        ####23dof 80fps start####
+        # G1BeyondMimicPolicyCfg(
+        #     policy_name="Take102_23dof_80fps",
+        #     start_timestep = 100,
+        #     max_timestep=-1,),
+        # G1BeyondMimicPolicyCfg(
+        #     policy_name="horse_23dof_80fps",
+        #     start_timestep = 100,
+        #     max_timestep=-1,),
+        # G1BeyondMimicPolicyCfg(
+        #     policy_name="dance12_23dof",
+        #     start_timestep = 100,
+        #     max_timestep=-1,) ,
+        # G1BeyondMimicPolicyCfg(
+        #     policy_name="dance12_wose",
+        #     start_timestep = 100,
+        #     max_timestep=-1,) ,
+        ####23dof 80fps end####
             
-            without_state_estimator=True,
-            use_modelmeta_config=True,
-            use_motion_from_model=True,
-            max_timestep=2000,
-        ),
-        # Index 2: 
-        G1BeyondMimicPolicyCfg(
-            policy_name="Gangnanstyle_wose",
-            without_state_estimator=True,
-            use_modelmeta_config=True,
-            use_motion_from_model=True,
-            max_timestep=2000,
-        ),
-        # Index 3:
-        G1BeyondMimicPolicyCfg(
-            # policy_name="Dance101_wose",
-            policy_name="Dance_wose",
+        # # G1BeyondMimicPolicyCfg(
+        # #     policy_name="dance24_wose",
+        # #     start_timestep = 1500,
+        # #     max_timestep=2900,  
+        # #     # max_timestep=2300,      1800  
+        # #     # max_timestep= 1800 aa
 
-            without_state_estimator=True,
-            use_modelmeta_config=True,
-            use_motion_from_model=True,
-            max_timestep=2000,
-        ),
+        # # ),
+        # # G1BeyondMimicPolicyCfg(
+        # #     policy_name="dance24_wose",
+        # #     start_timestep = 3100,
+        # #     # max_timestep=4500,   
+        # #     # max_timestep=4100,    # 4200 4100    
+        # #     max_timestep=4000,   
+
+        # # ),
+        # # # G1BeyondMimicPolicyCfg(
+        # # #     policy_name="dance24_wose",
+        # # #     start_timestep = 4500,
+        # # #     max_timestep=6800,        
+        # # # ),
+        # # G1BeyondMimicPolicyCfg(# 扭扭
+        # #     policy_name="dance24_wose",
+        # #     start_timestep = 6800,
+        # #     # max_timestep= 8700,  
+        # #     max_timestep= 7600,
+
+        # # ),
+        # # # G1BeyondMimicPolicyCfg(
+        # # #     policy_name="dance24_wose",
+        # # #     start_timestep = 8700,
+        # # #     max_timestep=10900,        
+        # # # ),
+        # # # G1BeyondMimicPolicyCfg(# 不美观
+        # # #     policy_name="dance24_wose",
+        # # #     start_timestep = 200,
+        # # #     max_timestep=1500,        
+        # # # ),
+        # # # FS11
+        # # # G1BeyondMimicPolicyCfg(# KUNGFU KICK
+        # # #     policy_name="fightSport11wose",
+        # # #     start_timestep = 850,
+        # # #     max_timestep=1740,        
+        # # # ),
+        # # G1BeyondMimicPolicyCfg(# BOX
+        # #     policy_name="fightSport11wose",
+        # #     start_timestep = 3800,
+        # #     max_timestep=4850,        
+        # # ),
+        # # # G1BeyondMimicPolicyCfg(# 踢腿
+        # # #     policy_name="fightSport11wose",
+        # # #     start_timestep = 5300,
+        # # #     max_timestep=-1,        
+        # # # ),
+        # # ## Dance12
+        # # # G1BeyondMimicPolicyCfg(
+        # # #     policy_name="dance12_wose",
+        # # #     start_timestep = 1800,
+        # # #     max_timestep=3000,        
+        # # # ),
+        # # # G1BeyondMimicPolicyCfg(# 有难度
+        # # #     policy_name="dance12_wose",
+        # # #     start_timestep = 3000,
+        # # #     max_timestep=4900,        
+        # # # ),
+        # # # G1BeyondMimicPolicyCfg(# 难
+        # # #     policy_name="dance12_wose",
+        # # #     start_timestep = 4900,
+        # # #     max_timestep=6500,        
+        # # # ),
+        # # ### Dance 11
+        # # G1BeyondMimicPolicyCfg(
+        # #     policy_name="Dance11_wose",           
+        # #     start_timestep = 1850,
+        # #     max_timestep = 3500,
+        # # ),
+        # # G1BeyondMimicPolicyCfg( # 会摔
+        # #     policy_name="Dance11_wose",           
+        # #     start_timestep = 3750,
+        # #     max_timestep=5000,        
+        # # ),
+        # # # 翻一个跟斗后跳舞
+        # # G1BeyondMimicPolicyCfg(
+        # #     policy_name="Dance11_wose",           
+        # #     start_timestep = 5700,
+        # #     max_timestep=6500,        
+        # # ),
+
+
+
+        # ## test
+        # # G1BeyondMimicPolicyCfg(
+        # #     policy_name="dance24_wose",
+        # #     start_timestep = 3230, 
+        # #     max_timestep=3845 ,    #可以再缩短？  会向后退，可能跌倒
+        # # ),
+        # # G1BeyondMimicPolicyCfg(
+        # #     policy_name="dance24_wose",
+        # #     start_timestep = 4500,
+        # #     max_timestep=5100 ,    
+        # # ),
+
+        # # G1BeyondMimicPolicyCfg(
+        # #     policy_name="dance24_wose",
+        # #     start_timestep = 4500,
+        # #     max_timestep=5190,      
+        # # ),
+
+        # # G1BeyondMimicPolicyCfg(# 扭扭  7600 
+        # #     policy_name="dance24_wose",
+        # #     start_timestep = 6800,
+        # #     max_timestep= 7510, #7600 ,  # 王厚一点      
+        # # ),
+        # # G1BeyondMimicPolicyCfg(# BOX
+        # #     policy_name="fightSport11wose",
+        # #     start_timestep = 3800, 
+        # #     max_timestep=4050 ,    
+        # # ),
+        # # G1BeyondMimicPolicyCfg(# BOX
+        # #     policy_name="fightSport11wose",
+        # #     start_timestep = 4330, 
+        # #     max_timestep=4830,    
+        # # ),
+
+        # G1BeyondMimicPolicyCfg(
+        #     policy_name="Gangnan_wose",           
+        #     start_timestep = 100,
+        #     max_timestep=896,        
+        # ),
+        # # G1BeyondMimicPolicyCfg(
+        # #     policy_name="Gangnan_wose",           
+        # #     start_timestep = 1000,
+        # #     max_timestep=1800,        
+        # # ),
+        # G1BeyondMimicPolicyCfg(
+        #     policy_name="Dance102_sar_wose",           
+        #     start_timestep = 0,
+        #     max_timestep=640,        
+        # ),
+        # G1BeyondMimicPolicyCfg(
+        #     policy_name="Dance102_sar_wose",           
+        #     start_timestep = 900,
+        #     max_timestep=1700,        
+        # ),
+    
     ]
 
     # Enable safety check for real robot
@@ -602,7 +801,90 @@ class g1_real_locomimic_multi(RlLocoMimicPipelineCfg):
 
     do_safety_check: bool = True
 
+@cfg_registry.register
+class g1_unitree_velocity(RlPipelineCfg):
+    """
+    Unitree Velocity policy from unitree_rl_mjlab.
+    
+    Uses WoGait policy for velocity control where the robot remains static
+    when velocity commands are zero, matching the unitree_rl_mjlab behavior.
+    
+    Features:
+    - WoGait policy for static standing
+    - Original unitree_rl_mjlab velocity control
+    - Keyboard-based velocity commands (WASD+QE)
+    - Training configuration compatibility
+    
+    Controls:
+    - Keyboard: WASD for movement, QE for rotation
+    - Joystick: Standard dual-stick control
+    """
 
-from .g1_real_servmimic_cfg import g1_real_servmimic  # noqa: F401
+    robot: str = "g1"
+    env: G1MujocoEnvCfg = G1MujocoEnvCfg()
+
+    ctrl: list[KeyboardCtrlCfg | JoystickCtrlCfg] = [
+        KeyboardCtrlCfg(
+            triggers_extra={
+                # Velocity control keys (unitree_rl_mjlab style)
+                "w": "[VELOCITY_FORWARD]",
+                "s": "[VELOCITY_BACKWARD]", 
+                "a": "[VELOCITY_LEFT]",
+                "d": "[VELOCITY_RIGHT]",
+                "q": "[VELOCITY_TURN_LEFT]",
+                "e": "[VELOCITY_TURN_RIGHT]",
+            }
+        ),
+        JoystickCtrlCfg(
+            triggers_extra={
+                "RB+Down": "[POLICY_TOGGLE]",
+                "RB+Up": "[POLICY_TOGGLE]",
+            }
+        ),
+    ]
+    
+    # Use the Unitree Velocity MJLab policy
+    policy: G1UnitreeMjlabVelocityPolicyCfg = G1UnitreeMjlabVelocityPolicyCfg()
+    # Alternative: Use standard Unitree policy for comparison
+    # loco_policy: G1UnitreePolicyCfg = G1UnitreePolicyCfg()
+    # loco_policy: G1AsapLocoPolicyCfg = G1AsapLocoPolicyCfg()
+
+    # Keep the same mimic policies as the original g1_locomimic
+    mimic_policies: list[G1BeyondMimicPolicyCfg|G1AmoPolicyCfg] = [
+        # G1AsapPolicyCfg(),
+        G1AmoPolicyCfg(),
+        G1BeyondMimicPolicyCfg(
+        policy_name="Gangnan_wose_stable",
+        without_state_estimator=True,
+        use_modelmeta_config=True,  # use robot dof config from modelmeta
+        use_motion_from_model=True,  # use motion from onnx model
+        max_timestep=1500,
+        ),
+        G1BeyondMimicPolicyCfg(
+        policy_name="Gangnan_wose_robust",
+        without_state_estimator=True,
+        use_modelmeta_config=True,  # use robot dof config from modelmeta
+        use_motion_from_model=True,  # use motion from onnx model
+        max_timestep=1500,
+        ),
+        G1BeyondMimicPolicyCfg(
+        policy_name="Gangnan_wose_bias",
+        without_state_estimator=True,
+        use_modelmeta_config=True,  # use robot dof config from modelmeta
+        use_motion_from_model=True,  # use motion from onnx model
+        max_timestep=1500,
+        ),
+        G1BeyondMimicPolicyCfg(
+        policy_name="Gangnan_wose",
+        without_state_estimator=True,
+        use_modelmeta_config=True,  # use robot dof config from modelmeta
+        use_motion_from_model=True,  # use motion from onnx model
+        max_timestep=1500,
+        ),
+
+    ]
+
+
+# from .g1_real_servmimic_cfg import g1_real_servmimic  # noqa: F401
 
 

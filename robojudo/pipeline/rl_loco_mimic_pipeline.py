@@ -435,7 +435,7 @@ class RlLocoMimicPipeline(RlMultiPolicyPipeline):
         self.current_pose = "standing"
         logger.info("Successfully switched to standing pose")
 
-    def prepare(self):
+    def prepare(self,traj_len=500):
         logger.info(f"=== PREPARE METHOD CALLED ===")
         logger.info(f"prepare_pos is None: {self.prepare_pos is None}")
         # Use custom prepare position if available, otherwise use loco position
@@ -446,7 +446,7 @@ class RlLocoMimicPipeline(RlMultiPolicyPipeline):
             init_motor_angle = self.loco_dof_pos.copy()
             logger.info(f"Preparing with locomotion position (default): {init_motor_angle[:5]}...")
         logger.info(f"Calling super().prepare() with init_motor_angle")
-        super().prepare(init_motor_angle=init_motor_angle)
+        super().prepare(init_motor_angle=init_motor_angle,traj_len=traj_len)
         logger.info(f"=== PREPARE METHOD COMPLETED ===")
 
 

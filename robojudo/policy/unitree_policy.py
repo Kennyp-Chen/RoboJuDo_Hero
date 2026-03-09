@@ -72,12 +72,19 @@ class UnitreePolicy(Policy):
                             case "q":
                                 commands[2] = command_remap(-value, self.commands_map[2])
                 return commands  # Return after processing keyboard
-        
         return commands
 
     def get_observation(self, env_data, ctrl_data):
         phase = self._get_phase()
         commands = self._get_commands(ctrl_data)
+        # 手动调整步态漂移补偿 - 适用于真实机器人
+        if env_data is not None and __name__=='robojudo.policy.unitree_policy':
+            # comands.shape=3： 0前后 1左右横移 2左右转向 （+ -）
+            ##前后
+            if abs(commands[0]) < 0.01 and  abs(commands[1]) < 0.01 and abs(commands[2]) < 0.01:
+                commands[0]=-0.075 #向后
+                commands[1]=-0.1 # 向右横移
+                commands[2]=-0.075 # 向右转向
 
         sin_pos = [np.sin(2 * np.pi * phase)]
         cos_pos = [np.cos(2 * np.pi * phase)]
