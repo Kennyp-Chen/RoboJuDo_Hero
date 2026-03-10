@@ -312,14 +312,16 @@ class g1_real_locomimic(RlLocoMimicPipelineCfg):
         *[0.35,-0.18,0.,0.87,0.,0.,0.]
     ]
 
-    # # Standing pose configuration
-    # standing_pos: list[float] = [
-    #     *[-0.1, 0.0, 0.0, 0.3, -0.2, 0.0],  # 左腿
-    #     *[-0.1, 0.0, 0.0, 0.3, -0.2, 0.0],  # 右腿
-    #     *[0, 0, 0],  # 腰部
-    #     *[0, 0, 0, 0, 0, 0, 0],  # 左臂
-    #     *[0, 0, 0, 0, 0, 0, 0],  # 右臂
-    # ]
+    # Standing pose configuration
+    standing_pos: list[float] = [
+        *[-0.1, 0.0, 0.0, 0.3, -0.2, 0.0],  # 左腿
+        *[-0.1, 0.0, 0.0, 0.3, -0.2, 0.0],  # 右腿
+        *[0, 0, 0],  # 腰部
+        # *[0, 0, 0, 0, 0, 0, 0],  # 左臂
+        # *[0, 0, 0, 0, 0, 0, 0],  # 右臂
+        *[0.35,0.18,0.,0.87,0.,0.,0.],
+        *[0.35,-0.18,0.,0.87,0.,0.,0.]
+    ]
 
     # Keyboard and controller with policy switching
     ctrl: list[KeyboardCtrlCfg | UnitreeCtrlCfg] = [
@@ -375,19 +377,33 @@ class g1_real_locomimic(RlLocoMimicPipelineCfg):
         # Index 0: Dance motion
         # G1AmoPolicyCfg(),
         # G1AmpWalkPolicyCfg(),
-
+        # G1BeyondMimicPolicyCfg(
+        #     policy_name="23dof_65fps/Take102",           
+        #     start_timestep = 100,
+        #     max_timestep=1800,        
+        # ),
+        G1BeyondMimicPolicyCfg( # swing 结束些许不稳
+            policy_name="23dof_65fps/dance2_subject4",
+            start_timestep = 8800,
+            max_timestep=10100,       
+        ),
+        G1BeyondMimicPolicyCfg(# 遮眼舞蹈
+            policy_name="23dof_50fps/dance2_subject4",
+            start_timestep = 4500,
+            max_timestep=6900,        
+        ),
+        G1BeyondMimicPolicyCfg(# 扭扭 swing
+            policy_name="23dof_50fps/dance2_subject4",
+            start_timestep = 6800,
+            max_timestep= 8760,        
+        ),
+        G1BeyondMimicPolicyCfg(
+            policy_name="23dof_65fps/GangnamStyle",           
+            start_timestep = 300,
+            max_timestep=2000,        
+        ),
 
         ####23dof 65fps start####
-        G1BeyondMimicPolicyCfg( # 稳定
-            policy_name="23dof_65fps/GangnamStyle",           
-            start_timestep = 200,
-            max_timestep=-1,        
-        ),
-        G1BeyondMimicPolicyCfg( # 稳定
-            policy_name="23dof_65fps/Take102",           
-            start_timestep = 100,
-            max_timestep=-1,        
-        ),  
         G1BeyondMimicPolicyCfg( # 4
             policy_name="23dof_65fps/dance1_subject1",
             start_timestep = 3000,# 3400

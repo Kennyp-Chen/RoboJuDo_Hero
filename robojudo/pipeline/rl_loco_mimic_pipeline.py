@@ -433,7 +433,9 @@ class RlLocoMimicPipeline(RlMultiPolicyPipeline):
         # Use move_to_pose to smoothly move to standing pose without resetting policy
         super().move_to_pose(target_pos=self.standing_pos.copy(), traj_len=500, blend_steps=150)
         self.current_pose = "standing"
-        logger.info("Successfully switched to standing pose")
+        # Set waiting_for_command to True to prevent automatic policy execution
+        self.waiting_for_command = True
+        logger.info("Successfully switched to standing pose - entering waiting command mode")
 
     def prepare(self,traj_len=500):
         logger.info(f"=== PREPARE METHOD CALLED ===")
