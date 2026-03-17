@@ -113,8 +113,8 @@ def check_combinations():
     
     # L1 + R1 + B
     if {"L1", "R1", "B"}.issubset(current_pressed_buttons):
-        logger.info("检测到 L1+R1+B，停止并关机")
-        stop_self_and_shutdown()
+        logger.info("检测到 L1+R1+B，停止监听并交还控制权给PC1")
+        stop_self_and_handover_to_pc1()
         global stop_listener
         stop_listener = True
 
@@ -148,14 +148,37 @@ def start_task():
         is_running_task = False
         task_process = None
 
-def stop_self_and_shutdown():
-    """停止自己并关机"""
-    logger.info("收到关机指令，准备关机...")
+def stop_self_and_handover_to_pc1():
+    """停止监听并交还控制权给PC1"""
+    global stop_listener
+    
+    logger.info("收到交还控制权指令，停止systemd服务...")
+    
     try:
-        # 关机PC2
-        subprocess.run("sudo shutdown -h now", shell=True)
+        # 方法1：尝试使用systemctl --user（如果配置了用户级服务）
+        result = subprocess.run("systemctl --user stop gamepad_listener 2>/dev/null", shell=True)
+        if result.returncode == 0:
+            logger.info("已通过用户级服务停止监听，控制权交还给PC1")
+            return
+        
+        # 方法2：尝试使用sudo（如果配置了免密）
+        result = subprocess.run("sudo -n systemctl stop gamepad_listener 2>/dev/null", shell=True)
+        if result.returncode == 0:
+            logger.info("已通过系统级服务停止监听，控制权交还给PC1")
+            return
+        
+        # 方法3：如果都失败了，记录错误并退出
+        logger.error("无法停止systemd服务，请检查权限配置")
+        logger.info("尝试的解决方案：")
+        logger.info("1. 配置用户级服务：systemctl --user enable gamepad_listener")
+        logger.info("2. 配置sudo免密：sudo visudo 添加 NOPASSWD 配置")
+        
+        # 备用方案：正常退出
+        stop_listener = True
+        
     except Exception as e:
-        logger.error(f"关机失败: {e}")
+        logger.error(f"停止服务失败: {e}")
+        stop_listener = True
 
 
 
@@ -201,7 +224,7 @@ def main():
     logger.info("="*60)
     logger.info("G1 PC2 手柄监听已启动 (RoboJuDo模式)")
     logger.info("[🎮] L1 + R1 + A = 启动任务")
-    logger.info("[🎮] L1 + R1 + B = 停止并关机")
+    logger.info("[🎮] L1 + R1 + B = 停止监听，交还控制权给PC1")
     logger.info("="*60)
 
     # 初始化状态

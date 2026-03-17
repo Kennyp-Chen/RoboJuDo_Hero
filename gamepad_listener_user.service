@@ -1,0 +1,21 @@
+[Unit]
+Description=G1 Gamepad Listener Service (User Level)
+After=network.target
+
+[Service]
+Type=forking
+User=unitree
+Group=unitree
+WorkingDirectory=/home/unitree/chenyupeng/sim2real/RoboJuDo
+Environment=PATH=/home/unitree/miniconda3/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+ExecStart=/home/unitree/chenyupeng/sim2real/RoboJuDo/start_gamepad_listener.sh start
+ExecStop=/home/unitree/chenyupeng/sim2real/RoboJuDo/start_gamepad_listener.sh stop
+ExecReload=/home/unitree/chenyupeng/sim2real/RoboJuDo/start_gamepad_listener.sh restart
+PIDFile=/home/unitree/chenyupeng/sim2real/RoboJuDo/gamepad_listener.pid
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=default.target

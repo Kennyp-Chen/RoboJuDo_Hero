@@ -10,10 +10,11 @@
 ## 功能特性
 
 ✅ **L1 + R1 + A** - 启动 `run_pipeline_serv.py`  
-✅ **L1 + R1 + B** - 关闭进程并关机PC2  
+✅ **L1 + R1 + B** - 停止监听，交还控制权给PC1  
 ✅ **开机自启动** - 通过systemd自动运行  
 ✅ **进程监控** - 自动检测任务状态  
 ✅ **日志记录** - 详细的运行日志  
+✅ **权限管理** - 支持sudo免密配置  
 
 ## 安装步骤
 
@@ -27,6 +28,11 @@
 # 设置权限
 chmod +x start_gamepad_listener.sh
 chmod +x robojudo_listener.py
+
+# 配置sudo免密（重要！）
+sudo visudo
+# 在文件末尾添加：
+# unitree ALL=(ALL) NOPASSWD: /bin/systemctl stop gamepad_listener, /bin/systemctl start gamepad_listener
 
 # 安装systemd服务
 sudo cp gamepad_listener.service /etc/systemd/system/
@@ -81,7 +87,7 @@ tail -20 gamepad_listener.log
 | 按键组合 | 功能 |
 |---------|------|
 | L1 + R1 + A | 启动机器人任务脚本 |
-| L1 + R1 + B | 停止并关机PC2 |
+| L1 + R1 + B | 停止监听，交还控制权给PC1 |
 
 ## 故障排除
 
@@ -108,7 +114,18 @@ conda activate robojudo
 python scripts/run_pipeline_serv.py
 ```
 
-### 4. 卸载服务
+### 4. 手柄按键无法停止服务
+```bash
+# 检查sudo免密配置
+sudo -n systemctl stop gamepad_listener
+
+# 如果提示需要密码，重新配置sudo免密：
+sudo visudo
+# 确保包含：
+# unitree ALL=(ALL) NOPASSWD: /bin/systemctl stop gamepad_listener, /bin/systemctl start gamepad_listener
+```
+
+### 5. 卸载服务
 ```bash
 # 停止并禁用服务
 sudo systemctl stop gamepad_listener
@@ -122,10 +139,19 @@ sudo systemctl daemon-reload
 ## 技术细节
 
 - **Python环境**: conda robojudo
-- **手柄检测**: evdev库
-- **进程管理**: psutil库
-- **系统服务**: systemd
+- **手柄检测**: Unitree机器人接口
+- **进程管理**: psutil库 + systemd
+- **系统服务**: systemd (系统级)
+- **权限控制**: sudo免密配置
 - **日志位置**: `./gamepad_listener.log`
+
+## 工作原理
+
+1. **开机自启动**: systemd在系统启动时自动运行监听服务
+2. **手柄监听**: 通过Unitree机器人接口获取手柄数据
+3. **按键检测**: 监听特定组合键 (L1+R1+A/B)
+4. **服务控制**: 使用systemctl命令管理服务生命周期
+5. **状态持久化**: 重启后服务自动恢复，无需手动干预
 
 ## 更新说明
 
