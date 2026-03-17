@@ -125,7 +125,33 @@ sudo visudo
 # unitree ALL=(ALL) NOPASSWD: /bin/systemctl stop gamepad_listener, /bin/systemctl start gamepad_listener
 ```
 
-### 5. 卸载服务
+### 5. 手动配置sudo免密（详细教程）
+如果自动配置失败，请按以下步骤手动配置：
+
+#### 步骤1：编辑sudoers文件
+```bash
+sudo visudo
+```
+
+#### 步骤2：在文件末尾添加以下行
+```
+unitree ALL=(ALL) NOPASSWD: /bin/systemctl stop gamepad_listener, /bin/systemctl start gamepad_listener
+```
+
+#### 步骤3：保存并退出
+- 在vi/vim中：按 `Esc`，然后输入 `:wq` 并回车
+- 在nano中：按 `Ctrl+X`，然后按 `Y` 确认，最后按回车
+
+#### 步骤4：验证配置
+```bash
+# 测试是否需要密码（应该没有任何输出）
+sudo -n systemctl stop gamepad_listener
+
+# 如果成功，重新启动服务
+sudo systemctl start gamepad_listener
+```
+
+### 6. 卸载服务
 ```bash
 # 停止并禁用服务
 sudo systemctl stop gamepad_listener
