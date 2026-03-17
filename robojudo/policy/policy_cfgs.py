@@ -130,8 +130,8 @@ class UnitreeMjlabVelocityPolicyCfg(PolicyCfg):
     
     robot: str = "g1"
     policy_type: str = "G1UnitreeMjlabVelocityPolicy"
-    # model_dir: str = "4900_23dof"  
-    model_dir: str = "demo_29dof"
+    model_dir: str = "4900_23dof"  
+    # model_dir: str = "demo_29dof"
     # model_dir:str="policy_20000_29dof"  
 
     @property
@@ -141,9 +141,9 @@ class UnitreeMjlabVelocityPolicyCfg(PolicyCfg):
         policy_file = ASSETS_DIR / f"models/{self.robot}/unitree_mjlab_velocity/{self.model_dir}/policy.onnx"
         return policy_file.as_posix()
     
-    action_scale: list[float] = [0.55, 0.35, 0.55, 0.35, 0.44, 0.44, 0.55, 0.35, 0.55, 0.35, 0.44, 0.44, 0.35, 0.44, 0.44,
-                     0.44, 0.44, 0.44, 0.44, 0.44, 0.07, 0.07, 0.44, 0.44, 0.44, 0.44, 0.44, 0.07, 0.07]
-    action_offset: list[float] = [-0.1,0,0,0.3,-0.2,0, -0.1,0,0,0.3,-0.2,0,  0,0,0,  0.35,0.18,0,0.87,0,0,0, 0.35,-0.18,0,0.87,0,0,0]
+    # action_scale: list[float] = [0.55, 0.35, 0.55, 0.35, 0.44, 0.44, 0.55, 0.35, 0.55, 0.35, 0.44, 0.44, 0.35, 0.44, 0.44,
+    #                  0.44, 0.44, 0.44, 0.44, 0.44, 0.07, 0.07, 0.44, 0.44, 0.44, 0.44, 0.44, 0.07, 0.07]
+    # action_offset: list[float] = [-0.1,0,0,0.3,-0.2,0, -0.1,0,0,0.3,-0.2,0,  0,0,0,  0.35,0.18,0,0.87,0,0,0, 0.35,-0.18,0,0.87,0,0,0]
     
     history_length: int = 1  # number of history observations to use
     history_obs_dims: dict[str, int] = {}
@@ -186,7 +186,7 @@ class UnitreeMjlabVelocityPolicyCfg(PolicyCfg):
     # ]
 
     commands_map: list[list[float]] = [
-        [-0.5, 0.0, 0.9],
+        [-0.6, 0.0, 0.9],
         [1.0, 0.0, -1.0],
         [1.0, 0.0, -1.0],
     ]

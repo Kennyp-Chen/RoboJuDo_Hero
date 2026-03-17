@@ -205,7 +205,7 @@ class G1UnitreeMjlabVelocityPolicy(Policy):
 
         # Apply action scale from deploy.yaml (exact values)
         if hasattr(self.cfg_policy, 'action_scale'):
-            action_scale = np.array(self.cfg_policy.action_scale)
+            action_scale = np.array(self.cfg_policy.obs_dof.action_scale)
             # action_offset = np.array(self.cfg_policy.action_offset)
             # action = action * action_scale + action_offset
             action = action * action_scale
