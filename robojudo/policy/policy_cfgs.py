@@ -3,7 +3,7 @@ from pydantic import field_validator, model_validator
 from robojudo.config import ASSETS_DIR, Config
 from robojudo.tools.tool_cfgs import DoFConfig
 
-
+import math
 class PolicyCfg(Config):
     policy_type: str  # name of the policy class
     robot: str  # robot name, e.g. "g1"
@@ -129,9 +129,9 @@ class UnitreeMjlabVelocityPolicyCfg(PolicyCfg):
     
     robot: str = "g1"
     policy_type: str = "G1UnitreeMjlabVelocityPolicy"
-    model_dir: str = "policy_20000_29dof" 
-    # model_dir: str = "4900_23dof" 
-    # model_dir: str = "demo_29dof"  
+    # model_dir: str = "policy_20000_29dof" 
+    # model_dir: str = "4900_23dof"  
+    model_dir: str = "demo_29dof"  
 
     @property
     def policy_file(self) -> str:
@@ -140,10 +140,7 @@ class UnitreeMjlabVelocityPolicyCfg(PolicyCfg):
         policy_file = ASSETS_DIR / f"models/{self.robot}/unitree_mjlab_velocity/{self.model_dir}/policy.onnx"
         return policy_file.as_posix()
     
-    action_scale: list[float] = [0.55, 0.35, 0.55, 0.35, 0.44, 0.44, 0.55, 0.35, 0.55, 0.35, 0.44, 0.44, 0.35, 0.44, 0.44,
-                     0.44, 0.44, 0.44, 0.44, 0.44, 0.07, 0.07, 0.44, 0.44, 0.44, 0.44, 0.44, 0.07, 0.07]
-    action_offset: list[float] = [-0.1,0,0,0.3,-0.2,0, -0.1,0,0,0.3,-0.2,0,  0,0,0,  0.35,0.18,0,0.87,0,0,0, 0.35,-0.18,0,0.87,0,0,0]
-    
+
     history_length: int = 1  # number of history observations to use
     history_obs_dims: dict[str, int] = {}
     
@@ -179,12 +176,11 @@ class AmpWalkPolicyCfg(PolicyCfg):
         command: float = 1.0     # deploy.yaml: velocity_commands scale
     
     robot: str = "g1"
-    policy_type: str = "G1GmrAmpPolicy"
-    # model_dir: str = "gmramp/run_20000" 
+    policy_type: str = "G1AmpPolicy"
+    model_dir: str = "gmramp/run_20000" 
     # model_dir: str = "gmramp/run_18400" 
-    model_dir: str = "gmramp/walk_20000" 
+    # model_dir: str = "gmramp/walk_20000" 
     # model_dir: str = "gmramp/walk_18000" 
-    # model_dir: str = "gmramp/runwalk_24000" 
 
 
 
@@ -203,8 +199,7 @@ class AmpWalkPolicyCfg(PolicyCfg):
     
     obs_scales: ObsScalesCfg = ObsScalesCfg()
     # self.decimation = 4
-
-    # dt: float = 0.005
+    # sim_dt: float = 0.005
     dt: float = 0.02
 
     max_cmd: list[float] = [1., 1., 2.5]
@@ -216,20 +211,141 @@ class AmpWalkPolicyCfg(PolicyCfg):
     '''
 
     ## run 
-    # if "run" in model_dir:
-    commands_map: list[list[float]] = [
-        [-1., 0.0, 2.5],
-        [-0., 0.0, 0.],
-        [-0., 0.0, 0.],
-    ]
-    ## walk
-    # elif "walk" in model_dir:
-        # commands_map: list[list[float]] = [
-        #     [-1., 0.0, 1.],
-        #     [0., 0.0, 0.],
-        #     [0., 0.0, 0.],
-        # ]
+    if "run" in model_dir:
+        commands_map: list[list[float]] = [
+            [-1., 0.0, 2.5],
+            [-0., 0.0, 0.],
+            # [-0., 0.0, 0.],
+            [-math.pi, 0.0, math.pi],
 
+        ]
+    # walk
+    elif "walk" in model_dir:
+        commands_map: list[list[float]] = [
+            [-1., 0.0, 1.],
+            [0., 0.0, 0.],
+            # [0., 0.0, 0.],
+            [-math.pi, 0.0, math.pi],
+        ]
+
+class AmpRunWalkPolicyCfg(PolicyCfg):
+    """
+    新版 legged_lab amp 260212
+    1. base_ang_vel: 3维
+    2. root_local_rot_tan_norm: 6维
+    3. velocity_commands: 3维
+    4. joint_pos: 29维 (G1机器人29个关节)
+    5. joint_vel: 29维
+    6. actions: 29维 (上一步动作)
+    7. key_body_pos_b: 18维 (6个关键身体部位 × 3维坐标)
+        - left_ankle_roll_link, right_ankle_roll_link
+        - left_wrist_yaw_link, right_wrist_yaw_link
+        - left_shoulder_roll_link, right_shoulder_roll_link
+    单时间步总维度: 3 + 6 + 3 + 29 + 29 + 29 + 18 = 117维
+    包含5步历史: 117 × 5 = 585维 ✓
+    """
+    class ObsScalesCfg(Config):
+        ang_vel: float = 1.0
+        root_local_rot_tan_norm: float = 1.0 # TODO: check if this is correct
+        command: float = 1.0
+        dof_pos: float = 1.0
+        dof_vel: float = 1.0
+        key_body_pos_b: float = 1.0 # TODO: check if this is correct
+
+    robot: str = "g1"
+    policy_type: str = "G1AmpRunWalkPolicy"
+    model_dir: str = "gmramp/runwalk_30000" 
+    # model_dir: str = "gmramp/runwalk_24000" 
+
+    @property
+    def policy_file(self) -> str:
+        """Override to point to ONNX model in unitree_mjlab_velocity directory."""
+        from robojudo.config.global_path import ASSETS_DIR
+        policy_file = ASSETS_DIR / f"models/{self.robot}/{self.model_dir}/policy.pt"
+
+
+        return policy_file.as_posix()
+    action_scale: float = 0.25
+
+    history_length: int = 5
+    history_obs_dims: dict[str, int] = {}
+    
+    obs_scales: ObsScalesCfg = ObsScalesCfg()
+    # dt: float = 0.005 # sim_dt
+    dt: float = 0.02 # ctrl_dt = sim_dt * decimation(采样/抽取因子)
+    # action_clip: float | None = 1.8
+
+    max_cmd: list[float] = [3., 1., 1.]# scale
+    action_beta: float = 1
+
+
+    commands_map: list[list[float]] = [
+        [-0.2, 0.0, 1.],
+        [-0.5, 0.0, 0.5],
+        [-0.5, 0.0, 0.5],
+    ]
+    # commands_map: list[list[float]] = [
+    #     [-0.1, 0.0, 0.1],
+    #     [-0.1, 0.0, 0.1],
+    #     [-math.pi, 0.0, math.pi],
+    # ]
+
+
+class AmpRecoveryPolicyCfg(PolicyCfg):
+    """
+
+    """
+
+    robot: str = "g1"
+    policy_type: str = "G1AmpRecoveryPolicy"
+    model_dir: str ="recover_policy/loco/amp_0309_1.onnx"
+    @property
+    def policy_file(self) -> str:
+        """Override to point to ONNX model in unitree_mjlab_velocity directory."""
+        from robojudo.config.global_path import ASSETS_DIR
+        policy_file = ASSETS_DIR / f"models/{self.robot}/{self.model_dir}"
+
+        return policy_file.as_posix()
+    class ObsScalesCfg(Config):
+        gravity: float = 1.0     # deploy.yaml: projected_gravity scale
+        dof_pos: float = 1.0     # deploy.yaml: joint_pos_rel scale
+        dof_vel: float = 1.0     # deploy.yaml: joint_vel_rel scale
+        ang_vel: float = 1.0     # deploy.yaml: base_ang_vel scale
+        command: float = 1.0     # deploy.yaml: velocity_commands scale
+    
+    action_scale: float = 0.25
+
+    history_length: int = 4
+    history_obs_dims: dict[str, int] = {}
+    
+    obs_scales: ObsScalesCfg = ObsScalesCfg()
+    dt: float = 0.02
+    action_clip: float = 100.0
+    max_cmd: list[float] = [1., 1., 2.5]
+    '''
+    self.commands.base_velocity.ranges.lin_vel_x = (0.0, 1.0)    # 前向速度: 0~1 m/s
+    self.commands.base_velocity.ranges.lin_vel_y = (-0.5, 0.5)   # 横向速度: ±0.5 m/s
+    self.commands.base_velocity.ranges.ang_vel_z = (-0.5, 0.5)   # 旋转速度: ±0.5 rad/s
+    self.commands.base_velocity.ranges.heading = (-math.pi, math.pi)  # 朝向: ±π rad
+    '''
+
+    mode: str = "run" 
+    if mode == "run" :
+        commands_map: list[list[float]] = [
+            [-1., 0.0, 2.5],
+            [-0., 0.0, 0.],
+            # [-0., 0.0, 0.],
+            [-math.pi, 0.0, math.pi],
+
+        ]
+    # walk
+    elif mode == "walk" :
+        commands_map: list[list[float]] = [
+            [-1., 0.0, 1.],
+            [0., 0.0, 0.],
+            # [0., 0.0, 0.],
+            [-math.pi, 0.0, math.pi],
+        ]
 
 class SmoothPolicyCfg(PolicyCfg):
     class ObsScalesCfg(Config):
@@ -329,9 +445,9 @@ class AMOPolicyCfg(PolicyCfg):
 
     commands_map: list[list[float]]
 
-
-class BeyondMimicPolicyCfg(PolicyCfg):
-    policy_type: str = "BeyondMimicPolicy"
+class MultiModalWBCPolicyCfg(PolicyCfg):
+    
+    policy_type: str = "MultiModalWBCPolicy"
     disable_autoload: bool = True
 
     policy_name: str
@@ -340,13 +456,58 @@ class BeyondMimicPolicyCfg(PolicyCfg):
 
     @property
     def policy_file(self) -> str:
-        policy_file = ASSETS_DIR / f"models/{self.robot}/beyondmimic/{self.policy_name}.onnx"
+        policy_file = ASSETS_DIR / f"models/{self.robot}/mulModWBC/50000/{self.policy_name}.onnx"
         return policy_file.as_posix()
 
     # ======= POLICY SPECIFIC CONFIGURATION =======
     action_scales: list[float]
 
     without_state_estimator: bool
+    override_robot_anchor_pos: bool = True  # if True, drop pos fdb
+
+    use_modelmeta_config: bool = True  # if True, use the config from modelmeta
+    use_motion_from_model: bool = True  # if True, use the motion data of onnx model
+
+    @model_validator(mode="after")
+    def check_modelmeta(self):
+        if self.use_motion_from_model:
+            if not self.use_modelmeta_config:
+                raise ValueError("use_modelmeta_config must be True when use_motion_from_model")
+
+        return self
+
+class BFMZeroPolicyCfg(PolicyCfg):
+    policy_type: str = "BFMZeroPolicy"
+    policy_name: str = "FBcprAuxModel"
+    start_timestep: int = 0
+    action_rescale: int = 5
+    # ======= POLICY SPECIFIC CONFIGURATION =======
+    max_timestep: int = -1
+    @property
+    def policy_file(self) -> str:
+        policy_file = ASSETS_DIR / f"models/{self.robot}/BFM0/{self.policy_name}.onnx"
+        return policy_file.as_posix()
+
+
+class BeyondMimicPolicyCfg(PolicyCfg):
+    policy_type: str = "BeyondMimicPolicy"
+    disable_autoload: bool = True
+
+    policy_name: str
+    max_timestep: int = -1
+    start_timestep: int = 0 
+
+    @property
+    def policy_file(self) -> str:
+        policy_file = ASSETS_DIR / f"models/{self.robot}/beyondmimic/{self.policy_name}.onnx"
+        # policy_file = ASSETS_DIR / f"models/{self.robot}/beyondmimic/23dof_65fps/{self.policy_name}.onnx"
+
+        return policy_file.as_posix()
+
+    # ======= POLICY SPECIFIC CONFIGURATION =======
+    action_scales: list[float]
+
+    without_state_estimator: bool =True
     override_robot_anchor_pos: bool = True  # if True, drop pos fdb
 
     use_modelmeta_config: bool = True  # if True, use the config from modelmeta

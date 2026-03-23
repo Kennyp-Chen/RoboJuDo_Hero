@@ -33,6 +33,9 @@ class MujocoEnvCfg(EnvCfg):
     sim_duration: float = 60.0
     sim_dt: float = 0.001
     sim_decimation: int = 20
+    
+    control_mode: str = "torque"
+    """Control mode: 'torque' (default) or 'position'"""
 
     visualize_extras: bool = True  # TODO: remove
 

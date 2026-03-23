@@ -120,37 +120,6 @@ class G1UnitreeMjlabVelocityPolicy(Policy):
                                 commands[2] = command_remap(-value, self.commands_map[2])
                 break
 
-
-        # for key in ctrl_data.keys():
-        #     if key in ["KeyboardCtrl"]:
-        #         keys = ctrl_data[key]["keyboard_event"]
-        #         for event in keys:
-        #             if event["type"] == "keyboard" and event["pressed"]:
-        #                 # unitree_rl_mjlab style keyboard mapping
-        #                 value = 1.0
-        #                 match event["name"]:
-        #                     case "w":
-        #                         commands[0] = command_remap(value, self.cfg_policy.commands_map[0])
-        #                     case "s":
-        #                         commands[0] = command_remap(-value, self.cfg_policy.commands_map[0])
-        #                     case "a":
-        #                         commands[1] = command_remap(-value, self.cfg_policy.commands_map[1])
-        #                     case "d":
-        #                         commands[1] = command_remap(value, self.cfg_policy.commands_map[1])
-        #                     case "q":
-        #                         commands[2] = command_remap(-value, self.cfg_policy.commands_map[2])
-        #                     case "e":
-        #                         commands[2] = command_remap(value, self.cfg_policy.commands_map[2])
-        #         break
-                
-        #     elif key in ["JoystickCtrl", "UnitreeCtrl"]:
-        #         axes = ctrl_data[key]["axes"]
-        #         lx, ly, rx, ry = axes["LeftX"], axes["LeftY"], axes["RightX"], axes["RightY"]
-                
-        #         commands[0] = command_remap(ly, self.cfg_policy.commands_map[0])
-        #         commands[1] = command_remap(lx, self.cfg_policy.commands_map[1])
-        #         commands[2] = command_remap(rx, self.cfg_policy.commands_map[2])
-        #         break
         return commands
 
     # def compute_obs(self, env_data, ctrl_data):
@@ -204,7 +173,7 @@ class G1UnitreeMjlabVelocityPolicy(Policy):
 
         # Apply action scale from deploy.yaml (exact values)
         if hasattr(self.cfg_policy, 'action_scale'):
-            action_scale = np.array(self.cfg_policy.action_scale)
+            action_scale = np.array(self.cfg_policy.obs_dof.action_scale)
             # action_offset = np.array(self.cfg_policy.action_offset)
             # action = action * action_scale + action_offset
             action = action * action_scale

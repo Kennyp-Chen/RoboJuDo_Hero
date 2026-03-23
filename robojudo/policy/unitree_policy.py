@@ -48,7 +48,7 @@ class UnitreePolicy(Policy):
                 keys = ctrl_data[key]["keyboard_event"]
                 for event in keys:
                     if event["type"] == "keyboard":
-                        value = event["pressed"] * 1.5
+                        value = event["pressed"] * 1.
                         match event["name"]:
                             case "w":
                                 commands[0] = command_remap(value, self.commands_map[0])

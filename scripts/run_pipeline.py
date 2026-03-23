@@ -24,8 +24,8 @@ def parse_args():
         "--config",
         type=str,
         # default="g1",
-        default="g1_locomimic",
-        # default="g1_unitree_velocity",
+        # default="g1_locomimic",
+        default="g1_bfmzero_tracking",
 
         help="Name of the config class to use",
     )

@@ -19,7 +19,8 @@ from .ctrl.g1_motion_ctrl_cfg import (  # noqa: F401
 )
 from .ctrl.g1_twist_redis_ctrl_cfg import G1TwistRedisCtrlCfg  # noqa: F401
 from .env.g1_dummy_env_cfg import G1DummyEnvCfg  # noqa: F401
-from .env.g1_mujuco_env_cfg import G1_12MujocoEnvCfg, G1_23MujocoEnvCfg, G1MujocoEnvCfg  # noqa: F401
+
+from .env.g1_mujuco_env_cfg import G1MujocoEnvCfg,G1_23MujocoEnvCfg
 from .env.g1_real_env_cfg import G1RealEnvCfg, G1UnitreeCfg  # noqa: F401
 from .policy.g1_amo_policy_cfg import G1AmoPolicyCfg  # noqa: F401
 from .policy.g1_asap_policy_cfg import G1AsapLocoPolicyCfg, G1AsapPolicyCfg  # noqa: F401
@@ -30,7 +31,66 @@ from .policy.g1_smooth_policy_cfg import G1SmoothPolicyCfg  # noqa: F401
 from .policy.g1_twist_policy_cfg import G1TwistPolicyCfg  # noqa: F401
 from .policy.g1_unitree_policy_cfg import G1UnitreePolicyCfg, G1UnitreeWoGaitPolicyCfg  # noqa: F401
 from .policy.g1_unitree_velocity_policy_cfg import G1UnitreeMjlabVelocityPolicyCfg# G1UnitreeWoGaitVelocityPolicyCfg  # noqa: F401
-from .policy.g1_amp_policy_cfg import G1AmpWalkPolicyCfg
+from .policy.g1_amp_policy_cfg import G1AmpWalkPolicyCfg,G1AmpRunWalkPolicyCfg,G1AmpRecoveryPolicyCfg
+from .policy.g1_multimodalwbc_policy_cfg import G1MultiModalWBCPolicyCfg
+from .policy.g1_bfmzero_policy_cfg import (
+    G1BFMZeroPolicyCfg,
+    G1BFMZeroTrackingPolicyCfg,
+    G1BFMZeroRewardPolicyCfg,
+    G1BFMZeroGoalPolicyCfg,
+)
+from ...controller.ctrl_cfgs import BFMKeyboardCtrlCfg, BFMJoystickCtrlCfg
+
+@cfg_registry.register
+class g1_bfmzero_tracking(RlPipelineCfg):
+    """
+    Unitree G1 robot with BFM Zero tracking policy using position control.
+    """
+
+    robot: str = "g1"
+    # env: G1MujocoEnvCfg = G1MujocoEnvCfg()
+    env: G1_23MujocoEnvCfg = G1_23MujocoEnvCfg()
+
+    ctrl: list[BFMKeyboardCtrlCfg] = [
+        BFMKeyboardCtrlCfg(),
+    ]
+
+    policy: G1BFMZeroTrackingPolicyCfg = G1BFMZeroTrackingPolicyCfg()
+
+
+@cfg_registry.register
+class g1_bfmzero_reward(RlPipelineCfg):
+    """
+    Unitree G1 robot with BFM Zero reward policy.
+    """
+
+    robot: str = "g1"
+    env: G1MujocoEnvCfg = G1MujocoEnvCfg()
+    # env: G1_23MujocoEnvCfg = G1_23MujocoEnvCfg()
+
+    ctrl: list[BFMKeyboardCtrlCfg] = [
+        BFMKeyboardCtrlCfg(),
+    ]
+
+    policy: G1BFMZeroRewardPolicyCfg = G1BFMZeroRewardPolicyCfg()
+
+
+@cfg_registry.register
+class g1_bfmzero_goal(RlPipelineCfg):
+    """
+    Unitree G1 robot with BFM Zero goal policy.
+    """
+
+    robot: str = "g1"
+    env: G1MujocoEnvCfg = G1MujocoEnvCfg()
+    # env: G1_23MujocoEnvCfg = G1_23MujocoEnvCfg()
+
+    ctrl: list[BFMKeyboardCtrlCfg] = [
+        BFMKeyboardCtrlCfg(),
+    ]
+
+    policy: G1BFMZeroGoalPolicyCfg = G1BFMZeroGoalPolicyCfg()
+
 
 # ======================== Basic Configs ======================== #
 @cfg_registry.register
@@ -53,7 +113,9 @@ class g1(RlPipelineCfg):
     # policy: G1UnitreePolicyCfg = G1UnitreePolicyCfg()
     # policy: G1UnitreeWoGaitPolicyCfg = G1UnitreeWoGaitPolicyCfg()
     # policy: G1AmoPolicyCfg = G1AmoPolicyCfg()
-    policy: G1AmpWalkPolicyCfg = G1AmpWalkPolicyCfg()
+    # policy: G1AmpWalkPolicyCfg = G1AmpWalkPolicyCfg()
+    # policy: G1AmpRunWalkPolicyCfg = G1AmpRunWalkPolicyCfg()
+    policy: G1BFMZeroPolicyCfg = G1BFMZeroPolicyCfg()
 
     # run_fullspeed: bool = env.is_sim
 
@@ -110,6 +172,7 @@ class g1_switch(RlMultiPolicyPipelineCfg):
     ]
 
 
+
 @cfg_registry.register
 class g1_locomimic(RlLocoMimicPipelineCfg):
     """
@@ -121,7 +184,9 @@ class g1_locomimic(RlLocoMimicPipelineCfg):
     robot: str = "g1"
     env: G1MujocoEnvCfg = G1MujocoEnvCfg()
 
-    ctrl: list[KeyboardCtrlCfg | JoystickCtrlCfg] = [
+    # env: G1_23MujocoEnvCfg = G1_23MujocoEnvCfg()
+
+    ctrl: list[KeyboardCtrlCfg | JoystickCtrlCfg | G1BeyondmimicCtrlCfg|BFMKeyboardCtrlCfg] = [
         KeyboardCtrlCfg(
             triggers_extra={
                 "]": "[POLICY_LOCO]",
@@ -138,11 +203,20 @@ class g1_locomimic(RlLocoMimicPipelineCfg):
                 "RB+Up": "[POLICY_MIMIC]",
             }
         ),
+        G1BeyondmimicCtrlCfg(
+            # motion_name="fallAndGetUp3_subject1",  # you can put your own motion file in assets/motions/g1
+        ),
+        BFMKeyboardCtrlCfg(),
+
     ]
-    # loco_policy: G1UnitreeMjlabVelocityPolicyCfg = G1UnitreeMjlabVelocityPolicyCfg()
+
+    loco_policy: G1UnitreeMjlabVelocityPolicyCfg = G1UnitreeMjlabVelocityPolicyCfg()
 
     # loco_policy: G1UnitreeWoGaitPolicyCfg = G1UnitreeWoGaitPolicyCfg()
-    loco_policy: G1UnitreePolicyCfg = G1UnitreePolicyCfg()
+    # loco_policy: G1UnitreePolicyCfg = G1UnitreePolicyCfg()
+        
+    # loco_policy: G1AmpRunWalkPolicyCfg=G1AmpRunWalkPolicyCfg()
+    # loco_policy:G1AmpRecoveryPolicyCfg=G1AmpRecoveryPolicyCfg()
     # loco_policy: G1AsapLocoPolicyCfg = G1AsapLocoPolicyCfg()
 
     # loco_policy: list[G1UnitreePolicyCfg|G1UnitreeWoGaitPolicyCfg|G1AsapLocoPolicyCfg] = [
@@ -151,41 +225,229 @@ class g1_locomimic(RlLocoMimicPipelineCfg):
     #     G1AsapLocoPolicyCfg(),
     # ]
 
-    mimic_policies: list[G1BeyondMimicPolicyCfg|G1AmoPolicyCfg|G1AmpWalkPolicyCfg] = [
+
+    mimic_policies: list[G1BeyondMimicPolicyCfg|G1AmoPolicyCfg|G1AmpWalkPolicyCfg|G1MultiModalWBCPolicyCfg|G1BFMZeroTrackingPolicyCfg] = [
         # G1AsapPolicyCfg(),
-        G1AmoPolicyCfg(),
-        G1AmpWalkPolicyCfg(),
+        # G1AmpRunWalkPolicyCfg(),
+        # G1AmoPolicyCfg(),
+        # G1AmpWalkPolicyCfg(),
+        # G1MultiModalWBCPolicyCfg(
+        #     policy_name="policy",
+        #     without_state_estimator=True,
+        #     use_modelmeta_config=False,  # use robot dof config from modelmeta
+        #     use_motion_from_model=False,  # use motion from onnx model
+        #     max_timestep=5000,
+        # ),
+        G1BFMZeroTrackingPolicyCfg(),
+        ##################BeyondMimic Policies######################
+        # 23dof_50fps start####################################
+        # # # fightAndSports1_subject1
+        # G1BeyondMimicPolicyCfg(# KUNGFU KICK
+        #     policy_name="23dof_50fps/fightAndSports1_subject1",
+        #     start_timestep = 850,
+        #     max_timestep=1300,        
+        # ),
+        # G1BeyondMimicPolicyCfg(# BOX
+        #     policy_name="23dof_50fps/fightAndSports1_subject1",
+        #     start_timestep = 3800,
+        #     max_timestep=4900,        
+        # ),
+        # G1BeyondMimicPolicyCfg(# 踢腿
+        #     policy_name="23dof_50fps/fightAndSports1_subject1",
+        #     start_timestep = 5200,
+        #     max_timestep=6300,        
+        # ),
+        # G1BeyondMimicPolicyCfg(# 
+        #     policy_name="23dof_50fps/fightAndSports1_subject1",
+        #     start_timestep = 6200,
+        #     max_timestep=8390,        
+        # ),
 
-        G1BeyondMimicPolicyCfg(
-        policy_name="Gangnan_wose_stable",
-        without_state_estimator=True,
-        use_modelmeta_config=True,  # use robot dof config from modelmeta
-        use_motion_from_model=True,  # use motion from onnx model
-        max_timestep=1500,
-        ),
-        # G1BeyondMimicPolicyCfg(
-        # policy_name="Gangnan_wose_robust",
-        # without_state_estimator=True,
-        # use_modelmeta_config=True,  # use robot dof config from modelmeta
-        # use_motion_from_model=True,  # use motion from onnx model
-        # max_timestep=1500,
+
+        # # fight1_subject2 上钩拳 长序列 双踢腿 ；保龄球；篮球接球传球
+        # G1BeyondMimicPolicyCfg( # 1800-2000上钩拳
+        #     policy_name="23dof_50fps/fight1_subject2",
+        #     start_timestep = 1590,
+        #     max_timestep=2000,        
         # ),
-        # G1BeyondMimicPolicyCfg(
-        # policy_name="Gangnan_wose_bias",
-        # without_state_estimator=True,
-        # use_modelmeta_config=True,  # use robot dof config from modelmeta
-        # use_motion_from_model=True,  # use motion from onnx model
-        # max_timestep=1500,
+        # G1BeyondMimicPolicyCfg( # 5000-5100 双踢腿 
+        #     policy_name="23dof_50fps/fight1_subject2",
+        #     start_timestep = 4800,
+        #     max_timestep=5250,        
         # ),
-        # G1BeyondMimicPolicyCfg(
-        # policy_name="Gangnan_wose",
-        # without_state_estimator=True,
-        # use_modelmeta_config=True,  # use robot dof config from modelmeta
-        # use_motion_from_model=True,  # use motion from onnx model
-        # max_timestep=1500,
+        # G1BeyondMimicPolicyCfg( # 三连双踢腿 
+        #     policy_name="23dof_50fps/fight1_subject2",
+        #     start_timestep = 14300,
+        #     max_timestep=14900,        
         # ),
 
-    ]
+
+        
+
+        # ## dance1_subject1
+        # G1BeyondMimicPolicyCfg(
+        #     policy_name="23dof_50fps/dance1_subject1",           
+        #     start_timestep = 1850,
+        #     max_timestep = 3500,
+        # ),
+        # G1BeyondMimicPolicyCfg(
+        #     policy_name="23dof_50fps/dance1_subject1",           
+        #     start_timestep = 3750,
+        #     max_timestep=5000,        
+        # ),
+        # # 翻一个跟斗后跳舞
+        # G1BeyondMimicPolicyCfg(
+        #     policy_name="23dof_50fps/dance1_subject1",           
+        #     start_timestep = 5700,
+        #     max_timestep=6500,        
+        # ),
+        
+        # # dance1_subject2
+        # G1BeyondMimicPolicyCfg(
+        #     policy_name="23dof_50fps/dance1_subject2",
+        #     start_timestep = 200,
+        #     max_timestep=1850,        
+        # ),
+        # G1BeyondMimicPolicyCfg(
+        #     policy_name="23dof_50fps/dance1_subject2",
+        #     start_timestep = 1800,
+        #     max_timestep=3130,        
+        # ),
+        # G1BeyondMimicPolicyCfg(
+        #     policy_name="23dof_50fps/dance1_subject2",
+        #     start_timestep = 3000,
+        #     max_timestep=4900,        
+        # ),
+        # G1BeyondMimicPolicyCfg(
+        #     policy_name="23dof_50fps/dance1_subject2",
+        #     start_timestep = 4900,
+        #     max_timestep=6700,        
+        # ),
+
+        # ## dance1_subject3 
+        # ##共6500 没有舞蹈感觉 需要29的手腕关节，否则前2000看不出来在跳舞
+        # # 单脚跳 
+
+        # # G1BeyondMimicPolicyCfg(
+        # #     policy_name="23dof_50fps/dance1_subject3",
+        # #     start_timestep = 100,
+        # #     max_timestep=-1,        
+        # # ),
+
+
+        # # dance2_subject1 
+        # # 转圈 后仰抖肩 单脚跳舞 空中转圈 第一次失败了
+
+        # G1BeyondMimicPolicyCfg(# 甩脚舞
+        #     policy_name="23dof_50fps/dance2_subject1",
+        #     start_timestep = 1800,
+        #     max_timestep=2800,        
+        # ),
+        # G1BeyondMimicPolicyCfg(# 抖肩
+        #     policy_name="23dof_50fps/dance2_subject1",
+        #     start_timestep = 2800,
+        #     max_timestep=3335,        
+        # ),
+        # G1BeyondMimicPolicyCfg(# 双手渐进抬手
+        #     policy_name="23dof_50fps/dance2_subject1",
+        #     start_timestep = 3300,
+        #     max_timestep=4260,        
+        # ),
+        # G1BeyondMimicPolicyCfg(# 转圈 低重心有难
+        #     policy_name="23dof_50fps/dance2_subject1",
+        #     start_timestep = 4260,
+        #     max_timestep=6300,        
+        # ),
+        # G1BeyondMimicPolicyCfg(# 上下摆手转圈后倾斜搓碟
+        #     policy_name="23dof_50fps/dance2_subject1",
+        #     start_timestep = 6300,
+        #     max_timestep=7600,        
+        # ),
+        # G1BeyondMimicPolicyCfg( # 单脚小跳 后仰倒退 后仰摇手
+        #     policy_name="23dof_50fps/dance2_subject1",
+        #     start_timestep = 7600,
+        #     max_timestep=9630,        
+        # ),
+
+        # # ## dance2_subject4
+        # # G1BeyondMimicPolicyCfg(
+        # #     policy_name="23dof_50fps/dance2_subject4",
+        # #     start_timestep = 1500,
+        # #     max_timestep=2900,        
+        # # ),
+        
+        # # G1BeyondMimicPolicyCfg(
+        # #     policy_name="23dof_50fps/dance2_subject4",
+        # #     start_timestep = 3100,
+        # #     max_timestep=4500,        
+        # # ),
+        # # G1BeyondMimicPolicyCfg(
+        # #     policy_name="23dof_50fps/dance2_subject4",
+        # #     start_timestep = 4500,
+        # #     max_timestep=5130 ,    
+        # # ),
+        # # G1BeyondMimicPolicyCfg(# 遮眼舞蹈
+        # #     policy_name="23dof_50fps/dance2_subject4",
+        # #     start_timestep = 4500,
+        # #     max_timestep=6900,        
+        # # ),
+        # # G1BeyondMimicPolicyCfg(# 扭扭
+        # #     policy_name="23dof_50fps/dance2_subject4",
+        # #     start_timestep = 7500,
+        # #     max_timestep= 8760,  # 7595 
+        # # ),
+
+
+
+        # # 23dof_50fps end ####################################
+
+        # # 23dof_65fps start ####################################
+
+        # G1BeyondMimicPolicyCfg(
+        #     policy_name="23dof_65fps/Take102",           
+        #     start_timestep = 100,
+        #     max_timestep=1800,        
+        # ),
+        # G1BeyondMimicPolicyCfg( # swing
+        #     policy_name="23dof_65fps/dance2_subject4",
+        #     start_timestep = 8800,
+        #     max_timestep=10100,       
+        # ),
+        # G1BeyondMimicPolicyCfg(
+        #     policy_name="23dof_65fps/GangnamStyle",           
+        #     start_timestep = 300,
+        #     max_timestep=2000,        
+        # ),
+        # G1BeyondMimicPolicyCfg( 
+        #     policy_name="23dof_65fps/dance2_subject4",
+        #     start_timestep = 9000,
+        #     max_timestep=10600,       
+        # ),
+        # G1BeyondMimicPolicyCfg( # 1
+        #     policy_name="23dof_65fps/dance2_subject4",
+        #     start_timestep = 10100,
+        #     max_timestep=11300,      
+        # ),
+        # # G1BeyondMimicPolicyCfg(
+        # #     policy_name="23dof_65fps/dance2_subject4",
+        # #     start_timestep = 6000,
+        # #     max_timestep=6720,        
+        # # ),
+        # G1BeyondMimicPolicyCfg( # 2
+        #     policy_name="23dof_65fps/dance2_subject4",
+        #     start_timestep = 4300,
+        #     max_timestep=5700,        
+        # ),
+        # G1BeyondMimicPolicyCfg(# 3
+        #     policy_name="23dof_65fps/dance2_subject4",
+        #     start_timestep = 6000,
+        #     max_timestep=7400,   # 6720     
+        # ),
+
+        # 23dof_65fps end ####################################
+   
+        ]
+
 
 
 @cfg_registry.register
@@ -329,6 +591,7 @@ class g1_beyondmimic_with_ctrl(RlPipelineCfg):
 
     policy: G1BeyondMimicPolicyCfg = G1BeyondMimicPolicyCfg(
         policy_name="Dance_wose",
+        # policy_name="Jump_wose",
         use_motion_from_model=False,  # use motion from BeyondmimicCtrl instead of the onnx
     )
 

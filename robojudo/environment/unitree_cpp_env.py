@@ -155,15 +155,15 @@ class UnitreeCppEnv(Environment):
     def step(self, pd_target, hand_pose=None):
         assert len(pd_target) == self.num_dofs, "pd_target len should be num_dofs of env"
 
-        # limits = self.position_limits
-        # pd_target_clipped = np.clip(pd_target, limits[:, 0], limits[:, 1])
+        limits = self.position_limits
+        pd_target_clipped = np.clip(pd_target, limits[:, 0], limits[:, 1])
 
-        # delta = pd_target - pd_target_clipped
-        # if np.any(delta != 0):
-        #     logger.warning(f"JOINT out of LIMIT-> {delta}")
+        delta = pd_target - pd_target_clipped
+        if np.any(delta != 0):
+            logger.warning(f"JOINT out of LIMIT-> {delta}")
 
-        # positions = pd_target_clipped
-        positions = pd_target
+        positions = pd_target_clipped
+        # positions = pd_target
         if self.enabled:
             self.unitree.step(positions.tolist())
 

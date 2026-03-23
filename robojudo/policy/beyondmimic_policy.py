@@ -166,6 +166,14 @@ class BeyondMimicPolicy(Policy):
 
             robot_anchor_quat_w = env_data.torso_quat
 
+            # # debug TODO: remove
+            # print("=" * 50)
+            # print("command", command)
+            # print("robot_anchor_pos_w", robot_anchor_pos_w)
+            # print("robot_anchor_quat_w", robot_anchor_quat_w)
+            # print("anchor_pos_w", anchor_pos_w)
+            # print("anchor_quat_w", anchor_quat_w)
+            
             return command, robot_anchor_pos_w, robot_anchor_quat_w, anchor_pos_w, anchor_quat_w, None
 
     def get_observation(self, env_data, ctrl_data):

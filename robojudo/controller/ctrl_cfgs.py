@@ -44,6 +44,54 @@ class JoystickCtrlCfg(CtrlCfg):
     }
 
 
+class BFMKeyboardCtrlCfg(CtrlCfg):
+    ctrl_type: str = "KeyboardCtrl"
+
+    combination_init_buttons: list[str] = ["Key.ctrl_l"]
+    """first button in combination, need to be held down to trigger other commands;"""
+
+    triggers: dict[str, str] = {
+        "Key.esc": "[SHUTDOWN]",
+        "`": "[SIM_REBORN]",
+        # "|": "[MOTION_RESET]",  # note: with shift
+        # "{": "[MOTION_LOAD_PREV]",  # note: with shift
+        # "}": "[MOTION_LOAD_NEXT]",  # note: with shift
+        # BFM Zero specific controls
+        "|": "[MOTION_RESET]",  # note: with shift
+        "-": "[BFM_MOTION_START]",
+        "n": "[BFM_NEXT]",
+        "m": "[BFM_LAST]",
+        "p": "[BFM_RESET_STOP_STATE]",
+        "o": "[BFM_ACTIONS_ZERO]",
+        # "5": "[BFM_KP_DOWN_SMALL]",
+        # "6": "[BFM_KP_UP_SMALL]",
+        # "4": "[BFM_KP_DOWN_LARGE]",
+        # "7": "[BFM_KP_UP_LARGE]",
+        # "0": "[BFM_KP_RESET]",
+    }
+
+
+class BFMJoystickCtrlCfg(CtrlCfg):
+    ctrl_type: str = "JoystickCtrl"
+
+    combination_init_buttons: list[str] = ["LB", "RB"]
+    """first button in combination, need to be held down to trigger other commands;"""
+
+    # reference for button names in JoystickThread config
+    triggers: dict[str, str] = {
+        # BFM Zero specific controls
+        "R1": "[BFM_POLICY_ACTIVATE]",
+        "R2": "[BFM_ACTIONS_ZERO]",
+        "A": "[BFM_INIT_STATE]",
+        "B": "[BFM_MOTION_START]",
+        "X": "[BFM_RESET_STOP_STATE]",
+        "Y": "[BFM_NEXT_REWARD_GOAL]",
+        "LB": "[SHUTDOWN]",
+        "RB": "[MOTION_RESET]",
+        # Note: combo keys supported: "LB+RB+A": "[TEST]",
+    }
+
+
 class UnitreeCtrlCfg(JoystickCtrlCfg):
     ctrl_type: str = "UnitreeCtrl"
 

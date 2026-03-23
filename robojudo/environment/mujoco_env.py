@@ -25,6 +25,10 @@ class MujocoEnv(Environment):
         self.sim_decimation = cfg_env.sim_decimation
         self.control_dt = self.sim_dt * self.sim_decimation
 
+        # Control mode: 'torque' (default) or 'position'
+        # self.control_mode = getattr(cfg_env, 'control_mode', 'torque')
+        # self.control_mode = getattr(cfg_env, 'control_mode', 'position')
+
         self.model = mujoco.MjModel.from_xml_path(cfg_env.xml)  # pyright: ignore[reportAttributeAccessIssue]
         self.model.opt.timestep = self.sim_dt
         self.data = mujoco.MjData(self.model)  # pyright: ignore[reportAttributeAccessIssue]
@@ -119,20 +123,25 @@ class MujocoEnv(Environment):
             self._torso_quat = fk_info[self._torso_name]["quat"]
             self._torso_pos = fk_info[self._torso_name]["pos"]
 
-    def step(self, pd_target, hand_pose=None):
+    def step(self, pd_target, hand_pose=None):# , if_pos_limit=True
         assert len(pd_target) == self.num_dofs, "pd_target len should be num_dofs of env"
-
+        
+        # if if_pos_limit:
+        #     pd_target = np.clip(pd_target, self.position_limits[:, 0], self.position_limits[:, 1])
         if hand_pose is not None:
             logger.info("Hand pose-->", hand_pose)
 
         self.viewer.cam.lookat = self.data.qpos.astype(np.float32)[:3]
         if self.viewer.is_alive:
             self.viewer.render()
-
+        
+        # # TODO if needed it?
+        # pd_target = np.clip(pd_target, self.position_limits[:, 0], self.position_limits[:, 1])
+        # # TODO if needed it?
+        
         for _ in range(self.sim_decimation):
             torque = (pd_target - self.dof_pos) * self.stiffness - self.dof_vel * self.damping
             torque = np.clip(torque, -self.torque_limits, self.torque_limits)
-
             self.data.ctrl = torque
 
             mujoco.mj_step(self.model, self.data)  # pyright: ignore[reportAttributeAccessIssue]
