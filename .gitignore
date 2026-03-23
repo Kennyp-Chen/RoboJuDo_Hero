@@ -134,4 +134,4 @@ MUJOCO_LOG.TXT
 assets/resources
 
 # Large model files
-assets/models/g1/BFM0/FBcprAuxModel.onnx
+# assets/models/g1/BFM0/FBcprAuxModel.onnx
