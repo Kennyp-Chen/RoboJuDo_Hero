@@ -202,6 +202,17 @@ class BFMZeroPolicy(Policy):
                         self.t = self.t_stop
                         self.start_motion = False
                         logger.info("Policy activated, tracking at stop position")
+                    elif self.task_type == "goal":
+                        self.z_index = 0
+                        logger.info("Policy activated, goal reset")
+                        logger.info(f"Switched to goal z_index={self.z_index}")
+
+                    elif self.task_type == "reward":
+                        self.z_index = 0
+                        logger.info("Policy activated, reward reset")
+                        logger.info(f"Switched to reward z_index={self.z_index}")
+                        
+
                 case "[BFM_MOTION_START]":
                     # Start tracking motion (triggered by "[" key)
                     self.flag_motion_done = False

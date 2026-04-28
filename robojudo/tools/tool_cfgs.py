@@ -26,6 +26,7 @@ class DoFConfig(Config):
     damping: list[float] | None = None
     torque_limits: list[float] | None = None
     position_limits: list[list[float]] | None = None  # [[min, max], ...]
+    action_scales: list[float] | None = None
 
     @computed_field
     @property
@@ -46,21 +47,51 @@ class DoFConfig(Config):
     def check_dof_and_process_subset(self):
         length = self.num_dofs
         if self.default_pos is not None and len(self.default_pos) != length:
-            raise ValueError(f"default_pos length {len(self.default_pos)} does not match num_dofs {length}")
+            raise ValueError(
+                f"default_pos length {len(self.default_pos)} does not match num_dofs {length}"
+            )
         if self.stiffness is not None and len(self.stiffness) != length:
-            raise ValueError(f"stiffness length {len(self.stiffness)} does not match num_dofs {length}")
+            msg = (
+                f"stiffness length {len(self.stiffness)} "
+                f"does not match num_dofs {length}"
+            )
+            raise ValueError(msg)
         if self.damping is not None and len(self.damping) != length:
-            raise ValueError(f"damping length {len(self.damping)} does not match num_dofs {length}")
+            msg = (
+                f"damping length {len(self.damping)} "
+                f"does not match num_dofs {length}"
+            )
+            raise ValueError(msg)
         if self.torque_limits is not None and len(self.torque_limits) != length:
-            raise ValueError(f"torque_limits length {len(self.torque_limits)} does not match num_dofs {length}")
+            msg = (
+                f"torque_limits length {len(self.torque_limits)} "
+                f"does not match num_dofs {length}"
+            )
+            raise ValueError(msg)
+        if self.action_scales is not None and len(self.action_scales) != length:
+            msg = (
+                f"action_scales length {len(self.action_scales)} "
+                f"does not match num_dofs {length}"
+            )
+            raise ValueError(msg)
         if self.position_limits is not None:
             if len(self.position_limits) != length:
-                raise ValueError(f"position_limits length {len(self.position_limits)} does not match num_dofs {length}")
+                msg = (
+                    f"position_limits length {len(self.position_limits)} "
+                    f"does not match num_dofs {length}"
+                )
+                raise ValueError(msg)
             for i, limits in enumerate(self.position_limits):
                 if len(limits) != 2:
-                    raise ValueError(f"position_limits[{i}] length {len(limits)} is not 2")
+                    raise ValueError(
+                        f"position_limits[{i}] length {len(limits)} is not 2"
+                    )
                 if limits[0] >= limits[1]:
-                    raise ValueError(f"position_limits[{i}] min {limits[0]} is not less than max {limits[1]}")
+                    msg = (
+                        f"position_limits[{i}] min {limits[0]} "
+                        f"is not less than max {limits[1]}"
+                    )
+                    raise ValueError(msg)
 
         # check subset
         if self._subset:

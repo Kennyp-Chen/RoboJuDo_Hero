@@ -4,15 +4,11 @@ import yaml
 from pydantic import ConfigDict, model_validator
 
 from robojudo.policy.policy_cfgs import BFMZeroPolicyCfg
-from robojudo.tools.tool_cfgs import DoFConfig
+from robojudo.tools.tool_cfgs import DoFConfig,convert_29dof_to_23dof
 
-
-def load_yaml_config(path_config = "assets/models/g1/BFM0/config.yaml"):
+def load_yaml_config(path_config: str | Path):
     """Load YAML configuration from config.yaml"""
-    yaml_path = (
-        Path(__file__).parent.parent.parent.parent.parent /
-        path_config
-    )
+    yaml_path = Path(path_config)
     if yaml_path.exists():
         with open(yaml_path, 'r') as f:
             return yaml.safe_load(f)
@@ -34,11 +30,6 @@ def map_joint_config(joint_names, config_dict, default_value=0.0):
     return result
 
 
-
-# Load configuration from YAML
-_yaml_config = load_yaml_config()
-
-
 class G1BFMZeroDoF(DoFConfig):
     """G1 BFM Zero DoF configuration with YAML-based parameters"""
     
@@ -50,21 +41,66 @@ class G1BFMZeroDoF(DoFConfig):
               'right_shoulder_pitch_joint', 'right_shoulder_roll_joint', 'right_shoulder_yaw_joint', 'right_elbow_joint', 
               'right_wrist_roll_joint', 'right_wrist_pitch_joint', 'right_wrist_yaw_joint']
     
-    default_pos: list[float] | None = map_joint_config(joint_names, _yaml_config['default_joint_pos'], 0.0)
-    stiffness: list[float] | None = map_joint_config(joint_names, _yaml_config['joint_kp'], 0.0)
-    damping: list[float] | None = map_joint_config(joint_names, _yaml_config['joint_kd'], 0.0)
+    default_pos: list[float] | None = None
+    stiffness: list[float] | None = None
+    damping: list[float] | None = None
+    torque_limits: list[float] | None = None
+    action_scales: list[float] | None = None
 
-    torque_limits: list[float] | None = map_joint_config(joint_names, _yaml_config['joint_effort_limit'])
-    action_scales: list[float]  = map_joint_config(joint_names, _yaml_config['action_scale'], 1.0)
+    def load_from_yaml(self, yaml_config: dict):
+        self.default_pos = map_joint_config(
+            self.joint_names, yaml_config['default_joint_pos'], 0.0
+        )
+        self.stiffness = map_joint_config(
+            self.joint_names, yaml_config['joint_kp'], 0.0
+        )
+        self.damping = map_joint_config(
+            self.joint_names, yaml_config['joint_kd'], 0.0
+        )
+        # self.torque_limits = map_joint_config(
+        #     self.joint_names, yaml_config['joint_effort_limit']
+        # )
+        self.action_scales = map_joint_config(
+            self.joint_names, yaml_config['action_scale'], 1.0
+        )
 
+
+
+class G1BFMZero23DoF(G1BFMZeroDoF):
+    """G1 BFM Zero 23DoF configuration"""
+    # Get 29DoF configuration
+    _dof_29 = G1BFMZeroDoF()
+    
+    # Convert to 23DoF
+    joint_names: list[str] = convert_29dof_to_23dof(_dof_29.joint_names, _dof_29.joint_names)
+
+    def load_from_yaml(self, yaml_config: dict):
+        # We need to map 29dof first, then convert to 23dof
+        full_default_pos = map_joint_config(self._dof_29.joint_names, yaml_config['default_joint_pos'], 0.0)
+        full_stiffness = map_joint_config(self._dof_29.joint_names, yaml_config['joint_kp'], 0.0)
+        full_damping = map_joint_config(self._dof_29.joint_names, yaml_config['joint_kd'], 0.0)
+        full_action_scales = map_joint_config(self._dof_29.joint_names, yaml_config['action_scale'], 1.0)
+
+        self.default_pos = convert_29dof_to_23dof(self._dof_29.joint_names, full_default_pos)
+        self.stiffness = convert_29dof_to_23dof(self._dof_29.joint_names, full_stiffness)
+        self.damping = convert_29dof_to_23dof(self._dof_29.joint_names, full_damping)
+        self.action_scales = convert_29dof_to_23dof(self._dof_29.joint_names, full_action_scales)
 
 
 class G1BFMZeroPolicyCfg(BFMZeroPolicyCfg):
     robot: str = "g1"
 
-    obs_dof: DoFConfig = G1BFMZeroDoF()
-    action_dof: DoFConfig = obs_dof
+    obs_dof: G1BFMZeroDoF = G1BFMZeroDoF()
+    action_dof: G1BFMZeroDoF = None
 
+    @model_validator(mode='after')
+    def load_config_from_yaml(self) -> 'G1BFMZeroPolicyCfg':
+        if self.action_dof is None:
+            self.action_dof = self.obs_dof
+        yaml_config = load_yaml_config(self.config_file)
+        if yaml_config:
+            self.obs_dof.load_from_yaml(yaml_config)
+        return self
     action_beta: float = 1.0
     
     # YAML-based configurations
@@ -85,7 +121,7 @@ class G1BFMZeroPolicyCfg(BFMZeroPolicyCfg):
     start: int = 0
     end: int = 2000
     stop: int = 0
-    ctx_path: str = "assets/models/g1/BFM0/tracking_inference/zs_7.pkl"  # Path to context file relative to model directory
+    ctx_path: str = "tracking_inference/zs_7.pkl"  # Path to context file relative to model directory
     gamma: float = 0.8
     window_size: int = 3
 
@@ -97,6 +133,33 @@ class G1BFMZeroPolicyCfg(BFMZeroPolicyCfg):
 
     # # For goal task
     # selected_goals: list = None
+
+
+class G1BFMZero23DoFPolicyCfg(G1BFMZeroPolicyCfg):
+    """BFM Zero Policy for 23DoF"""
+    obs_dof: G1BFMZero23DoF = G1BFMZero23DoF()
+    action_dof: G1BFMZero23DoF = None
+
+    @model_validator(mode='after')
+    def load_config_from_yaml(self) -> 'G1BFMZero23DoFPolicyCfg':
+        if self.action_dof is None:
+            self.action_dof = self.obs_dof
+        yaml_config = load_yaml_config(self.config_file)
+        if yaml_config:
+            self.obs_dof.load_from_yaml(yaml_config)
+        return self
+
+
+class G1BFMZeroTracking23DoFPolicyCfg(G1BFMZero23DoFPolicyCfg):
+    """BFM Zero 23DoF Policy for tracking tasks"""
+    task_type: str = "tracking"
+    ctx_path: str = "tracking_inference/zs_7.pkl"
+    train_method: str = "23dof_low_20260407_182514"
+    start: int = 0
+    end: int = 2000
+    stop: int = 0
+    gamma: float = 0.8
+    window_size: int = 3
 
 
 class G1BFMZeroTrackingPolicyCfg(G1BFMZeroPolicyCfg):
@@ -114,6 +177,8 @@ class G1BFMZeroRewardPolicyCfg(G1BFMZeroPolicyCfg):
     """BFM Zero Policy for reward-based tasks"""
     task_type: str = "reward"
     ctx_path: str = "../reward_inference/reward_locomotion.pkl"
+    train_method: str = "low"
+
     selected_rewards_filter_z: list = [
         {"reward": "move-ego-low0.6-0-0.7", "z_ids": [0]},
         {"reward": "move-ego-90-0.3", "z_ids": [0]},
@@ -121,11 +186,24 @@ class G1BFMZeroRewardPolicyCfg(G1BFMZeroPolicyCfg):
         {"reward": "spin-arms-5-l-l", "z_ids": [0]},
     ]
 
+class G1BFMZeroReward23DoFPolicyCfg(G1BFMZero23DoFPolicyCfg):
+    """BFM Zero 23DoF Policy for reward-based tasks"""
+    task_type: str = "reward"
+    train_method: str = "23dof_low_20260407_182514"
+    ctx_path: str = "../reward_inference/reward_locomotion.pkl"
+    selected_rewards_filter_z: list = [
+        {"reward": "move-ego-low0.6-0-0.7", "z_ids": [0]},
+        {"reward": "move-ego-90-0.3", "z_ids": [0]},
+        {"reward": "move-ego-0-0", "z_ids": [0]},
+        {"reward": "spin-arms-5-l-l", "z_ids": [0]},
+    ]
 
 class G1BFMZeroGoalPolicyCfg(G1BFMZeroPolicyCfg):
     """BFM Zero Policy for goal-based tasks"""
     task_type: str = "goal"
     ctx_path: str = "../goal_inference/goal_reaching.pkl"
+    train_method: str = "low"
+
     # selected_goals: list = [
     #     "fallAndGetUp1_subject4_2193",
     #     "dance1_subject3_505", 
@@ -133,3 +211,8 @@ class G1BFMZeroGoalPolicyCfg(G1BFMZeroPolicyCfg):
     #     "walk2_subject1_2588",
     # ]
 
+class G1BFMZeroGoal23DoFPolicyCfg(G1BFMZero23DoFPolicyCfg):
+    """BFM Zero 23DoF Policy for goal-based tasks"""
+    task_type: str = "goal"
+    ctx_path: str = "../goal_inference/goal_reaching.pkl"
+    train_method: str = "23dof_low_20260407_182514"

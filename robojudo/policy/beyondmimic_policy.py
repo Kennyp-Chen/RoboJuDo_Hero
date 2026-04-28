@@ -44,6 +44,7 @@ class BeyondMimicPolicy(Policy):
         self.motion_anchor_body_index = -1
 
         cfg_policy_new = cfg_policy.model_copy()
+        # 根据meata config 自适应dof
         if cfg_policy_new.use_modelmeta_config:
             logger.info("[BeyondMimicPolicy] Using modelmeta as config ...")
             modelmeta = self.session.get_modelmeta()  # all str,
@@ -123,7 +124,6 @@ class BeyondMimicPolicy(Policy):
         if 0 < self.max_timestep <= self.timestep:
             self.play_speed = 0.0
             self.flag_motion_done = True
-
         for command in commands or []:
             match command:
                 case "[MOTION_RESET]":
@@ -204,7 +204,7 @@ class BeyondMimicPolicy(Policy):
         obs_joint_vel_rel = dof_vel
         obs_last_action = self.last_action
 
-        obs_prop = np.concatenate(
+        obs = np.concatenate(
             [
                 obs_command,
                 obs_motion_anchor_pos_b if not self.without_state_estimator else [],
@@ -217,7 +217,6 @@ class BeyondMimicPolicy(Policy):
             ]
         )
 
-        obs = obs_prop
         extras = {
             "pos": pos,
             "ori": ori,

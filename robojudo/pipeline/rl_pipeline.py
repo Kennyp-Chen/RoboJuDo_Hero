@@ -53,11 +53,6 @@ class PolicyWrapper:
         pd_target = action + self.policy.default_pos
         return self.actions_adapter.fit(pd_target, template=self.env_dof_cfg.default_pos)
     
-    # # get joint target_joint_pos
-    # def get_joint_target(self, obs):
-    #     action = self.policy.get_action(obs)
-    #     target_joint_pos = action * self.policy.joint_limits
-    #     return target_joint_pos
     
     def get_init_dof_pos(self):
         return self.actions_adapter.fit(self.policy.get_init_dof_pos(), template=self.env_dof_cfg.default_pos)
@@ -158,6 +153,10 @@ class RlPipeline(Pipeline):
         commands = ctrl_data.get("COMMANDS", [])
         if len(commands) > 0:
             logger.info(f"{'=' * 10} COMMANDS {'=' * 10}\n{commands}")
+
+        # Update observation state (advance tracking index) before getting observations
+        if hasattr(self.policy, 'update_obs'):
+            self.policy.update_obs()
 
         obs, extras = self.policy.get_observation(env_data, ctrl_data)
         pd_target = self.policy.get_pd_target(obs)

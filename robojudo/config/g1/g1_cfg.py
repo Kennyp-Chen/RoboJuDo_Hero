@@ -36,6 +36,9 @@ from .policy.g1_multimodalwbc_policy_cfg import G1MultiModalWBCPolicyCfg
 from .policy.g1_bfmzero_policy_cfg import (
     G1BFMZeroPolicyCfg,
     G1BFMZeroTrackingPolicyCfg,
+    G1BFMZeroTracking23DoFPolicyCfg,
+    G1BFMZeroGoal23DoFPolicyCfg,
+    G1BFMZeroReward23DoFPolicyCfg,
     G1BFMZeroRewardPolicyCfg,
     G1BFMZeroGoalPolicyCfg,
 )
@@ -54,8 +57,11 @@ class g1_bfmzero_tracking(RlPipelineCfg):
     ctrl: list[BFMKeyboardCtrlCfg] = [
         BFMKeyboardCtrlCfg(),
     ]
-
-    policy: G1BFMZeroTrackingPolicyCfg = G1BFMZeroTrackingPolicyCfg()
+    # policy: G1BFMZeroTrackingPolicyCfg = G1BFMZeroTrackingPolicyCfg()
+    policy: G1BFMZeroTracking23DoFPolicyCfg = G1BFMZeroTracking23DoFPolicyCfg(
+        train_method="23dof_260411",
+        ctx_path="tracking_inference/zs_18.pkl"
+    )
 
 
 @cfg_registry.register
@@ -65,14 +71,16 @@ class g1_bfmzero_reward(RlPipelineCfg):
     """
 
     robot: str = "g1"
-    env: G1MujocoEnvCfg = G1MujocoEnvCfg()
-    # env: G1_23MujocoEnvCfg = G1_23MujocoEnvCfg()
+    # env: G1MujocoEnvCfg = G1MujocoEnvCfg()
+    env: G1_23MujocoEnvCfg = G1_23MujocoEnvCfg()
 
     ctrl: list[BFMKeyboardCtrlCfg] = [
         BFMKeyboardCtrlCfg(),
     ]
-
-    policy: G1BFMZeroRewardPolicyCfg = G1BFMZeroRewardPolicyCfg()
+    # policy: G1BFMZeroRewardPolicyCfg = G1BFMZeroRewardPolicyCfg()
+    policy: G1BFMZeroReward23DoFPolicyCfg = G1BFMZeroReward23DoFPolicyCfg(
+        train_method="23dof_260411"
+    )
 
 
 @cfg_registry.register
@@ -82,14 +90,17 @@ class g1_bfmzero_goal(RlPipelineCfg):
     """
 
     robot: str = "g1"
-    env: G1MujocoEnvCfg = G1MujocoEnvCfg()
-    # env: G1_23MujocoEnvCfg = G1_23MujocoEnvCfg()
+    # env: G1MujocoEnvCfg = G1MujocoEnvCfg()
+    env: G1_23MujocoEnvCfg = G1_23MujocoEnvCfg()
 
     ctrl: list[BFMKeyboardCtrlCfg] = [
         BFMKeyboardCtrlCfg(),
     ]
 
-    policy: G1BFMZeroGoalPolicyCfg = G1BFMZeroGoalPolicyCfg()
+    # policy: G1BFMZeroGoalPolicyCfg = G1BFMZeroGoalPolicyCfg()
+    policy: G1BFMZeroGoal23DoFPolicyCfg = G1BFMZeroGoal23DoFPolicyCfg(
+        train_method="23dof_260411"
+    )
 
 
 # ======================== Basic Configs ======================== #
@@ -182,9 +193,9 @@ class g1_locomimic(RlLocoMimicPipelineCfg):
     """
 
     robot: str = "g1"
-    env: G1MujocoEnvCfg = G1MujocoEnvCfg()
+    # env: G1MujocoEnvCfg = G1MujocoEnvCfg()
 
-    # env: G1_23MujocoEnvCfg = G1_23MujocoEnvCfg()
+    env: G1_23MujocoEnvCfg = G1_23MujocoEnvCfg()
 
     ctrl: list[KeyboardCtrlCfg | JoystickCtrlCfg | G1BeyondmimicCtrlCfg|BFMKeyboardCtrlCfg] = [
         KeyboardCtrlCfg(
@@ -227,6 +238,38 @@ class g1_locomimic(RlLocoMimicPipelineCfg):
 
 
     mimic_policies: list[G1BeyondMimicPolicyCfg|G1AmoPolicyCfg|G1AmpWalkPolicyCfg|G1MultiModalWBCPolicyCfg|G1BFMZeroTrackingPolicyCfg] = [
+        # G1BeyondMimicPolicyCfg(
+        #         policy_name="23dof_50fps/OldTownRoad_v1",
+        #     ),
+
+        # G1BeyondMimicPolicyCfg(
+        #         policy_name="29dof_50fps/OldTownRoad_v2",
+
+        #     ),
+        
+        # G1BeyondMimicPolicyCfg(
+        #         policy_name="29dof_50fps/Reze1",
+        #     ),
+
+
+
+        # G1BeyondMimicPolicyCfg(
+        #         policy_name="29dof_50fps/gangster2.6w",
+        #         # policy_name="23dof_50fps/slide_10499",
+
+        #     ),
+
+        # G1BeyondMimicPolicyCfg(
+        #         policy_name="29dof_50fps/eva_angel_2.55w",
+        #         # policy_name="23dof_50fps/baicai_1.5w",
+        # #     ),
+        # G1BeyondMimicPolicyCfg(policy_name="23dof_50fps/baicai",),
+        # G1BeyondMimicPolicyCfg(policy_name="23dof_50fps/slide",),
+        # G1BeyondMimicPolicyCfg(policy_name="23dof_50fps/go_james",),
+        # G1BeyondMimicPolicyCfg(policy_name="23dof_50fps/go_woman",),
+        G1BeyondMimicPolicyCfg(policy_name="23dof_50fps/OldTownRoad_v1",),
+
+
         # G1AsapPolicyCfg(),
         # G1AmpRunWalkPolicyCfg(),
         # G1AmoPolicyCfg(),
@@ -238,25 +281,43 @@ class g1_locomimic(RlLocoMimicPipelineCfg):
         #     use_motion_from_model=False,  # use motion from onnx model
         #     max_timestep=5000,
         # ),
-        G1BFMZeroTrackingPolicyCfg(),
+        # G1BFMZeroTrackingPolicyCfg(),
+        # G1BeyondMimicPolicyCfg
+        #         policy_name="/dance1_subject3_wose",
+        #     ),
+    
+
         ##################BeyondMimic Policies######################
         # 23dof_50fps start####################################
         # # # fightAndSports1_subject1
+        # G1BeyondMimicPolicyCfg(# KUNGFU KICK 蹲下后结束
+        #     policy_name="23dof_50fps/fight1_subject2",
+        #     start_timestep = 850,
+        #     max_timestep=1250,        
+        # ),
+        # G1BeyondMimicPolicyCfg(# KUNGFU KICK 上钩拳后结束
+        #     policy_name="23dof_50fps/fight1_subject2",
+        #     start_timestep = 850,
+        #     max_timestep=1350,        
+        # ),
+
         # G1BeyondMimicPolicyCfg(# KUNGFU KICK
-        #     policy_name="23dof_50fps/fightAndSports1_subject1",
+        #     policy_name="23dof_50fps/WoHandTrack/fight1_subject2",
         #     start_timestep = 850,
         #     max_timestep=1300,        
         # ),
+
+
         # G1BeyondMimicPolicyCfg(# BOX
         #     policy_name="23dof_50fps/fightAndSports1_subject1",
         #     start_timestep = 3800,
         #     max_timestep=4900,        
         # ),
-        # G1BeyondMimicPolicyCfg(# 踢腿
-        #     policy_name="23dof_50fps/fightAndSports1_subject1",
-        #     start_timestep = 5200,
-        #     max_timestep=6300,        
-        # ),
+        G1BeyondMimicPolicyCfg(# 旋转踢腿
+            policy_name="23dof_50fps/fightAndSports1_subject1",
+            start_timestep = 5200,
+            max_timestep=6300,        
+        ),
         # G1BeyondMimicPolicyCfg(# 
         #     policy_name="23dof_50fps/fightAndSports1_subject1",
         #     start_timestep = 6200,
@@ -264,22 +325,22 @@ class g1_locomimic(RlLocoMimicPipelineCfg):
         # ),
 
 
-        # # fight1_subject2 上钩拳 长序列 双踢腿 ；保龄球；篮球接球传球
+        # fight1_subject2 上钩拳 长序列 双踢腿 ；保龄球；篮球接球传球
         # G1BeyondMimicPolicyCfg( # 1800-2000上钩拳
-        #     policy_name="23dof_50fps/fight1_subject2",
+        #     policy_name="23dof_50fps//WoHandTrack/fight1_subject2",
         #     start_timestep = 1590,
         #     max_timestep=2000,        
         # ),
-        # G1BeyondMimicPolicyCfg( # 5000-5100 双踢腿 
-        #     policy_name="23dof_50fps/fight1_subject2",
-        #     start_timestep = 4800,
-        #     max_timestep=5250,        
-        # ),
-        # G1BeyondMimicPolicyCfg( # 三连双踢腿 
-        #     policy_name="23dof_50fps/fight1_subject2",
-        #     start_timestep = 14300,
-        #     max_timestep=14900,        
-        # ),
+        G1BeyondMimicPolicyCfg( # 5000-5100 双踢腿 
+            policy_name="23dof_50fps//WoHandTrack/fight1_subject2",
+            start_timestep = 4800,
+            max_timestep=5250,        
+        ),
+        G1BeyondMimicPolicyCfg( # 三连双踢腿 
+            policy_name="23dof_50fps/WoHandTrack/fight1_subject2",
+            start_timestep = 14300,
+            max_timestep=14900,        
+        ),
 
 
         

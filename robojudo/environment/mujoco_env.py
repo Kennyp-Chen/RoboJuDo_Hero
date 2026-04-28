@@ -138,7 +138,7 @@ class MujocoEnv(Environment):
         # # TODO if needed it?
         # pd_target = np.clip(pd_target, self.position_limits[:, 0], self.position_limits[:, 1])
         # # TODO if needed it?
-        
+        # print(self.torque_limits)
         for _ in range(self.sim_decimation):
             torque = (pd_target - self.dof_pos) * self.stiffness - self.dof_vel * self.damping
             torque = np.clip(torque, -self.torque_limits, self.torque_limits)

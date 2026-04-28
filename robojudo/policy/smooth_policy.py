@@ -55,7 +55,7 @@ class SmoothPolicy(Policy):
         rp = rpy[:2]
 
         commands = self._get_commands(ctrl_data)
-        print(f"Commands: {commands}")
+        # print(f"Commands: {commands}")
         phase = self._get_phase()
 
         sin_pos = [np.sin(2 * np.pi * phase)]

@@ -479,14 +479,24 @@ class MultiModalWBCPolicyCfg(PolicyCfg):
 class BFMZeroPolicyCfg(PolicyCfg):
     policy_type: str = "BFMZeroPolicy"
     policy_name: str = "FBcprAuxModel"
+    train_method: str = "official"
+    # train_method: str = "low"
+    # train_method: str = "23dof-bfmzero-isaac-low"
+    # train_method: str = "23dof_low_20260407_182514"
+
     start_timestep: int = 0
     action_rescale: int = 5
     # ======= POLICY SPECIFIC CONFIGURATION =======
     max_timestep: int = -1
     @property
     def policy_file(self) -> str:
-        policy_file = ASSETS_DIR / f"models/{self.robot}/BFM0/{self.policy_name}.onnx"
+        policy_file = ASSETS_DIR / f"models/{self.robot}/BFM0/{self.train_method}/{self.policy_name}.onnx"
         return policy_file.as_posix()
+    
+    @property
+    def config_file(self) -> str:
+        config_file = ASSETS_DIR / f"models/{self.robot}/BFM0/{self.train_method}/config.yaml"
+        return str(config_file)
 
 
 class BeyondMimicPolicyCfg(PolicyCfg):
@@ -663,6 +673,84 @@ class KungfuBotGeneralPolicyCfg(PolicyCfg):
 
     compatibility_old_version: bool = False
     """For old version of kungfubot general policy (before 2025-11-13 bugfix #68)"""
+
+
+class GentlePolicyCfg(PolicyCfg):
+    """
+    Gentle Policy based on gentleHum sim2sim project
+    
+    This policy implements complex observations including:
+    - Motion tracking with future prediction
+    - Compliance control
+    - Historical joint positions and actions
+    - Projected gravity and root angular velocity
+    """
+    class ObsScalesCfg(Config):
+        pass
+
+    policy_type: str = "GentlePolicy"
+    policy_name: str = "policy_latest"
+    model_path: str = "gentleHum"
+
+    @property
+    def policy_file(self) -> str:
+        """Path to the ONNX policy file"""
+        from robojudo.config import ASSETS_DIR
+        policy_file = ASSETS_DIR / f"models/{self.robot}/{self.model_path}/{self.policy_name}.onnx"
+        return policy_file.as_posix()
+    motions_path: str = "assets/motions/g1/gentleHumanoid"
+
+    # Action processing - override to support array
+    action_scale: list[float] =  [
+        0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5,  # legs & waist
+        0.5, 0.5, 1.0, 1.0, 0.5, 0.5, 1.0, 1.0,  # knees & ankles  
+        0.5, 0.5, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0,  # arms
+        1.0, 1.0, 1.0, 1.0  # wrists
+    ],  # Override to support list # Override to support list
+    action_clip: float | None = 10.0
+    action_beta: float = 1.0
+
+    # # Observation configuration
+    # obs_scales: ObsScalesCfg = ObsScalesCfg()
+
+    # Joint position history steps (from JS: [0, 1, 2, 3, 4, 8])
+    joint_pos_steps: list[int] = [0, 1, 2, 3, 4, 8]
+
+    # Future prediction steps (from JS: [0, 2, 4, 8, 16])
+    future_steps: list[int] = [0, 2, 4, 8, 16]
+
+    # Previous actions history steps
+    prev_actions_steps: int = 3
+
+    # Compliance settings
+    compliance_enabled: bool = False
+    compliance_threshold: float = 10.0
+
+    # Motion tracking settings
+    tracking_enabled: bool = True
+    transition_steps: int = 100
+
+    # Command mapping
+    commands_map: list[list[float]] = [
+        [-1.0, 0.0, 1.0],
+        [1.0, 0.0, -1.0], 
+        [1.0, 0.0, -1.0],
+    ]
+     
+    @field_validator("action_clip")
+    def check_action_clip(cls, v):
+        if v is not None and v <= 0:
+            raise ValueError("action_clip must be positive")
+        return v
+ 
+    @model_validator(mode="after")
+    def check_action_scale(self):
+        # Custom validation for action_scale array
+        if hasattr(self, 'action_scale') and isinstance(self.action_scale, list):
+            for scale in self.action_scale:
+                if scale <= 0:
+                    raise ValueError("All action_scale values must be positive")
+        return self
 
 
 class TwistPolicyCfg(PolicyCfg):

@@ -29,6 +29,7 @@ from .policy.g1_kungfubot_policy_cfg import G1KungfuBotGeneralPolicyCfg, G1Kungf
 from .policy.g1_smooth_policy_cfg import G1SmoothPolicyCfg  # noqa: F401
 from .policy.g1_twist_policy_cfg import G1TwistPolicyCfg  # noqa: F401
 from .policy.g1_unitree_policy_cfg import G1UnitreePolicyCfg, G1UnitreeWoGaitPolicyCfg  # noqa: F401
+from .policy.g1_gentle_policy_cfg import G1GentlePolicyCfg
 
 # ======================== Custom Configs ======================== #
 """
@@ -46,3 +47,40 @@ class g1_dev(RlPipelineCfg):
     ]
 
     policy: G1UnitreePolicyCfg = G1UnitreePolicyCfg()
+
+@cfg_registry.register
+class g1_smooth(RlPipelineCfg):
+    robot: str = "g1"
+    # env: G1_23MujocoEnvCfg = G1_23MujocoEnvCfg()
+    env: G1MujocoEnvCfg = G1MujocoEnvCfg()
+    # env: G1_12MujocoEnvCfg = G1_12MujocoEnvCfg()
+
+    ctrl: list[KeyboardCtrlCfg] = [
+        KeyboardCtrlCfg(),
+    ]
+
+    policy: G1SmoothPolicyCfg = G1SmoothPolicyCfg()
+
+@cfg_registry.register
+class g1_gentle(RlPipelineCfg):
+    robot: str = "g1"
+    # env: G1_23MujocoEnvCfg = G1_23MujocoEnvCfg()
+    env: G1MujocoEnvCfg = G1MujocoEnvCfg()
+    # env: G1_12MujocoEnvCfg = G1_12MujocoEnvCfg()
+
+    ctrl: list[KeyboardCtrlCfg] = [
+        KeyboardCtrlCfg(
+            triggers_extra={
+                "]": "[MOTION_FADE_OUT]",
+                "[": "[MOTION_FADE_IN]",
+                ";": "[MOTION_LOAD_NEXT]",
+                "'": "[MOTION_LOAD_PREV]",
+                "-": "[COMPLIANCE_ON]",
+                "=": "[COMPLIANCE_OFF]",
+                "Key.up": "[TRESH_UP]",
+                "Key.down": "[TRESH_DOWN]",
+
+            }
+        )
+    ]
+    policy: G1GentlePolicyCfg = G1GentlePolicyCfg()
