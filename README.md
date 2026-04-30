@@ -111,6 +111,27 @@ This configuration combines **Unitree RL MJLab Velocity** policy with **BeyondMi
 
 The robot will enter a sitting position.
 
+**Gamepad Listener Setup (Optional)**
+
+To enable automatic joystick monitoring on G1 PC2:
+
+```bash
+# 1. Run the setup script
+sh setup_gamepad_service.sh
+
+# 2. Edit sudoers file
+sudo visudo
+
+# 3. Add the following line at the end of the file
+unitree ALL=(ALL) NOPASSWD: /bin/systemctl stop gamepad_listener, /bin/systemctl start gamepad_listener
+
+# 4. Save and exit
+```
+
+After setup, the listener will automatically start and monitor for joystick commands:
+- `L1 + R1 + A`: Start `run_pipeline_real`
+- `L1 + R1 + B`: Exit PC2 control and return to PC1 control
+
 ## 📋 New Policies
 
 | Policy | Simulation | Real Robot | Project Link | Description |

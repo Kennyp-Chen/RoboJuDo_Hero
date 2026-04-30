@@ -28,7 +28,7 @@ logger = logging.getLogger(__name__)
 # 配置
 WORK_DIR = os.path.expanduser("~/chenyupeng/sim2real/RoboJuDo")
 CONDA_ENV = "robojudo"
-SCRIPT_PATH = "scripts/run_pipeline_serv.py"
+SCRIPT_PATH = "scripts/run_pipline_real.py"
 LOG_FILE = "run.log"
 
 # 切换工作目录
@@ -135,7 +135,7 @@ def start_task():
 
     try:
         # 启动命令：使用conda run确保环境正确
-        full_cmd = "conda run -n robojudo nohup python scripts/run_pipeline_serv.py > run.log 2>&1 & echo $!"
+        full_cmd = "conda run -n robojudo nohup python scripts/run_pipline_real.py > run.log 2>&1 & echo $!"
         result = subprocess.check_output(full_cmd, shell=True, text=True)
         pid = int(result.strip())
 
