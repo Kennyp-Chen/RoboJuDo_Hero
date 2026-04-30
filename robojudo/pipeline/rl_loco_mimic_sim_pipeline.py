@@ -246,6 +246,14 @@ class RlLocoMimicSimPipeline(RlMultiPolicyPipeline):
         self.ctrl_manager.post_step_callback(ctrl_data)
 
         self.policy.post_step_callback(commands)
+        
+        # Also send BFM commands to all mimic policies
+        bfm_commands = [cmd for cmd in commands if cmd.startswith("[BFM_")]
+        if bfm_commands and self.policy_locomotion_mimic_flag == 1:
+            for policy_id in self.policy_manager.policy_mimic_ids:
+                if policy_id != self.policy_manager.current_policy_id:
+                    self.policy_manager.policy_by_id(policy_id).post_step_callback(bfm_commands)
+        
         if self.visualizer is not None:
             self.policy.debug_viz(self.visualizer, env_data, ctrl_data, extras)
 

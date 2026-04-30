@@ -128,7 +128,8 @@ class BeyondMimicCtrl(Controller):
         self.motion_init_align.set_base(quat=init2anchor_quat, pos=init2anchor_pos)
 
     def post_step_callback(self, commands: list[str] | None = None):
-        self.pbar.set(self.timestep)
+        if self.playing:
+            self.pbar.set(self.timestep)
         if self.timestep < self.motion.time_step_total - 1:
             if self.playing:
                 self.timestep += 1

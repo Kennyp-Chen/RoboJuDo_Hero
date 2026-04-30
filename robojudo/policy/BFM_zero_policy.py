@@ -184,7 +184,7 @@ class BFMZeroPolicy(Policy):
 
     def post_step_callback(self, commands: list[str] | None = None):
         self.timestep += 1 * self.play_speed
-        if self.pbar:
+        if self.pbar and hasattr(self, 'start_motion') and self.start_motion:
             self.pbar.set(self.timestep)
 
         # Don't auto-start motion when max_timestep is reached

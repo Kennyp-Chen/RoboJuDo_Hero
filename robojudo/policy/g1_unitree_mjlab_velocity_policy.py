@@ -106,7 +106,6 @@ class G1UnitreeMjlabVelocityPolicy(Policy):
                 for event in keys:
                     if event["type"] == "keyboard":
                         value = event["pressed"] * 1.
-                        print(value)
                         match event["name"]:
                             case "w":
                                 commands[0] = command_remap(value, self.commands_map[0])

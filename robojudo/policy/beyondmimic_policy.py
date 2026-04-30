@@ -117,7 +117,7 @@ class BeyondMimicPolicy(Policy):
 
     def post_step_callback(self, commands: list[str] | None = None):
         self.timestep += 1 * self.play_speed
-        if self.pbar:
+        if self.pbar and self.play_speed > 0:
             self.pbar.set(self.timestep)
 
         if 0 < self.max_timestep <= self.timestep:

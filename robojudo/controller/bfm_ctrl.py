@@ -1,7 +1,9 @@
 import time
 import numpy as np
+import logging
 from queue import Empty, Queue
-from loguru import logger
+
+logger = logging.getLogger(__name__)
 
 from robojudo.controller import Controller, ctrl_registry
 from robojudo.controller.ctrl_cfgs import BFMKeyboardCtrlCfg, BFMJoystickCtrlCfg

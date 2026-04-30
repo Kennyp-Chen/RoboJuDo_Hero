@@ -30,6 +30,7 @@ ctrl_registry.add("JoystickCtrl", ".joystick_ctrl")
 ctrl_registry.add("UnitreeCtrl", ".unitree_ctrl")
 ctrl_registry.add("KeyboardCtrl", ".keyboard_ctrl")
 ctrl_registry.add("KeyboardStdinCtrl", ".keyboard_stdin_ctrl")  # SSH keyboard control
+ctrl_registry.add("BFMKeyboardCtrl", ".bfm_ctrl")
 ctrl_registry.add("BeyondMimicCtrl", ".beyondmimic_ctrl")
 ctrl_registry.add("MotionCtrl", ".motion_ctrl")
 ctrl_registry.add("MotionH2HCtrl", ".motion_h2h_ctrl")

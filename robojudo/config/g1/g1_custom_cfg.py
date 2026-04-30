@@ -107,7 +107,7 @@ class g1_locomimic_sim(RlLocoMimicSimPipelineCfg):
         G1BeyondmimicCtrlCfg(
             # motion_name="fallAndGetUp3_subject1",  # you can put your own motion file in assets/motions/g1
         ),
-        # BFMKeyboardCtrlCfg(),
+        BFMKeyboardCtrlCfg(),
 
     ]
 
@@ -134,7 +134,15 @@ class g1_locomimic_sim(RlLocoMimicSimPipelineCfg):
     # ]
 
 
-    mimic_policies: list[G1BeyondMimicPolicyCfg] = [
+    mimic_policies: list[G1BeyondMimicPolicyCfg | G1BFMZeroTracking23DoFPolicyCfg | G1BFMZeroGoal23DoFPolicyCfg | G1BFMZeroReward23DoFPolicyCfg] = [
+        G1BFMZeroTracking23DoFPolicyCfg(
+            train_method="23dof_260411",
+            ctx_path="tracking_inference/zs_18.pkl"
+        ),
+        G1BFMZeroGoal23DoFPolicyCfg(),
+        G1BFMZeroReward23DoFPolicyCfg(),
+        G1BeyondMimicPolicyCfg(policy_name="23dof_50fps/goodness_dance",),
+        G1BeyondMimicPolicyCfg(policy_name="23dof_50fps/gangster_dance",),
         G1BeyondMimicPolicyCfg(policy_name="23dof_50fps/baicai",),
         G1BeyondMimicPolicyCfg(policy_name="23dof_50fps/slide",),
         G1BeyondMimicPolicyCfg(policy_name="23dof_50fps/go_james",),

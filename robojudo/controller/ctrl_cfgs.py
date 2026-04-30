@@ -44,7 +44,7 @@ class JoystickCtrlCfg(CtrlCfg):
     }
 
 class BFMKeyboardCtrlCfg(CtrlCfg):
-    ctrl_type: str = "KeyboardCtrl"
+    ctrl_type: str = "BFMKeyboardCtrl"
 
     combination_init_buttons: list[str] = ["Key.ctrl_l"]
     """first button in combination, need to be held down to trigger other commands;"""
