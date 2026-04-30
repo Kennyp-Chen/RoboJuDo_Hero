@@ -132,7 +132,3 @@ assets/motions
 logs
 MUJOCO_LOG.TXT
 assets/resources
-
-# Model files (large files)
-*.onnx
-assets/models
