@@ -66,6 +66,43 @@ python scripts/run_pipeline_sim.py -c g1_locomimic_sim
 python scripts/run_pipeline_sim.py -c g1_unitree_mjlab_velocity
 ```
 
+### Running on Real Robot
+
+**Installation**
+
+UnitreeCpp has been installed in the `packages` directory. No need to clone again. To install:
+
+```bash
+cd packages/unitree_cpp
+pip install -e .
+```
+
+**Configuration**
+
+Configure the network interface in `robojudo/config/g1/g1_custom_cfg.py`:
+
+```python
+class g1_real_locomimic(g1):
+    env: G1RealEnvCfg = G1RealEnvCfg(
+        env_type="UnitreeCppEnv",
+        unitree=G1UnitreeCfg(
+            net_if="eth0",  # Change to your network interface
+        ),
+    )
+```
+
+**Running**
+
+After completing the interface configuration, run the following command in the project directory:
+
+```bash
+python scripts/run_pipeline_real.py -c g1_real_locomimic
+```
+
+This configuration combines **Unitree RL MJLab Velocity** policy with **BeyondMimic** policy.
+
+The robot will enter a sitting position.
+
 ## 📋 New Policies
 
 | Policy | Simulation | Real Robot | Project Link | Description |
@@ -87,43 +124,6 @@ All new policy configurations are located in `robojudo/config/g1/g1_custom_cfg.p
 - `g1_gentle` - GentleHumanoid policy
 - `g1_locomimic_sim` - Multiple BeyondMimic policies
 - `g1_unitree_mjlab_velocity` - UnitreeMJLab velocity control
-
-## 🤖 Running on Real Robot
-
-### Installation
-
-UnitreeCpp has been installed in the `packages` directory. No need to clone again. To install:
-
-```bash
-cd packages/unitree_cpp
-pip install -e .
-```
-
-### Configuration
-
-Configure the network interface in `robojudo/config/g1/g1_custom_cfg.py`:
-
-```python
-class g1_real_locomimic(g1):
-    env: G1RealEnvCfg = G1RealEnvCfg(
-        env_type="UnitreeCppEnv",
-        unitree=G1UnitreeCfg(
-            net_if="eth0",  # Change to your network interface
-        ),
-    )
-```
-
-### Running
-
-After completing the interface configuration, run the following command in the project directory:
-
-```bash
-python scripts/run_pipeline_real.py -c g1_real_locomimic
-```
-
-This configuration combines **Unitree RL MJLab Velocity** policy with **BeyondMimic** policy.
-
-The robot will enter a sitting position. At this point, you can start deploying the real robot.
 
 ## 📚 Documentation
 
