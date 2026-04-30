@@ -27,6 +27,14 @@ The **RoboJuDo_SAR** (SimAndReal) branch includes the following new features:
 - **Multiple GVHMR2GMR2BeyondMimic Policies**: See my [Video2Mimic](https://github.com/Kennyp-Chen/Video2Mimic) for GVHMR+GMR workflow
 - **UnitreeMJLab Policy**: Added support for [UnitreeMJLab](https://github.com/unitreerobotics/unitree_rl_mjlab) project for Unitree robot control
 
+### Real Robot Deployment Improvements
+
+- **Automatic PC2 Exit**: When the `run_pipeline_real` script exits on Unitree G1 PC2, it automatically releases PC2 control and returns to PC1's official zero-torque mode
+- **Joystick Listener**: Added a listener that allows the robot to automatically monitor joystick commands after one-time network (Ethernet/WiFi) configuration:
+  - `L1 + R1 + A`: Start `run_pipeline_real`
+  - `L1 + R1 + B`: Exit PC2 control and return to PC1 control
+- **Sitting Position Startup**: Implemented sitting position startup, eliminating the need for sling/hanging startup. The robot can now start directly from a chair
+
 ## 🚀 Quick Start
 
 ### Installation
