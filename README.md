@@ -88,6 +88,43 @@ All new policy configurations are located in `robojudo/config/g1/g1_custom_cfg.p
 - `g1_locomimic_sim` - Multiple BeyondMimic policies
 - `g1_unitree_mjlab_velocity` - UnitreeMJLab velocity control
 
+## 🤖 Running on Real Robot
+
+### Installation
+
+UnitreeCpp has been installed in the `packages` directory. No need to clone again. To install:
+
+```bash
+cd packages/unitree_cpp
+pip install -e .
+```
+
+### Configuration
+
+Configure the network interface in `robojudo/config/g1/g1_custom_cfg.py`:
+
+```python
+class g1_real_locomimic(g1):
+    env: G1RealEnvCfg = G1RealEnvCfg(
+        env_type="UnitreeCppEnv",
+        unitree=G1UnitreeCfg(
+            net_if="eth0",  # Change to your network interface
+        ),
+    )
+```
+
+### Running
+
+After completing the interface configuration, run the following command in the project directory:
+
+```bash
+python scripts/run_pipeline_real.py -c g1_real_locomimic
+```
+
+This configuration combines **Unitree RL MJLab Velocity** policy with **BeyondMimic** policy.
+
+The robot will enter a sitting position. At this point, you can start deploying the real robot.
+
 ## 📚 Documentation
 
 For detailed documentation on the original RoboJuDo framework, please refer to [README_RoboJuDo.md](README_RoboJuDo.md).
@@ -105,5 +142,5 @@ This project inherits the MIT license from the original RoboJuDo project. See [L
 - [RoboJuDo](https://github.com/HansZ8/RoboJuDo) - The original modular robotics simulation framework
 - [BFMZero](https://github.com/OpenBMB/BFMZero) - BFMZero project
 - [GentleHumanoid](https://github.com/GentleHumanoid/gentleHum) - GentleHumanoid project
-- [UnitreeMJLab](https://github.com/unitreerobotics/unitree_rl_mjlab) - Unitree robot learning lab
+- [UnitreeRlMjLab](https://github.com/unitreerobotics/unitree_rl_mjlab) - Unitree robot learning lab
 - [BeyondMimic](https://github.com/HybridRobotics/whole_body_tracking) - Whole body motion tracking
