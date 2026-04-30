@@ -107,10 +107,10 @@ The robot will enter a sitting position.
 
 | Policy | Simulation | Real Robot | Project Link | Description |
 |--------|-----------|------------|--------------|-------------|
-| **BFMZero** | 🖥️ 🤖 | - | - | [BFMZero](https://github.com/LeCAR-Lab/BFM-Zero) | Multi-mode policy with Tracking, Reward, and Goal modes |
-| **GentleHumanoid** | 🖥️ 🤖 | - | - | [GentleHumanoid](https://github.com/Axellwppr/gentle-humanoid) | Motion tracking with compliance control |
-| **UnitreeMJLab** | 🖥️ 🤖 | - | - | [UnitreeMJLab](https://github.com/unitreerobotics/unitree_rl_mjlab) | Unitree robot velocity control policy |
-| **BeyondMimic (GVHMR2GMR)** | 🖥️ 🤖 | - | - | [BeyondMimic](https://github.com/HybridRobotics/whole_body_tracking) | Multiple motion tracking policies (see [Video2Mimic](https://github.com/Kennyp-Chen/Video2Mimic) for GVHMR+GMR workflow) |
+| **BFMZero** | 🖥️ 🤖 | - | [BFMZero](https://github.com/LeCAR-Lab/BFM-Zero) | Multi-mode policy with Tracking, Reward, and Goal modes |
+| **GentleHumanoid** | 🖥️ 🤖 | - | [GentleHumanoid](https://github.com/Axellwppr/gentle-humanoid) | Motion tracking with compliance control |
+| **UnitreeMJLab** | 🖥️ 🤖 | - | [UnitreeMJLab](https://github.com/unitreerobotics/unitree_rl_mjlab) | Unitree robot velocity control policy |
+| **BeyondMimic (GVHMR2GMR)** | 🖥️ 🤖 | - | [BeyondMimic](https://github.com/HybridRobotics/whole_body_tracking) | Multiple motion tracking policies (see [Video2Mimic](https://github.com/Kennyp-Chen/Video2Mimic) for GVHMR+GMR workflow) |
 
 🖥️ means policy is ready for simulation, while 🤖 means policy has been tested on real robot.
 
