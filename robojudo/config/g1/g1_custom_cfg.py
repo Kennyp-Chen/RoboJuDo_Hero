@@ -43,6 +43,7 @@ from .policy.g1_bfmzero_policy_cfg import (
     G1BFMZeroGoalPolicyCfg,
 )
 from .policy.g1_gentle_policy_cfg import G1GentlePolicyCfg
+from .policy.g1_kungfuathlete_policy_cfg import G1KungFuAthletePolicyCfg
 
 
 # ======================== Custom Configs ======================== #
@@ -135,12 +136,19 @@ class g1_locomimic_sim(RlLocoMimicSimPipelineCfg):
 
 
     mimic_policies: list[G1BeyondMimicPolicyCfg | G1BFMZeroTracking23DoFPolicyCfg | G1BFMZeroGoal23DoFPolicyCfg | G1BFMZeroReward23DoFPolicyCfg] = [
-        G1BFMZeroTracking23DoFPolicyCfg(
-            train_method="23dof_260411",
-            ctx_path="tracking_inference/zs_18.pkl"
-        ),
-        G1BFMZeroGoal23DoFPolicyCfg(),
-        G1BFMZeroReward23DoFPolicyCfg(),
+        ###############GentleHumanoid Policies###############
+        
+        ###############BFM Zero Policies###############
+        # G1BFMZeroTracking23DoFPolicyCfg(),
+        # G1BFMZeroTrackingPolicyCfg(),
+        # G1BFMZeroGoal23DoFPolicyCfg(),
+        # G1BFMZeroGoalPolicyCfg(),  
+        # G1BFMZeroReward23DoFPolicyCfg(),
+        # G1BFMZeroRewardPolicyCfg(),
+        ##################BeyondMimic Policies######################
+        # G1BeyondMimicPolicyCfg(policy_name="29dof_50fps/OldTownRoad_v1",),
+
+        G1BeyondMimicPolicyCfg(policy_name="23dof_50fps/eva_angel_dance",),
         G1BeyondMimicPolicyCfg(policy_name="23dof_50fps/goodness_dance",),
         G1BeyondMimicPolicyCfg(policy_name="23dof_50fps/gangster_dance",),
         G1BeyondMimicPolicyCfg(policy_name="23dof_50fps/baicai",),
@@ -149,7 +157,6 @@ class g1_locomimic_sim(RlLocoMimicSimPipelineCfg):
         G1BeyondMimicPolicyCfg(policy_name="23dof_50fps/go_woman",),
         G1BeyondMimicPolicyCfg(policy_name="23dof_50fps/OldTownRoad_v1",),
 
-        ##################BeyondMimic Policies######################
         # 23dof_50fps start####################################
         # # # fightAndSports1_subject1
         # G1BeyondMimicPolicyCfg(# KUNGFU HighKICK 蹲下后结束
@@ -254,3 +261,49 @@ class g1_bfmzero_goal(RlPipelineCfg):
     policy: G1BFMZeroGoal23DoFPolicyCfg = G1BFMZeroGoal23DoFPolicyCfg(
         train_method="23dof_260411"
     )
+
+
+@cfg_registry.register
+class g1_kungfuathlete(RlPipelineCfg):
+    """
+     with External as motion source.
+    G1 robot with KungFuAthlete policy
+
+    """
+
+    robot: str = "g1"
+    env: G1MujocoEnvCfg = G1MujocoEnvCfg()
+    ctrl: list[KeyboardCtrlCfg | G1BeyondmimicCtrlCfg] = [
+        KeyboardCtrlCfg(
+            triggers_extra={
+                "]": "[MOTION_FADE_OUT]",
+                "[": "[MOTION_FADE_IN]",
+                ";": "[MOTION_LOAD_NEXT]",
+                "'": "[MOTION_LOAD_PREV]",
+            }
+        ),
+        G1BeyondmimicCtrlCfg(
+            motion_name="../KungFuAthlete/1307",  # you can put your own motion file in assets/motions/g1
+        ),
+    ]
+
+    policy: G1KungFuAthletePolicyCfg = G1KungFuAthletePolicyCfg()
+
+# class g1_beyondmimic_with_ctrl(RlPipelineCfg):
+#     """
+#     BeyondMimic with External BeyondMimicCtrl as motion source.
+#     """
+
+#     robot: str = "g1"
+#     env: G1MujocoEnvCfg = G1MujocoEnvCfg()
+#     ctrl: list[KeyboardCtrlCfg | G1BeyondmimicCtrlCfg] = [
+#         KeyboardCtrlCfg(),
+#         G1BeyondmimicCtrlCfg(
+#             motion_name="dance1_subject2",  # you can put your own motion file in assets/motions/g1
+#         ),
+#     ]
+
+#     policy: G1BeyondMimicPolicyCfg = G1BeyondMimicPolicyCfg(
+#         policy_name="29dof/Dance_wose",
+#         use_motion_from_model=False,  # use motion from BeyondmimicCtrl instead of the onnx
+#     )

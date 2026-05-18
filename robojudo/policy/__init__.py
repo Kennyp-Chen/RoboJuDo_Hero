@@ -43,4 +43,5 @@ policy_registry.add("AsapLocoPolicy", ".asap_policy")
 policy_registry.add("KungfuBotGeneralPolicy", ".kungfubot_policy")
 policy_registry.add("TwistPolicy", ".twist_policy")
 policy_registry.add("GentlePolicy", ".gentle_policy")
+policy_registry.add("KungFuAthletePolicy", ".kungfuathlete_policy")
 

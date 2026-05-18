@@ -224,7 +224,7 @@ class g1_beyondmimic_with_ctrl(RlPipelineCfg):
     ]
 
     policy: G1BeyondMimicPolicyCfg = G1BeyondMimicPolicyCfg(
-        policy_name="Dance_wose",
+        policy_name="29dof/Dance_wose",
         use_motion_from_model=False,  # use motion from BeyondmimicCtrl instead of the onnx
     )
 

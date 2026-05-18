@@ -154,7 +154,8 @@ class G1BFMZeroTracking23DoFPolicyCfg(G1BFMZero23DoFPolicyCfg):
     """BFM Zero 23DoF Policy for tracking tasks"""
     task_type: str = "tracking"
     ctx_path: str = "tracking_inference/zs_7.pkl"
-    train_method: str = "23dof_low_20260407_182514"
+    # train_method: str = "23dof_low_20260407_182514"
+    train_method: str = "23dof_260411"
     start: int = 0
     end: int = 2000
     stop: int = 0
@@ -189,7 +190,8 @@ class G1BFMZeroRewardPolicyCfg(G1BFMZeroPolicyCfg):
 class G1BFMZeroReward23DoFPolicyCfg(G1BFMZero23DoFPolicyCfg):
     """BFM Zero 23DoF Policy for reward-based tasks"""
     task_type: str = "reward"
-    train_method: str = "23dof_low_20260407_182514"
+    # train_method: str = "23dof_low_20260407_182514"
+    train_method: str = "23dof_260411"
     ctx_path: str = "../reward_inference/reward_locomotion.pkl"
     selected_rewards_filter_z: list = [
         {"reward": "move-ego-low0.6-0-0.7", "z_ids": [0]},
@@ -215,4 +217,6 @@ class G1BFMZeroGoal23DoFPolicyCfg(G1BFMZero23DoFPolicyCfg):
     """BFM Zero 23DoF Policy for goal-based tasks"""
     task_type: str = "goal"
     ctx_path: str = "../goal_inference/goal_reaching.pkl"
-    train_method: str = "23dof_low_20260407_182514"
+    # train_method: str = "23dof_low_20260407_182514"
+    train_method: str = "23dof_260411"
+

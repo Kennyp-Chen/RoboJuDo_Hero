@@ -630,3 +630,49 @@ class TwistPolicyCfg(PolicyCfg):
     @property
     def mimic_obs_other_ids(self) -> list[int]:
         return [f for f in range(self.mimic_obs_total_degrees) if f not in self.mimic_obs_wrist_ids]
+
+
+class KungFuAthletePolicyCfg(PolicyCfg):
+    """KungFuAthlete Policy Configuration for G1 Robot"""
+    model_config = {"arbitrary_types_allowed": True}
+    
+    policy_type: str = "KungFuAthletePolicy"
+    policy_name: str = "Taichi_recover"
+    
+    @property
+    def policy_file(self) -> str:
+        from robojudo.config import ASSETS_DIR
+        policy_file = ASSETS_DIR / f"models/{self.robot}/KungFuAthlete/{self.policy_name}.onnx"
+        return policy_file.as_posix()
+    
+    # 策略特定配置
+    action_scale: list[float] = None  # 将在DoF配置中设置
+    action_clip: float | None = None
+    action_beta: float = 1.0
+    freq: int = 50
+    
+    # 观测配置 (从文档中提取: 160维)
+    class ObsScalesCfg:
+        command: float = 1.0
+        motion_anchor_pos_b: float = 1.0
+        motion_anchor_ori_b: float = 1.0
+        base_lin_vel: float = 1.0
+        base_ang_vel: float = 1.0
+        joint_pos: float = 1.0
+        joint_vel: float = 1.0
+        actions: float = 1.0
+    
+    obs_scales: ObsScalesCfg = ObsScalesCfg()
+    
+    # 观测噪声配置
+    class ObsNoiseCfg:
+        command: float = 0.0
+        motion_anchor_pos_b: float = 0.25
+        motion_anchor_ori_b: float = 0.05
+        base_lin_vel: float = 0.5
+        base_ang_vel: float = 0.2
+        joint_pos: float = 0.01
+        joint_vel: float = 0.5
+        actions: float = 0.0
+    
+    obs_noise: ObsNoiseCfg = ObsNoiseCfg()
