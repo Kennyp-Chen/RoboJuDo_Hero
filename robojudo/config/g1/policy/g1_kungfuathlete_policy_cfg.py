@@ -94,16 +94,17 @@ class G1KungFuAthletePolicyCfg(PolicyCfg):
     obs_dof: G1KungFuAthleteDoF = G1KungFuAthleteDoF()
     action_dof: G1KungFuAthleteDoF = None
     
+    use_onnx: bool = False
+    
     @property
     def policy_file(self) -> str:
-        """Path to the PyTorch policy file"""
         from robojudo.config import ASSETS_DIR
-        policy_file = ASSETS_DIR / f"models/{self.robot}/KungFuAthlete/{self.policy_name}.pt"
+        ext = "onnx" if self.use_onnx else "pt"
+        policy_file = ASSETS_DIR / f"models/{self.robot}/KungFuAthlete/{self.policy_name}.{ext}"
         return policy_file.as_posix()
     
     @property
     def onnx_policy_file(self) -> str:
-        """Path to the ONNX policy file (fallback)"""
         from robojudo.config import ASSETS_DIR
         policy_file = ASSETS_DIR / f"models/{self.robot}/KungFuAthlete/{self.policy_name}.onnx"
         return policy_file.as_posix()

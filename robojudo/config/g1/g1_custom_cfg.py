@@ -272,7 +272,9 @@ class g1_kungfuathlete(RlPipelineCfg):
     """
 
     robot: str = "g1"
-    env: G1MujocoEnvCfg = G1MujocoEnvCfg()
+    # env: G1MujocoEnvCfg = G1MujocoEnvCfg()
+    env: G1_23MujocoEnvCfg = G1_23MujocoEnvCfg()
+
     ctrl: list[KeyboardCtrlCfg | G1BeyondmimicCtrlCfg] = [
         KeyboardCtrlCfg(
             triggers_extra={
@@ -287,23 +289,7 @@ class g1_kungfuathlete(RlPipelineCfg):
         ),
     ]
 
-    policy: G1KungFuAthletePolicyCfg = G1KungFuAthletePolicyCfg()
-
-# class g1_beyondmimic_with_ctrl(RlPipelineCfg):
-#     """
-#     BeyondMimic with External BeyondMimicCtrl as motion source.
-#     """
-
-#     robot: str = "g1"
-#     env: G1MujocoEnvCfg = G1MujocoEnvCfg()
-#     ctrl: list[KeyboardCtrlCfg | G1BeyondmimicCtrlCfg] = [
-#         KeyboardCtrlCfg(),
-#         G1BeyondmimicCtrlCfg(
-#             motion_name="dance1_subject2",  # you can put your own motion file in assets/motions/g1
-#         ),
-#     ]
-
-#     policy: G1BeyondMimicPolicyCfg = G1BeyondMimicPolicyCfg(
-#         policy_name="29dof/Dance_wose",
-#         use_motion_from_model=False,  # use motion from BeyondmimicCtrl instead of the onnx
-#     )
+    policy: G1KungFuAthletePolicyCfg = G1KungFuAthletePolicyCfg(
+        use_onnx=True,
+        policy_name="Taichi_recover",
+    )

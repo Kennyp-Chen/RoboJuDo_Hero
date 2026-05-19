@@ -25,8 +25,9 @@ def parse_args():
         type=str,
         # default="g1",
         # default="g1_locomimic_sim",
-        default="g1_gentle",
+        # default="g1_gentle",
         # default="g1_bfmzero_tracking",
+        default="g1_kungfuathlete",
 
         help="Name of the config class to use",
     )

@@ -1,13 +1,13 @@
 import logging
+
 import numpy as np
 import torch
-from typing import Dict, Any
 from scipy.spatial.transform import Rotation as sRot
 
-from robojudo.policy.base_policy import Policy
 from robojudo.config.g1.policy.g1_kungfuathlete_policy_cfg import G1KungFuAthletePolicyCfg
 from robojudo.policy import policy_registry
-from robojudo.utils.util_func import subtract_frame_transforms, matrix_from_quat
+from robojudo.policy.base_policy import Policy
+from robojudo.utils.util_func import matrix_from_quat, subtract_frame_transforms
 
 logger = logging.getLogger(__name__)
 
@@ -34,8 +34,11 @@ class KungFuAthletePolicy(Policy):
         # 加载机器人初始状态
         self._load_robot_init_states()
         
-        # 加载PyTorch模型
-        self._load_model()
+        self.use_onnx = getattr(self.cfg_policy, "use_onnx", False)
+        if self.use_onnx:
+            self._load_onnx_model()
+        else:
+            self._load_model()
         
         # 初始化动作历史
         self.last_action = np.zeros(self.num_actions, dtype=np.float32)
@@ -50,7 +53,9 @@ class KungFuAthletePolicy(Policy):
         # yields identity at frame 0 (matching training behavior).
         self._xml_quat_correction = None  # computed lazily on first update
         
-        logger.info(f"KungFuAthletePolicy initialized with {self.observation_dim}D observations and {self.num_actions}D actions")
+        logger.info(
+            f"KungFuAthletePolicy: {self.observation_dim}D obs, {self.num_actions}D actions"
+        )
     
     def _load_motion_data(self):
         """加载动作数据文件"""
@@ -112,6 +117,28 @@ class KungFuAthletePolicy(Policy):
         logger.info("Successfully loaded robot init states")
         logger.info(f"Init states keys: {list(self.robot_init_states.keys())}")
     
+    def _load_onnx_model(self):
+        try:
+            import onnxruntime as ort
+            model_path = getattr(self.cfg_policy, "onnx_policy_file", self.cfg_policy.policy_file)
+            if self.cfg_policy.policy_file.endswith(".onnx"):
+                model_path = self.cfg_policy.policy_file
+            logger.info(f"Loading ONNX model from {model_path}")
+            providers = ['CPUExecutionProvider']
+            if hasattr(self.device, 'type') and self.device.type == 'cuda':
+                providers.insert(0, 'CUDAExecutionProvider')
+            elif isinstance(self.device, str) and "cuda" in self.device:
+                providers.insert(0, 'CUDAExecutionProvider')
+            self.ort_session = ort.InferenceSession(model_path, providers=providers)
+            self.input_names = [i.name for i in self.ort_session.get_inputs()]
+            self.output_names = [o.name for o in self.ort_session.get_outputs()]
+            logger.info(f"ONNX Model inputs: {self.input_names}")
+            logger.info(f"ONNX Model outputs: {self.output_names}")
+            self.actor_weights = None
+        except Exception as e:
+            logger.error(f"Failed to load ONNX model: {e}")
+            self.ort_session = None
+
     def _load_model(self):
         """Load PyTorch checkpoint directly"""
         try:
@@ -209,7 +236,9 @@ class KungFuAthletePolicy(Policy):
         )
         
         # 验证维度
-        assert obs_prop.shape[0] == self.observation_dim, f"Expected {self.observation_dim}D obs, got {obs_prop.shape[0]}D"
+        assert obs_prop.shape[0] == self.observation_dim, (
+            f"Expected {self.observation_dim}D obs, got {obs_prop.shape[0]}D"
+        )
         
         extras = {
             "pos": pos,
@@ -273,12 +302,19 @@ class KungFuAthletePolicy(Policy):
         )
     
     def get_action(self, obs: np.ndarray) -> np.ndarray:
-        """计算动作 (29维)"""
-        # 验证输入维度
         assert obs.shape[0] == self.observation_dim, f"Expected {self.observation_dim}D obs, got {obs.shape[0]}D"
         
-        # 优先使用神经网络推理
-        if hasattr(self, 'actor_weights') and self.actor_weights is not None:
+        if self.use_onnx and hasattr(self, 'ort_session') and self.ort_session is not None:
+            try:
+                obs_tensor = obs.astype(np.float32)
+                with torch.no_grad():
+                    ort_inputs = {self.input_names[0]: obs_tensor[None, :]}
+                    actions_tensor = self.ort_session.run(self.output_names, ort_inputs)
+                raw_action = actions_tensor[0][0]
+            except Exception as e:
+                logger.error(f"ONNX network inference failed: {e}")
+                raw_action = np.zeros(self.num_actions, dtype=np.float32)
+        elif hasattr(self, 'actor_weights') and self.actor_weights is not None:
             try:
                 with torch.no_grad():
                     action_tensor = self._forward_network(obs)
@@ -286,17 +322,13 @@ class KungFuAthletePolicy(Policy):
             except Exception as e:
                 logger.error(f"Neural network inference failed: {e}")
                 raw_action = np.zeros(self.num_actions, dtype=np.float32)
+
+        assert raw_action.shape[0] == self.num_actions, (
+            f"Expected {self.num_actions}D action, got {raw_action.shape[0]}D"
+        )
         
-        # 验证输出维度
-        assert raw_action.shape[0] == self.num_actions, f"Expected {self.num_actions}D action, got {raw_action.shape[0]}D"
-        
-        # 保存上一步的原始(未缩放)动作,用于下一帧的observation last_action
-        # 训练环境中 last_action 是缩放前的原始网络输出
         self.last_action = raw_action.copy()
-        
-        # 动作后处理(缩放)用于PD target计算
         scaled_action = self._post_process_action(raw_action)
-        
         return scaled_action
     
     def _post_process_action(self, action: np.ndarray) -> np.ndarray:

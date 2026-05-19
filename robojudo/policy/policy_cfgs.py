@@ -638,11 +638,13 @@ class KungFuAthletePolicyCfg(PolicyCfg):
     
     policy_type: str = "KungFuAthletePolicy"
     policy_name: str = "Taichi_recover"
+    use_onnx: bool = False
     
     @property
     def policy_file(self) -> str:
         from robojudo.config import ASSETS_DIR
-        policy_file = ASSETS_DIR / f"models/{self.robot}/KungFuAthlete/{self.policy_name}.onnx"
+        ext = "onnx" if self.use_onnx else "pt"
+        policy_file = ASSETS_DIR / f"models/{self.robot}/KungFuAthlete/{self.policy_name}.{ext}"
         return policy_file.as_posix()
     
     # 策略特定配置
