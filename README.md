@@ -9,6 +9,10 @@
 
 </div>
 
+> **[中文版](README_CN.md)**
+
+---
+
 ## 📖 Overview
 
 RoboJuDo_Hero is a fork and extended version of [RoboJuDo](https://github.com/HansZ8/RoboJuDo), a modular robotics simulation framework. This project extends the original framework with additional policies, improved simulation capabilities, and enhanced real robot integration.
@@ -72,6 +76,9 @@ python scripts/run_pipeline_sim.py -c g1_locomimic_sim
 
 # UnitreeMJLab Policy
 python scripts/run_pipeline_sim.py -c g1_unitree_mjlab_velocity
+
+# KungFuAthlete Policy (motion tracking)
+python scripts/run_pipeline_sim.py -c g1_kungfuathlete
 ```
 
 ### Running on Real Robot
@@ -140,6 +147,7 @@ After setup, the listener will automatically start and monitor for joystick comm
 | **GentleHumanoid** | 🖥️ 🤖 | - | [GentleHumanoid](https://github.com/Axellwppr/gentle-humanoid) | Motion tracking with compliance control |
 | **UnitreeMJLab** | 🖥️ 🤖 | - | [UnitreeMJLab](https://github.com/unitreerobotics/unitree_rl_mjlab) | Unitree robot velocity control policy |
 | **BeyondMimic (GVHMR2GMR)** | 🖥️ 🤖 | - | [BeyondMimic](https://github.com/HybridRobotics/whole_body_tracking) | Multiple motion tracking policies (see [Video2Mimic](https://github.com/Kennyp-Chen/Video2Mimic) for GVHMR+GMR workflow) |
+| **KungFuAthlete** | 🖥️ 🤖 | - | [KungFuAthleteBot](https://github.com/NPCLEI/KungFuAthleteBot) | Motion tracking policy with 29DoF position control and 154D observations |
 
 🖥️ means policy is ready for simulation, while 🤖 means policy has been tested on real robot.
 
@@ -153,10 +161,26 @@ All new policy configurations are located in `robojudo/config/g1/g1_custom_cfg.p
 - `g1_gentle` - GentleHumanoid policy
 - `g1_locomimic_sim` - Multiple BeyondMimic policies
 - `g1_unitree_mjlab_velocity` - UnitreeMJLab velocity control
+- `g1_kungfuathlete` - KungFuAthlete motion tracking
 
 ## 📚 Documentation
 
 For detailed documentation on the original RoboJuDo framework, please refer to [README_RoboJuDo.md](README_RoboJuDo.md).
+
+### AI Coding with AGENTS.MD & Policy Skills
+
+This repository provides structured documentation to assist AI coding agents when extending the framework with new policies:
+
+- **[AGENTS.MD](AGENTS.MD)** — The first file AI agents should read when working in this repo. It defines the project's architecture, hard rules, code conventions, and verification flow. This file originates from the [RoboJuDo project](https://github.com/HansZ8/RoboJuDo/blob/dev/agent-init/AGENTS.md) by HansZ8, adapted for this fork. We thank the RoboJuDo author for this foundational reference that enables consistent AI-assisted development.
+
+- **[docs/add-new-policy.md](docs/add-new-policy.md) / [English](docs/add-new-policy-en.md)** — A step-by-step guide for adding a new humanoid robot RL policy (Actor NN) to the RoboJuDo framework. Covers the full workflow: config creation, DoF setup, policy implementation, registration, pipeline config, and verification.
+
+- **[docs/extract-policy-config.md](docs/extract-policy-config.md) / [English](docs/extract-policy-config-en.md)** — A guide for extracting configuration information from external RL training projects, producing a standardized summary that can be consumed by the `add-new-policy` workflow.
+
+**Recommended workflow for AI-assisted policy integration:**
+1. Read [AGENTS.MD](AGENTS.MD) to understand project conventions
+2. Use [docs/extract-policy-config.md](docs/extract-policy-config.md) to extract config from a training project
+3. Use [docs/add-new-policy.md](docs/add-new-policy.md) to generate the policy implementation code
 
 ## 🤝 Contributing
 
@@ -173,3 +197,4 @@ This project inherits the MIT license from the original RoboJuDo project. See [L
 - [GentleHumanoid](https://github.com/GentleHumanoid/gentleHum) - GentleHumanoid project
 - [UnitreeRlMjLab](https://github.com/unitreerobotics/unitree_rl_mjlab) - Unitree robot learning lab
 - [BeyondMimic](https://github.com/HybridRobotics/whole_body_tracking) - Whole body motion tracking
+- [KungFuAthleteBot](https://github.com/NPCLEI/KungFuAthleteBot) - KungFuAthlete motion tracking project

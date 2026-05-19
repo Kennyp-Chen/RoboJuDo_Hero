@@ -266,9 +266,9 @@ class g1_bfmzero_goal(RlPipelineCfg):
 @cfg_registry.register
 class g1_kungfuathlete(RlPipelineCfg):
     """
-     with External as motion source.
-    G1 robot with KungFuAthlete policy
-
+    G1 robot with KungFuAthlete policy.
+    Uses External as motion source.
+    Source: https://github.com/NPCLEI/KungFuAthleteBot
     """
 
     robot: str = "g1"

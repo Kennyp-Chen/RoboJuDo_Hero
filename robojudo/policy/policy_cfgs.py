@@ -633,7 +633,9 @@ class TwistPolicyCfg(PolicyCfg):
 
 
 class KungFuAthletePolicyCfg(PolicyCfg):
-    """KungFuAthlete Policy Configuration for G1 Robot"""
+    """KungFuAthlete Policy Configuration for G1 Robot
+    Source: https://github.com/NPCLEI/KungFuAthleteBot
+    """
     model_config = {"arbitrary_types_allowed": True}
     
     policy_type: str = "KungFuAthletePolicy"

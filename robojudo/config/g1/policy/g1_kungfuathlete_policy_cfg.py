@@ -5,7 +5,9 @@ from robojudo.tools.tool_cfgs import DoFConfig
 
 
 class G1KungFuAthleteDoF(DoFConfig):
-    """G1 KungFuAthlete DoF configuration"""
+    """G1 KungFuAthlete DoF configuration
+    Source: https://github.com/NPCLEI/KungFuAthleteBot
+    """
     joint_names: list[str] = [
         'left_hip_pitch_joint', 'left_hip_roll_joint', 'left_hip_yaw_joint',
         'left_knee_joint', 'left_ankle_pitch_joint', 'left_ankle_roll_joint',

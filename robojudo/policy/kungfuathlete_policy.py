@@ -18,6 +18,7 @@ class KungFuAthletePolicy(Policy):
     
     This policy implements motion tracking for KungFuAthlete project
     with 29DOF position control and 154D observations (1307 model config).
+    Source: https://github.com/NPCLEI/KungFuAthleteBot
     """
     
     def __init__(self, cfg_policy: G1KungFuAthletePolicyCfg, device: str = "cpu"):
