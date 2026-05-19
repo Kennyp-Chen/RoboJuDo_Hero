@@ -5,6 +5,21 @@ import platform
 if platform.machine().startswith("aarch64"):
     os.environ["OMP_NUM_THREADS"] = "1"
 
+# ====== Conda environment check ======
+_REQUIRED_CONDA_ENV = "robojudo_sar"
+_current_env = os.environ.get("CONDA_DEFAULT_ENV", "")
+if _current_env and _current_env != _REQUIRED_CONDA_ENV:
+    import warnings
+    warnings.warn(
+        f"Expected conda environment '{_REQUIRED_CONDA_ENV}', "
+        f"but '{_current_env}' is active. "
+        f"Run: conda activate {_REQUIRED_CONDA_ENV}"
+    )
+elif not _current_env:
+    # Not running inside any conda env - common on bare Python or container
+    pass
+# ====================================
+
 # Fix libgomp issue on ARM platform (Jetson)
 import torch  # noqa: F401, I001
 import numpy  # noqa: F401, I001

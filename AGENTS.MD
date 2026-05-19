@@ -34,6 +34,17 @@ Install and run via the README — `pip install -e .` plus optional submodules
 through `python submodule_install.py`. Active dev install: `pip install -e
 ".[dev]"` to pull `ruff` and `pre-commit`.
 
+### 2.1 Conda environment (required)
+
+**All project scripts must be run inside the `robojudo_sar` conda environment.**
+The package `robojudo/__init__.py` checks `CONDA_DEFAULT_ENV` at import time
+and emits a warning if a different conda env is active.
+
+```bash
+conda activate robojudo_sar
+python scripts/run_pipeline_sim.py
+```
+
 Always-run commands:
 
 ```bash
