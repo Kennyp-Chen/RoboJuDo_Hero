@@ -147,7 +147,7 @@ unitree ALL=(ALL) NOPASSWD: /bin/systemctl stop gamepad_listener, /bin/systemctl
 | **GentleHumanoid** | 🖥️ 🤖 | - | [GentleHumanoid](https://github.com/Axellwppr/gentle-humanoid) | 带柔顺控制的运动跟踪 |
 | **UnitreeMJLab** | 🖥️ 🤖 | - | [UnitreeMJLab](https://github.com/unitreerobotics/unitree_rl_mjlab) | Unitree 机器人速度控制策略 |
 | **BeyondMimic (GVHMR2GMR)** | 🖥️ 🤖 | - | [BeyondMimic](https://github.com/HybridRobotics/whole_body_tracking) | 多种运动跟踪策略（查看 [Video2Mimic](https://github.com/Kennyp-Chen/Video2Mimic) 了解 GVHMR+GMR 工作流） |
-| **KungFuAthlete** | 🖥️ 🤖 | - | [KungFuAthleteBot](https://github.com/NPCLEI/KungFuAthleteBot) | 29DoF 位置控制 + 154D 观测的运动跟踪策略 |
+| **KungFuAthlete** | 🖥️ 🤖 | - | [KungFuAthleteBot](https://github.com/NPCLEI/KungFuAthleteBot) | 武术动作运动跟踪数据集与策略（太极拳、拳术、刀剑、技巧翻跃），支持跌倒恢复 |
 
 🖥️ 表示策略已准备好用于仿真，🤖 表示已在真机上测试过。
 
