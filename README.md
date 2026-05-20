@@ -48,6 +48,11 @@ The **RoboJuDo_SAR** (SimAndReal) branch includes the following new features:
 git clone https://github.com/Kennyp-Chen/RoboJuDo_Hero.git
 cd RoboJuDo_Hero/
 
+# Pull model files managed by Git LFS
+# (Required: model .onnx, .pt, .pkl files are stored via Git LFS)
+git lfs install
+git lfs pull
+
 # Create a Python environment
 conda create -n robojudo_sar python=3.11 -y
 conda activate robojudo_sar

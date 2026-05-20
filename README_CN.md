@@ -48,6 +48,11 @@ RoboJuDo_Hero 是 [RoboJuDo](https://github.com/HansZ8/RoboJuDo) 的一个分支
 git clone https://github.com/Kennyp-Chen/RoboJuDo_Hero.git
 cd RoboJuDo_Hero/
 
+# 拉取 Git LFS 管理的模型文件
+# （必需：模型 .onnx、.pt、.pkl 等文件通过 Git LFS 存储）
+git lfs install
+git lfs pull
+
 # 创建 Python 环境
 conda create -n robojudo_sar python=3.11 -y
 conda activate robojudo_sar
