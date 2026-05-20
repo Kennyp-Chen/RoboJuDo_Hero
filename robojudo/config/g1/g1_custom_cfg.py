@@ -105,9 +105,6 @@ class g1_locomimic_sim(RlLocoMimicSimPipelineCfg):
                 "RB+Up": "[POLICY_MIMIC]",
             }
         ),
-        G1BeyondmimicCtrlCfg(
-            # motion_name="fallAndGetUp3_subject1",  # you can put your own motion file in assets/motions/g1
-        ),
         BFMKeyboardCtrlCfg(),
 
     ]
@@ -272,8 +269,8 @@ class g1_kungfuathlete(RlPipelineCfg):
     """
 
     robot: str = "g1"
-    # env: G1MujocoEnvCfg = G1MujocoEnvCfg()
-    env: G1_23MujocoEnvCfg = G1_23MujocoEnvCfg()
+    env: G1MujocoEnvCfg = G1MujocoEnvCfg()
+    # env: G1_23MujocoEnvCfg = G1_23MujocoEnvCfg()
 
     ctrl: list[KeyboardCtrlCfg | G1BeyondmimicCtrlCfg] = [
         KeyboardCtrlCfg(
@@ -290,6 +287,6 @@ class g1_kungfuathlete(RlPipelineCfg):
     ]
 
     policy: G1KungFuAthletePolicyCfg = G1KungFuAthletePolicyCfg(
-        use_onnx=True,
-        policy_name="Taichi_recover",
+        # use_onnx=True,
+        policy_name="1307Taichi",
     )

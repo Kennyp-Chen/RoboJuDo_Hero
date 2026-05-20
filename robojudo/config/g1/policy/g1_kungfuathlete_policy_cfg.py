@@ -81,8 +81,8 @@ class G1KungFuAthletePolicyCfg(PolicyCfg):
     
     robot: str = "g1"
     policy_type: str = "KungFuAthletePolicy"
-    policy_name: str = "1307"
-    
+    policy_name: str = "1307Taichi"
+
     # 动作文件配置
     motion_file: str = "1307.npz"
     
@@ -102,14 +102,9 @@ class G1KungFuAthletePolicyCfg(PolicyCfg):
     def policy_file(self) -> str:
         from robojudo.config import ASSETS_DIR
         ext = "onnx" if self.use_onnx else "pt"
-        policy_file = ASSETS_DIR / f"models/{self.robot}/KungFuAthlete/{self.policy_name}.{ext}"
+        policy_file = ASSETS_DIR / f"models/{self.robot}/KungFuAthlete/{self.policy_name}/policy.{ext}"
         return policy_file.as_posix()
-    
-    @property
-    def onnx_policy_file(self) -> str:
-        from robojudo.config import ASSETS_DIR
-        policy_file = ASSETS_DIR / f"models/{self.robot}/KungFuAthlete/{self.policy_name}.onnx"
-        return policy_file.as_posix()
+
     
     # 策略特定配置参数
     disable_autoload: bool = True  # 禁用基类的自动torch.jit.load
@@ -118,31 +113,6 @@ class G1KungFuAthletePolicyCfg(PolicyCfg):
     action_beta: float = 1.0
     freq: int = 50
     
-    # 观测配置 (从文档中提取)
-    class ObsScalesCfg:
-        command: float = 1.0
-        motion_anchor_pos_b: float = 1.0
-        motion_anchor_ori_b: float = 1.0
-        base_lin_vel: float = 1.0
-        base_ang_vel: float = 1.0
-        joint_pos: float = 1.0
-        joint_vel: float = 1.0
-        actions: float = 1.0
-    
-    obs_scales: ObsScalesCfg = ObsScalesCfg()
-    
-    # 观测噪声配置 (从文档中提取)
-    class ObsNoiseCfg:
-        command: float = 0.0
-        motion_anchor_pos_b: float = 0.25
-        motion_anchor_ori_b: float = 0.05
-        base_lin_vel: float = 0.5
-        base_ang_vel: float = 0.2
-        joint_pos: float = 0.01
-        joint_vel: float = 0.5
-        actions: float = 0.0
-    
-    obs_noise: ObsNoiseCfg = ObsNoiseCfg()
     
     @model_validator(mode='after')
     def validate_config(self) -> 'G1KungFuAthletePolicyCfg':

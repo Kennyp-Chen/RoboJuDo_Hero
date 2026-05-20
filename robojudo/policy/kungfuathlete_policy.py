@@ -119,26 +119,23 @@ class KungFuAthletePolicy(Policy):
         logger.info(f"Init states keys: {list(self.robot_init_states.keys())}")
     
     def _load_onnx_model(self):
-        try:
-            import onnxruntime as ort
-            model_path = getattr(self.cfg_policy, "onnx_policy_file", self.cfg_policy.policy_file)
-            if self.cfg_policy.policy_file.endswith(".onnx"):
-                model_path = self.cfg_policy.policy_file
-            logger.info(f"Loading ONNX model from {model_path}")
-            providers = ['CPUExecutionProvider']
-            if hasattr(self.device, 'type') and self.device.type == 'cuda':
-                providers.insert(0, 'CUDAExecutionProvider')
-            elif isinstance(self.device, str) and "cuda" in self.device:
-                providers.insert(0, 'CUDAExecutionProvider')
-            self.ort_session = ort.InferenceSession(model_path, providers=providers)
-            self.input_names = [i.name for i in self.ort_session.get_inputs()]
-            self.output_names = [o.name for o in self.ort_session.get_outputs()]
-            logger.info(f"ONNX Model inputs: {self.input_names}")
-            logger.info(f"ONNX Model outputs: {self.output_names}")
-            self.actor_weights = None
-        except Exception as e:
-            logger.error(f"Failed to load ONNX model: {e}")
-            self.ort_session = None
+        import onnxruntime as ort
+        model_path = getattr(self.cfg_policy, "policy_file", self.cfg_policy.policy_file)
+        if self.cfg_policy.policy_file.endswith(".onnx"):
+            model_path = self.cfg_policy.policy_file
+        logger.info(f"Loading ONNX model from {model_path}")
+        providers = ['CPUExecutionProvider']
+        if hasattr(self.device, 'type') and self.device.type == 'cuda':
+            providers.insert(0, 'CUDAExecutionProvider')
+        elif isinstance(self.device, str) and "cuda" in self.device:
+            providers.insert(0, 'CUDAExecutionProvider')
+        self.ort_session = ort.InferenceSession(model_path, providers=providers)
+        self.input_names = [i.name for i in self.ort_session.get_inputs()]
+        self.output_names = [o.name for o in self.ort_session.get_outputs()]
+        logger.info(f"ONNX Model inputs: {self.input_names}")
+        logger.info(f"ONNX Model outputs: {self.output_names}")
+        self.actor_weights = None
+
 
     def _load_model(self):
         """Load PyTorch checkpoint directly"""

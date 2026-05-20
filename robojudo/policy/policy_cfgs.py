@@ -639,16 +639,16 @@ class KungFuAthletePolicyCfg(PolicyCfg):
     model_config = {"arbitrary_types_allowed": True}
     
     policy_type: str = "KungFuAthletePolicy"
-    policy_name: str = "Taichi_recover"
+    policy_name: str = "1307Taichi"
     use_onnx: bool = False
     
     @property
     def policy_file(self) -> str:
         from robojudo.config import ASSETS_DIR
         ext = "onnx" if self.use_onnx else "pt"
-        policy_file = ASSETS_DIR / f"models/{self.robot}/KungFuAthlete/{self.policy_name}.{ext}"
+        policy_file = ASSETS_DIR / f"models/{self.robot}/KungFuAthlete/{self.policy_name}/policy.{ext}"
         return policy_file.as_posix()
-    
+
     # 策略特定配置
     action_scale: list[float] = None  # 将在DoF配置中设置
     action_clip: float | None = None
@@ -668,15 +668,4 @@ class KungFuAthletePolicyCfg(PolicyCfg):
     
     obs_scales: ObsScalesCfg = ObsScalesCfg()
     
-    # 观测噪声配置
-    class ObsNoiseCfg:
-        command: float = 0.0
-        motion_anchor_pos_b: float = 0.25
-        motion_anchor_ori_b: float = 0.05
-        base_lin_vel: float = 0.5
-        base_ang_vel: float = 0.2
-        joint_pos: float = 0.01
-        joint_vel: float = 0.5
-        actions: float = 0.0
-    
-    obs_noise: ObsNoiseCfg = ObsNoiseCfg()
+

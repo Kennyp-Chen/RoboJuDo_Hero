@@ -132,3 +132,5 @@ profile_output*
 logs
 MUJOCO_LOG.TXT
 assets/resources
+.opencode
+
