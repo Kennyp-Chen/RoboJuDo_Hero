@@ -32,9 +32,6 @@ class KungFuAthletePolicy(Policy):
         self.motion_anchor_body_index = -1
         self.command = None
         
-        # 加载机器人初始状态
-        self._load_robot_init_states()
-        
         self.use_onnx = getattr(self.cfg_policy, "use_onnx", False)
         if self.use_onnx:
             self._load_onnx_model()
@@ -86,37 +83,6 @@ class KungFuAthletePolicy(Policy):
             self.motion_length = 0
             self.motion_fps = 30.0
             self.motion_dt = 1.0 / self.motion_fps
-    
-    def _load_robot_init_states(self):
-        """加载机器人初始状态文件"""
-        # 构建机器人初始状态文件路径
-        motion_dir = self.cfg_policy.motion_file_path.rsplit('/', 1)[0]
-        init_states_path = f"{motion_dir}/robot_init_states_8192.pth"
-        
-        logger.info(f"Loading robot init states from {init_states_path}")
-        
-        # 直接载入，不使用try-catch
-        self.robot_init_states = torch.load(init_states_path, map_location=self.device)
-        
-        # 根据实际文件结构提取数据
-        if 'dof_pos' in self.robot_init_states:
-            # dof_pos: [8192, 29] - 取第一个环境的状态
-            self.init_joint_pos = self.robot_init_states['dof_pos'][0]
-            logger.info(f"Loaded init joint pos: {self.init_joint_pos.shape}")
-        
-        if 'robot_root_states_xyzw' in self.robot_init_states:
-            # robot_root_states_xyzw: [8192, 13] - [x, y, z, qx, qy, qz, qw, vx, vy, vz, wx, wy, wz]
-            self.init_base_pos = self.robot_init_states['robot_root_states_xyzw'][0, :3]  # [x, y, z]
-            self.init_base_quat = self.robot_init_states['robot_root_states_xyzw'][0, 3:7]  # [qx, qy, qz, qw]
-            self.init_base_lin_vel = self.robot_init_states['robot_root_states_xyzw'][0, 7:10]  # [vx, vy, vz]
-            self.init_base_ang_vel = self.robot_init_states['robot_root_states_xyzw'][0, 10:13]  # [wx, wy, wz]
-            logger.info(f"Loaded init base pos: {self.init_base_pos.shape}")
-            logger.info(f"Loaded init base quat: {self.init_base_quat.shape}")
-            logger.info(f"Loaded init base lin vel: {self.init_base_lin_vel.shape}")
-            logger.info(f"Loaded init base ang vel: {self.init_base_ang_vel.shape}")
-        
-        logger.info("Successfully loaded robot init states")
-        logger.info(f"Init states keys: {list(self.robot_init_states.keys())}")
     
     def _load_onnx_model(self):
         import onnxruntime as ort
