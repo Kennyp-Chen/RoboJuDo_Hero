@@ -2,7 +2,7 @@
 
 <div align="center">
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![License: CC BY 4.0](https://img.shields.io/badge/License-CC_BY_4.0-lightgrey.svg)](https://creativecommons.org/licenses/by/4.0/)
 [![Python 3.11](https://img.shields.io/badge/python-3.11-blue.svg)](https://www.python.org/downloads/release/python-3110/)
 
 **基于 RoboJuDo 的模块化机器人仿真框架，扩展了更多策略与功能**
@@ -15,7 +15,7 @@
 
 ## 📖 概述
 
-RoboJuDo_Hero 是 [RoboJuDo](https://github.com/HansZ8/RoboJuDo) 的一个分支扩展版本，RoboJuDo 是一个模块化机器人仿真框架。本项目在原框架基础上扩展了更多的策略、改进的仿真能力以及增强的真实机器人集成。
+RoboJuDo_Hero 是基于 [RoboJuDo](https://github.com/HansZ8/RoboJuDo) (作者 HansZ8) 的衍生项目，RoboJuDo 是一个模块化机器人仿真框架。本项目在原框架基础上扩展了更多的策略、改进的仿真能力以及增强的真实机器人集成。
 
 ### 原始 RoboJuDo
 
@@ -193,7 +193,7 @@ unitree ALL=(ALL) NOPASSWD: /bin/systemctl stop gamepad_listener, /bin/systemctl
 
 ## 📄 许可证
 
-本项目继承了原始 RoboJuDo 项目的 MIT 许可证。详情请见 [LICENSE](LICENSE)。
+本项目继承了原始 RoboJuDo 项目的 CC BY 4.0 许可证。详情请见 [LICENSE](LICENSE)。
 
 ## 🙏 致谢
 

@@ -2,7 +2,7 @@
 
 <div align="center">
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![License: CC BY 4.0](https://img.shields.io/badge/License-CC_BY_4.0-lightgrey.svg)](https://creativecommons.org/licenses/by/4.0/)
 [![Python 3.11](https://img.shields.io/badge/python-3.11-blue.svg)](https://www.python.org/downloads/release/python-3110/)
 
 **A modular robotics simulation framework based on RoboJuDo, enhanced with additional policies and features**
@@ -15,7 +15,7 @@
 
 ## 📖 Overview
 
-RoboJuDo_Hero is a fork and extended version of [RoboJuDo](https://github.com/HansZ8/RoboJuDo), a modular robotics simulation framework. This project extends the original framework with additional policies, improved simulation capabilities, and enhanced real robot integration.
+RoboJuDo_Hero is a derivative project based on [RoboJuDo](https://github.com/HansZ8/RoboJuDo) by HansZ8, a modular robotics simulation framework. This project extends the original framework with additional policies, improved simulation capabilities, and enhanced real robot integration.
 
 ### Original RoboJuDo
 
@@ -176,7 +176,7 @@ For detailed documentation on the original RoboJuDo framework, please refer to [
 
 This repository provides structured documentation to assist AI coding agents when extending the framework with new policies:
 
-- **[AGENTS.MD](AGENTS.MD)** — The first file AI agents should read when working in this repo. It defines the project's architecture, hard rules, code conventions, and verification flow. This file originates from the [RoboJuDo project](https://github.com/HansZ8/RoboJuDo/blob/dev/agent-init/AGENTS.md) by HansZ8, adapted for this fork. We thank the RoboJuDo author for this foundational reference that enables consistent AI-assisted development.
+- **[AGENTS.MD](AGENTS.MD)** — The first file AI agents should read when working in this repo. It defines the project's architecture, hard rules, code conventions, and verification flow. This file originates from the [RoboJuDo project](https://github.com/HansZ8/RoboJuDo/blob/dev/agent-init/AGENTS.md) by HansZ8, adapted for this project. We thank the RoboJuDo author for this foundational reference that enables consistent AI-assisted development.
 
 - **[docs/add-new-policy.md](docs/add-new-policy.md) / [English](docs/add-new-policy-en.md)** — A step-by-step guide for adding a new humanoid robot RL policy (Actor NN) to the RoboJuDo framework. Covers the full workflow: config creation, DoF setup, policy implementation, registration, pipeline config, and verification.
 
@@ -193,7 +193,7 @@ This project is based on [RoboJuDo](https://github.com/HansZ8/RoboJuDo) by HansZ
 
 ## 📄 License
 
-This project inherits the MIT license from the original RoboJuDo project. See [LICENSE](LICENSE) for details.
+This project inherits the CC BY 4.0 license from the original RoboJuDo project. See [LICENSE](LICENSE) for details.
 
 ## 🙏 Acknowledgments
 
