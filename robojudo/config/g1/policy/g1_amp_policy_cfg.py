@@ -77,24 +77,6 @@ class G1AmpDoF(DoFConfig):
        0.01, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01], dtype=float32)}
     '''
 class G1AmpWalkPolicyCfg(AmpWalkPolicyCfg):
-    """
-    参考 UnitreeWoGaitPolicyCfg
-    将UnitreeWoGaitPolicyCfg+G1UnitreeWoGaitPolicyCfg合并
-    /home/hero/Projects/Robotics/Sim2Real/RoboJuDo/robojudo/policy/policy_cfgs.py
-    /home/hero/Projects/Robotics/Sim2Real/RoboJuDo/robojudo/config/g1/policy/g1_unitree_policy_cfg.py
-    
-    Unitree Velocity policy configuration from unitree_rl_mjlab.
-    
-    This configuration uses ONNX model for velocity control,
-    directly loading and using the original unitree_rl_mjlab model.
-    
-    Features:
-    - Direct ONNX model inference
-    - Original unitree_rl_mjlab velocity control parameters
-    - Keyboard-based velocity commands (WASD+QE)
-    - Training configuration compatibility
-    """
-
     obs_dof: DoFConfig = G1AmpDoF()
     action_dof: DoFConfig = obs_dof
     
@@ -107,19 +89,3 @@ class G1AmpWalkPolicyCfg(AmpWalkPolicyCfg):
         "actions": action_dof.num_dofs,
     }
 
-
-
-'''
-不需要部署
-AMP
-history_obs_dims = {
-    "base_lin_vel_b": 3,
-    "base_ang_vel_b": 3, 
-    "gravity": 3,
-    "base_pos_z": 1,
-    "dof_pos": 29,  # G1 has 29 DOFs
-    "dof_vel": 29,
-    "key_links_pos_b": 12,  # 4 key links * 3 coordinates
-    "actions": 29
-}
-'''

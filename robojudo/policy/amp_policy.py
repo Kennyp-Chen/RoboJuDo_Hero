@@ -7,21 +7,9 @@ from robojudo.utils.util_func import command_remap, get_gravity_orientation
 
 
 @policy_registry.register
-class G1GmrAmpPolicy(Policy):
-    """
-    Unitree Velocity policy using ONNX model from unitree_rl_mjlab.
-    
-    This policy directly loads and uses ONNX models for velocity control,
-    matching the original unitree_rl_mjlab deployment approach.
-    
-    Features:
-    - Direct ONNX model inference
-    - Original unitree_rl_mjlab velocity control parameters
-    - Keyboard-based velocity commands (WASD+QE)
-    - Training configuration compatibility
-    """
-    
-    cfg_policy: "G1GmrAmpPolicyCfg"
+class G1AmpPolicy(Policy):
+    '''trained by https://github.com/zitongbai/legged_lab'''
+    cfg_policy: "G1AmpWalkPolicyCfg"
 
     def __init__(self, cfg_policy, device):
         super().__init__(cfg_policy=cfg_policy, device=device)
@@ -154,29 +142,3 @@ class G1GmrAmpPolicy(Policy):
         """Required abstract method implementation - pipeline only passes commands."""
         self.timestep += 1  # 更新步数用于调试
     
-    # def get_action(self, obs: np.ndarray) -> np.ndarray:
-
-    #     # Prepare input for ONNX model
-    #     obs_tensor = obs.astype(np.float32)
-        
-    #     # Run ONNX inference
-    #     with torch.no_grad():
-    #         ort_inputs = {self.input_names[0]: obs_tensor[None, :]}  # Add batch dimension
-    #         actions_tensor = self.ort_session.run(self.output_names, ort_inputs)
-        
-    #     # Get action from output
-    #     action = actions_tensor[0][0]#numpy().squeeze()  # Remove batch dimension
-    #     # action_beta: float = 1.0  # action smoothing factor 1的时候不变
-    #     action = (1 - self.action_beta) * self.last_action + self.action_beta * action
-    #     self.last_action = action.copy()
-    #     if self.action_clip is not None:
-    #         action = np.clip(action, -self.action_clip, self.action_clip)
-
-    #     # Apply action scale from deploy.yaml (exact values)
-    #     if hasattr(self.cfg_policy, 'action_scale'):
-    #         action_scale = np.array(self.cfg_policy.action_scale)
-    #         # action_offset = np.array(self.cfg_policy.action_offset)
-    #         # action = action * action_scale + action_offset
-    #         action = action * action_scale
-
-    #     return action

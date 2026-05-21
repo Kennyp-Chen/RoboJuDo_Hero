@@ -251,3 +251,13 @@ A change is done when:
 
 <!-- Add rules below this comment. Suggested format: a level-3 heading per
      rule, with a short rationale so future agents understand the why. -->
+
+### 9.1 Git commit → 本地 atomic commit 自动创建，push 到 GitHub 需用户确认
+
+- AI Agent 在完成 bugfix、feature、配置变更等较大改动时，**应自动在本地创建一个原子级 commit**（每个 commit 逻辑完整、可独立存在）。
+- commit message 需清晰说明做了什么、为什么。
+- **严禁 AI Agent 擅自推送任何 commit 到 GitHub 远程仓库。**
+- 所有推送操作（`git push`）必须先向用户列出将要推送的 commit 内容、影响范围，在获得用户明确批准后方可执行。
+- `git push --force` 绝对禁止，必须由用户手动执行或在明确许可下执行。
+
+例外：仅作探索/分析/调查、未改动任何代码，或微小调整（typo fix、注释修正、单变量改名）不触发自动 commit。

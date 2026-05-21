@@ -3,6 +3,7 @@ from robojudo.controller.ctrl_cfgs import (
     JoystickCtrlCfg,  # noqa: F401
     KeyboardCtrlCfg,  # noqa: F401
     UnitreeCtrlCfg,  # noqa: F401
+    BFMKeyboardCtrlCfg,  # noqa: F401
 )
 from robojudo.pipeline.pipeline_cfgs import (
     RlLocoMimicPipelineCfg,  # noqa: F401
@@ -31,6 +32,13 @@ from .policy.g1_twist_policy_cfg import G1TwistPolicyCfg  # noqa: F401
 from .policy.g1_unitree_policy_cfg import G1UnitreePolicyCfg, G1UnitreeWoGaitPolicyCfg  # noqa: F401
 from .policy.g1_unitree_velocity_policy_cfg import G1UnitreeMjlabVelocityPolicyCfg# G1UnitreeWoGaitVelocityPolicyCfg  # noqa: F401
 from .policy.g1_amp_policy_cfg import G1AmpWalkPolicyCfg
+from .policy.g1_bfmzero_policy_cfg import (  # noqa: F401
+    G1BFMZeroTracking23DoFPolicyCfg,
+    G1BFMZeroReward23DoFPolicyCfg,
+    G1BFMZeroGoal23DoFPolicyCfg,
+)
+from .policy.g1_gentle_policy_cfg import G1GentlePolicyCfg  # noqa: F401
+from .policy.g1_kungfuathlete_policy_cfg import G1KungFuAthletePolicyCfg  # noqa: F401
 
 
 # ======================== Basic Configs ======================== #
@@ -111,60 +119,7 @@ class g1_switch(RlMultiPolicyPipelineCfg):
     ]
 
 
-@cfg_registry.register
-class g1_locomimic(RlLocoMimicPipelineCfg):
-    """
-    Example of loco mimic pipeline configuration.
-    You can switch between loco and mimic policies during runtime, with interpolation.
-    === Check more fancy locomimic examples in g1_loco_mimic_cfg.py ===
-    """
-
-    robot: str = "g1"
-    env: G1MujocoEnvCfg = G1MujocoEnvCfg()
-
-    ctrl: list[KeyboardCtrlCfg ] = [
-        KeyboardCtrlCfg(
-            triggers_extra={
-                "]": "[POLICY_LOCO]",
-                "[": "[POLICY_MIMIC]",
-            }
-        ),
-        # JoystickCtrlCfg(
-        #     triggers_extra={
-        #         "RB+Down": "[POLICY_LOCO]",
-        #         "RB+Up": "[POLICY_MIMIC]",
-        #     }
-        # ),
-    ]
-    # # Sitting pose configuration
-    sitting_pos: list[float] = [
-        *[-1.2, 0.0, 0.0, 1.5, -0.2, 0.0],  # 左腿
-        *[-1.2, 0.0, 0.0, 1.5, -0.2, 0.0],  # 右腿
-        *[0, 0, 0],  # 腰部
-        # *[-0.4, 0, 0, 0, -1.5, 0, 0],# 左臂
-        # *[-0.4, 0, 0, 0, 1.5, 0, 0], # 右臂
-        *[0.35,0.18,0.,0.87,0.,0.,0.],
-        *[0.35,-0.18,0.,0.87,0.,0.,0.]
-    ]
-
-    # Standing pose configuration
-    standing_pos: list[float] = [
-        *[-0.1, 0.0, 0.0, 0.3, -0.2, 0.0],  # 左腿
-        *[-0.1, 0.0, 0.0, 0.3, -0.2, 0.0],  # 右腿
-        *[0, 0, 0],  # 腰部
-        # *[0, 0, 0, 0, 0, 0, 0],  # 左臂
-        # *[0, 0, 0, 0, 0, 0, 0],  # 右臂
-        *[0.35,0.18,0.,0.87,0.,0.,0.],
-        *[0.35,-0.18,0.,0.87,0.,0.,0.]
-    ]
-
-    loco_policy: G1UnitreePolicyCfg = G1UnitreePolicyCfg()
-    mimic_policies: list[G1AsapPolicyCfg] = [
-        G1AsapPolicyCfg(),
-    ]
-
-
-# ======================== Configs for supported Policy ======================== #
+# # ======================== Configs for supported Policy ======================== #
 
 
 @cfg_registry.register
@@ -879,6 +834,92 @@ class g1_twist(RlPipelineCfg):
     policy: G1TwistPolicyCfg = G1TwistPolicyCfg()
 
 
+@cfg_registry.register
+class g1_gentle(RlPipelineCfg):
+    robot: str = "g1"
+    env: G1_23MujocoEnvCfg = G1_23MujocoEnvCfg()
+
+    ctrl: list[KeyboardCtrlCfg] = [
+        KeyboardCtrlCfg(
+            triggers_extra={
+                "]": "[MOTION_FADE_OUT]",
+                "[": "[MOTION_FADE_IN]",
+                ";": "[MOTION_LOAD_NEXT]",
+                "'": "[MOTION_LOAD_PREV]",
+                "-": "[COMPLIANCE_ON]",
+                "=": "[COMPLIANCE_OFF]",
+                "Key.up": "[TRESH_UP]",
+                "Key.down": "[TRESH_DOWN]",
+            }
+        )
+    ]
+    policy: G1GentlePolicyCfg = G1GentlePolicyCfg()
+
+
+@cfg_registry.register
+class g1_bfmzero_tracking(RlPipelineCfg):
+    robot: str = "g1"
+    env: G1_23MujocoEnvCfg = G1_23MujocoEnvCfg()
+
+    ctrl: list[BFMKeyboardCtrlCfg] = [
+        BFMKeyboardCtrlCfg(),
+    ]
+    policy: G1BFMZeroTracking23DoFPolicyCfg = G1BFMZeroTracking23DoFPolicyCfg(
+        train_method="23dof_260411",
+        ctx_path="tracking_inference/zs_18.pkl"
+    )
+
+
+@cfg_registry.register
+class g1_bfmzero_reward(RlPipelineCfg):
+    robot: str = "g1"
+    env: G1_23MujocoEnvCfg = G1_23MujocoEnvCfg()
+
+    ctrl: list[BFMKeyboardCtrlCfg] = [
+        BFMKeyboardCtrlCfg(),
+    ]
+    policy: G1BFMZeroReward23DoFPolicyCfg = G1BFMZeroReward23DoFPolicyCfg(
+        train_method="23dof_260411"
+    )
+
+
+@cfg_registry.register
+class g1_bfmzero_goal(RlPipelineCfg):
+    robot: str = "g1"
+    env: G1_23MujocoEnvCfg = G1_23MujocoEnvCfg()
+
+    ctrl: list[BFMKeyboardCtrlCfg] = [
+        BFMKeyboardCtrlCfg(),
+    ]
+    policy: G1BFMZeroGoal23DoFPolicyCfg = G1BFMZeroGoal23DoFPolicyCfg(
+        train_method="23dof_260411"
+    )
+
+
+@cfg_registry.register
+class g1_kungfuathlete(RlPipelineCfg):
+    robot: str = "g1"
+    env: G1MujocoEnvCfg = G1MujocoEnvCfg()
+
+    ctrl: list[KeyboardCtrlCfg | G1BeyondmimicCtrlCfg] = [
+        KeyboardCtrlCfg(
+            triggers_extra={
+                "]": "[MOTION_FADE_OUT]",
+                "[": "[MOTION_FADE_IN]",
+                ";": "[MOTION_LOAD_NEXT]",
+                "'": "[MOTION_LOAD_PREV]",
+            }
+        ),
+        G1BeyondmimicCtrlCfg(
+            motion_name="../KungFuAthlete/1307",
+        ),
+    ]
+
+    policy: G1KungFuAthletePolicyCfg = G1KungFuAthletePolicyCfg(
+        policy_name="1307Taichi",
+        use_onnx=True,
+    )
+
 
 # ======================== Custom Multi-Policy Examples ======================== #
 
@@ -1059,6 +1100,42 @@ class g1_unitree_velocity(RlPipelineCfg):
         ),
 
     ]
+
+
+@cfg_registry.register
+class g1_amp(RlPipelineCfg):
+    """
+    Unitree G1 robot configuration, AMP Walk Policy, Sim2Sim.
+    
+    Uses GmrAmp policy for AMP-based walking with velocity control.
+    
+    Features:
+    - AMP-based walking policy
+    - Keyboard-based velocity commands (WASD+QE)
+    - Training configuration compatibility
+    
+    Controls:
+    - Keyboard: WASD for movement, QE for rotation
+    """
+
+    robot: str = "g1"
+    env: G1MujocoEnvCfg = G1MujocoEnvCfg()
+
+    ctrl: list[KeyboardCtrlCfg | JoystickCtrlCfg] = [
+        KeyboardCtrlCfg(
+            triggers_extra={
+                "w": "[VELOCITY_FORWARD]",
+                "s": "[VELOCITY_BACKWARD]", 
+                "a": "[VELOCITY_LEFT]",
+                "d": "[VELOCITY_RIGHT]",
+                "q": "[VELOCITY_TURN_LEFT]",
+                "e": "[VELOCITY_TURN_RIGHT]",
+            }
+        ),
+        JoystickCtrlCfg(),
+    ]
+
+    policy: G1AmpWalkPolicyCfg = G1AmpWalkPolicyCfg()
 
 
 # from .g1_real_servmimic_cfg import g1_real_servmimic  # noqa: F401

@@ -30,6 +30,7 @@ RoboJuDo_Hero 是基于 [RoboJuDo](https://github.com/HansZ8/RoboJuDo) (作者 H
 - **GentleHumanoid 策略**：添加了对 [GentleHumanoid](https://github.com/GentleHumanoid/gentleHum) 项目的支持，包含运动跟踪与柔顺控制
 - **多种 GVHMR2GMR2BeyondMimic 策略**：查看我的 [Video2Mimic](https://github.com/Kennyp-Chen/Video2Mimic) 了解 GVHMR+GMR 工作流
 - **UnitreeMJLab 策略**：添加了对 [UnitreeMJLab](https://github.com/unitreerobotics/unitree_rl_mjlab) 项目的支持，用于 Unitree 机器人控制
+- **GMR-AMP 策略**：添加了对 [legged_lab](https://github.com/zitongbai/legged_lab) 基于 AMP 的行走策略支持。包含 walk 和 run 两种变体（目前在仿真和真机上效果均不佳）
 
 ### 真实机器人部署改进
 
@@ -84,6 +85,9 @@ python scripts/run_pipeline_sim.py -c g1_unitree_mjlab_velocity
 
 # KungFuAthlete 策略（运动跟踪）
 python scripts/run_pipeline_sim.py -c g1_kungfuathlete
+
+# GMR-AMP 行走策略（实验性）
+python scripts/run_pipeline_sim.py -c g1_amp
 ```
 
 ### 在真机上运行
@@ -148,11 +152,12 @@ unitree ALL=(ALL) NOPASSWD: /bin/systemctl stop gamepad_listener, /bin/systemctl
 
 | 策略 | 仿真 | 真机 | 项目链接 | 描述 |
 |--------|-----------|------------|--------------|-------------|
-| **BFMZero** | 🖥️ 🤖 | - | [BFMZero](https://github.com/LeCAR-Lab/BFM-Zero) | 多模式策略，支持 Tracking、Reward、Goal 模式 |
-| **GentleHumanoid** | 🖥️ 🤖 | - | [GentleHumanoid](https://github.com/Axellwppr/gentle-humanoid) | 带柔顺控制的运动跟踪 |
-| **UnitreeMJLab** | 🖥️ 🤖 | - | [UnitreeMJLab](https://github.com/unitreerobotics/unitree_rl_mjlab) | Unitree 机器人速度控制策略 |
-| **BeyondMimic (GVHMR2GMR)** | 🖥️ 🤖 | - | [BeyondMimic](https://github.com/HybridRobotics/whole_body_tracking) | 多种运动跟踪策略（查看 [Video2Mimic](https://github.com/Kennyp-Chen/Video2Mimic) 了解 GVHMR+GMR 工作流） |
-| **KungFuAthlete** | 🖥️ 🤖 | - | [KungFuAthleteBot](https://github.com/NPCLEI/KungFuAthleteBot) | 武术动作运动跟踪数据集与策略（太极拳、拳术、刀剑、技巧翻跃），支持跌倒恢复 |
+| **BFMZero** | 🖥️ | - | [BFMZero](https://github.com/LeCAR-Lab/BFM-Zero) | 多模式策略，支持 Tracking、Reward、Goal 模式 |
+| **GentleHumanoid** | 🖥️ | - | [GentleHumanoid](https://github.com/Axellwppr/gentle-humanoid) | 带柔顺控制的运动跟踪 |
+| **UnitreeMJLab** | 🖥️ | 🤖 | [UnitreeMJLab](https://github.com/unitreerobotics/unitree_rl_mjlab) | Unitree 机器人速度控制策略 |
+| **BeyondMimic (GVHMR2GMR)** | 🖥️ | 🤖 | [BeyondMimic](https://github.com/HybridRobotics/whole_body_tracking) | 多种运动跟踪策略（查看 [Video2Mimic](https://github.com/Kennyp-Chen/Video2Mimic) 了解 GVHMR+GMR 工作流） |
+| **KungFuAthlete** | 🖥️ | - | [KungFuAthleteBot](https://github.com/NPCLEI/KungFuAthleteBot) | 武术动作运动跟踪数据集与策略（太极拳、拳术、刀剑、技巧翻跃），支持跌倒恢复 |
+| **GMR-AMP** | 🖥️ | - | [legged_lab](https://github.com/zitongbai/legged_lab) | 基于 AMP 的 GMR 行走策略（含 walk 与 run 变体，目前在仿真和真机上效果均不佳） |
 
 🖥️ 表示策略已准备好用于仿真，🤖 表示已在真机上测试过。
 
@@ -167,6 +172,7 @@ unitree ALL=(ALL) NOPASSWD: /bin/systemctl stop gamepad_listener, /bin/systemctl
 - `g1_locomimic_sim` — 多种 BeyondMimic 策略
 - `g1_unitree_mjlab_velocity` — UnitreeMJLab 速度控制
 - `g1_kungfuathlete` — KungFuAthlete 运动跟踪
+- `g1_amp` — GMR-AMP 行走策略（实验性）
 
 ## 📚 文档
 
@@ -203,3 +209,4 @@ unitree ALL=(ALL) NOPASSWD: /bin/systemctl stop gamepad_listener, /bin/systemctl
 - [UnitreeRlMjLab](https://github.com/unitreerobotics/unitree_rl_mjlab) — Unitree 机器人学习实验室
 - [BeyondMimic](https://github.com/HybridRobotics/whole_body_tracking) — 全身运动跟踪
 - [KungFuAthleteBot](https://github.com/NPCLEI/KungFuAthleteBot) — KungFuAthlete 运动跟踪项目
+- [legged_lab](https://github.com/zitongbai/legged_lab) — GMR-AMP 行走策略

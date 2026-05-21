@@ -30,6 +30,7 @@ The **RoboJuDo_SAR** (SimAndReal) branch includes the following new features:
 - **GentleHumanoid Policy**: Added support for [GentleHumanoid](https://github.com/GentleHumanoid/gentleHum) project with motion tracking and compliance control
 - **Multiple GVHMR2GMR2BeyondMimic Policies**: See my [Video2Mimic](https://github.com/Kennyp-Chen/Video2Mimic) for GVHMR+GMR workflow
 - **UnitreeMJLab Policy**: Added support for [UnitreeMJLab](https://github.com/unitreerobotics/unitree_rl_mjlab) project for Unitree robot control
+- **GMR-AMP Policy**: Added support for [legged_lab](https://github.com/zitongbai/legged_lab) AMP-based walking policy for GMR. Includes walk and run variants (currently poor performance in both sim and real)
 
 ### Real Robot Deployment Improvements
 
@@ -84,6 +85,9 @@ python scripts/run_pipeline_sim.py -c g1_unitree_mjlab_velocity
 
 # KungFuAthlete Policy (motion tracking)
 python scripts/run_pipeline_sim.py -c g1_kungfuathlete
+
+# GMR-AMP Walk Policy (experimental)
+python scripts/run_pipeline_sim.py -c g1_amp
 ```
 
 ### Running on Real Robot
@@ -148,11 +152,12 @@ After setup, the listener will automatically start and monitor for joystick comm
 
 | Policy | Simulation | Real Robot | Project Link | Description |
 |--------|-----------|------------|--------------|-------------|
-| **BFMZero** | 🖥️ 🤖 | - | [BFMZero](https://github.com/LeCAR-Lab/BFM-Zero) | Multi-mode policy with Tracking, Reward, and Goal modes |
-| **GentleHumanoid** | 🖥️ 🤖 | - | [GentleHumanoid](https://github.com/Axellwppr/gentle-humanoid) | Motion tracking with compliance control |
-| **UnitreeMJLab** | 🖥️ 🤖 | - | [UnitreeMJLab](https://github.com/unitreerobotics/unitree_rl_mjlab) | Unitree robot velocity control policy |
-| **BeyondMimic (GVHMR2GMR)** | 🖥️ 🤖 | - | [BeyondMimic](https://github.com/HybridRobotics/whole_body_tracking) | Multiple motion tracking policies (see [Video2Mimic](https://github.com/Kennyp-Chen/Video2Mimic) for GVHMR+GMR workflow) |
-| **KungFuAthlete** | 🖥️ 🤖 | - | [KungFuAthleteBot](https://github.com/NPCLEI/KungFuAthleteBot) | Martial arts motion tracking dataset & policy (Tai Chi, fist, saber, acrobatics) with fall recovery |
+| **BFMZero** | 🖥️ | - | [BFMZero](https://github.com/LeCAR-Lab/BFM-Zero) | Multi-mode policy with Tracking, Reward, and Goal modes |
+| **GentleHumanoid** | 🖥️ | - | [GentleHumanoid](https://github.com/Axellwppr/gentle-humanoid) | Motion tracking with compliance control |
+| **UnitreeMJLab** | 🖥️ | 🤖 | [UnitreeMJLab](https://github.com/unitreerobotics/unitree_rl_mjlab) | Unitree robot velocity control policy |
+| **BeyondMimic (GVHMR2GMR)** | 🖥️ | 🤖 | [BeyondMimic](https://github.com/HybridRobotics/whole_body_tracking) | Multiple motion tracking policies (see [Video2Mimic](https://github.com/Kennyp-Chen/Video2Mimic) for GVHMR+GMR workflow) |
+| **KungFuAthlete** | 🖥️ | - | [KungFuAthleteBot](https://github.com/NPCLEI/KungFuAthleteBot) | Martial arts motion tracking dataset & policy (Tai Chi, fist, saber, acrobatics) with fall recovery |
+| **GMR-AMP** | 🖥️ | - | [legged_lab](https://github.com/zitongbai/legged_lab) | AMP-based walking policy for GMR (walk & run variants, currently poor performance in both sim & real) |
 
 🖥️ means policy is ready for simulation, while 🤖 means policy has been tested on real robot.
 
@@ -167,6 +172,7 @@ All new policy configurations are located in `robojudo/config/g1/g1_custom_cfg.p
 - `g1_locomimic_sim` - Multiple BeyondMimic policies
 - `g1_unitree_mjlab_velocity` - UnitreeMJLab velocity control
 - `g1_kungfuathlete` - KungFuAthlete motion tracking
+- `g1_amp` - GMR-AMP walk policy (experimental)
 
 ## 📚 Documentation
 
@@ -203,3 +209,4 @@ This project inherits the CC BY 4.0 license from the original RoboJuDo project. 
 - [UnitreeRlMjLab](https://github.com/unitreerobotics/unitree_rl_mjlab) - Unitree robot learning lab
 - [BeyondMimic](https://github.com/HybridRobotics/whole_body_tracking) - Whole body motion tracking
 - [KungFuAthleteBot](https://github.com/NPCLEI/KungFuAthleteBot) - KungFuAthlete motion tracking project
+- [legged_lab](https://github.com/zitongbai/legged_lab) - GMR-AMP walking policy

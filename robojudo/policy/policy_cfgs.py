@@ -270,10 +270,10 @@ class AmpWalkPolicyCfg(PolicyCfg):
         command: float = 1.0     # deploy.yaml: velocity_commands scale
     
     robot: str = "g1"
-    policy_type: str = "G1GmrAmpPolicy"
-    # model_dir: str = "gmramp/run_20000" 
+    policy_type: str = "G1AmpPolicy"
+    model_dir: str = "gmramp/run_20000" 
     # model_dir: str = "gmramp/run_18400" 
-    model_dir: str = "gmramp/walk_20000" 
+    # model_dir: str = "gmramp/walk_20000" 
     # model_dir: str = "gmramp/walk_18000" 
 
 

@@ -36,7 +36,6 @@ class MujocoEnvCfg(EnvCfg):
 
     visualize_extras: bool = True  # TODO: remove
 
-
 class RobotEnvCfg(EnvCfg):
     env_type: str = "DummyEnv"
     is_sim: bool = False
@@ -79,8 +78,8 @@ class UnitreeEnvCfg(RobotEnvCfg):
         control_dt: float = 0.02
         """control command dt"""
 
-    # env_type: str = "UnitreeEnv"  # For unitree_sdk2py
-    env_type: str = "UnitreeCppEnv" # For unitree_cpp
+    env_type: str = "UnitreeEnv"  # For unitree_sdk2py
+    # env_type: str = "UnitreeCppEnv" # For unitree_cpp
     """UnitreeEnv for unitree_sdk2py, UnitreeCppEnv for unitree_cpp, check README for more details"""
 
     unitree: UnitreeCfg
