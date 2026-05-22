@@ -472,6 +472,79 @@ python -c "from robojudo.policy import policy_registry; print('{POLICY_NAME}Poli
 python scripts/run_pipeline_sim.py -c g1_{snake_case}
 ```
 
+### Step 7 (Post-Cleanup): Core-File & Dead-Code Verification
+
+After all policy files are in place and verified, run this final cleanup check.
+
+**7.1 Check for core-file modifications**
+
+The following files are shared infrastructure — changes to them affect ALL existing policies:
+
+```
+robojudo/environment/base_env.py
+robojudo/environment/mujoco_env.py
+robojudo/pipeline/rl_pipeline.py
+robojudo/tools/dof.py
+robojudo/tools/tool_cfgs.py
+robojudo/controller/
+```
+
+Run the following against any merge / diff to confirm the policy commit does not touch them:
+
+```bash
+# Replace BASE_REF with the commit before the policy was added
+git diff BASE_REF..HEAD -- \
+    robojudo/environment/base_env.py \
+    robojudo/environment/mujoco_env.py \
+    robojudo/pipeline/rl_pipeline.py \
+    robojudo/tools/dof.py \
+    robojudo/tools/tool_cfgs.py
+```
+
+If any of these files appear in the diff, the change must:
+- Be **opt-in** (gated by a new cfg flag, defaulting to current behavior), OR
+- Be **invisible** to existing policies (existing call sites still get the same return shapes / side effects).
+
+If neither condition holds, flag the modification to the user for review.
+
+**7.2 Check for dead code**
+
+Identify and remove any code that was added for this policy but has no effect:
+
+- **Unused config fields**: Search for new fields added to shared config classes that are never read anywhere (`git show HEAD -- <file>` then cross-reference usage with `grep -rn`)
+- **Commented-out code blocks**: Search for large blocks left commented that serve no purpose
+- **Unused imports / registrations**: Verify every `policy_registry.add()` entry has a corresponding policy file, and every `@cfg_registry.register` entry is actually defined
+
+```bash
+# Example: find fields defined but never read
+git diff BASE_REF..HEAD -- robojudo/tools/tool_cfgs.py
+# Then search for each new field name across the codebase
+grep -rn "FIELD_NAME" --include="*.py" robojudo/
+```
+
+Remove any dead code found. Files that should contain **only** the code needed for the policy to function.
+
+**7.3 Re-run simulation after cleanup**
+
+If any dead code was removed in step 7.2, re-run the simulation test to confirm the policy still works:
+
+```bash
+python scripts/run_pipeline_sim.py -c g1_{snake_case}
+```
+
+Wait for the simulation to produce visual output (the robot should stand and move). The simulation runs in a loop — use `Ctrl+C` or kill the process after confirming the robot behaves correctly.
+
+**7.4 Final diff review**
+
+Before submitting, review the full diff of the policy commit to ensure it contains only:
+
+1. New policy files (`robojudo/policy/{snake_case}_policy.py`, config files, model assets)
+2. Minimal registrations in `__init__.py` and `policy_cfgs.py`
+3. Pipeline config in `g1_custom_cfg.py`
+4. Updated README (if applicable)
+
+No changes to shared infrastructure files should be present unless explicitly justified per 7.1.
+
 ---
 
 ## Architecture Quick Reference

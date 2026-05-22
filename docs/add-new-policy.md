@@ -472,6 +472,79 @@ python -c "from robojudo.policy import policy_registry; print('{POLICY_NAME}Poli
 python scripts/run_pipeline_sim.py -c g1_{snake_case}
 ```
 
+### 第 7 步（清理后）：主干文件 & 死代码验证
+
+所有策略文件就位并验证通过后，执行最终清理检查。
+
+**7.1 检查主干文件是否被修改**
+
+以下文件是共享基础设施——改动它们会影响**所有现有策略**：
+
+```
+robojudo/environment/base_env.py
+robojudo/environment/mujoco_env.py
+robojudo/pipeline/rl_pipeline.py
+robojudo/tools/dof.py
+robojudo/tools/tool_cfgs.py
+robojudo/controller/
+```
+
+通过以下命令确认策略 commit 没有触碰它们：
+
+```bash
+# 将 BASE_REF 替换为添加策略前的 commit
+git diff BASE_REF..HEAD -- \
+    robojudo/environment/base_env.py \
+    robojudo/environment/mujoco_env.py \
+    robojudo/pipeline/rl_pipeline.py \
+    robojudo/tools/dof.py \
+    robojudo/tools/tool_cfgs.py
+```
+
+如果有任何文件出现在 diff 中，该改动必须：
+- **可 opt-in**（通过新的 cfg 标志门控，默认保持当前行为），或
+- **对现有策略不可见**（现有调用点仍然获得相同的返回形状/副作用）
+
+如果两个条件都不满足，则标记该修改给用户审查。
+
+**7.2 检查死代码**
+
+找出并删除为这个策略添加但没有实际作用的代码：
+
+- **未使用的配置字段**：搜索添加到共享配置类中的新字段，确认没有在任何地方被读取（`git show HEAD -- <file>` 后交叉引用 `grep -rn`）
+- **被注释掉的代码块**：搜索大量被注释掉但无用途的代码
+- **未使用的导入 / 注册**：验证每个 `policy_registry.add()` 条目都有对应的策略文件，每个 `@cfg_registry.register` 条目都有实际定义
+
+```bash
+# 示例：找出定义但从未读取的字段
+git diff BASE_REF..HEAD -- robojudo/tools/tool_cfgs.py
+# 然后在代码库中搜索每个新字段名
+grep -rn "FIELD_NAME" --include="*.py" robojudo/
+```
+
+删除找到的死代码。文件应**仅包含**策略运行所需的代码。
+
+**7.3 清理后重新运行仿真**
+
+如果在 7.2 中删除了任何死代码，重新运行仿真测试以确认策略仍然正常工作：
+
+```bash
+python scripts/run_pipeline_sim.py -c g1_{snake_case}
+```
+
+等待仿真产生可视化输出（机器人应站立并运动）。仿真会循环运行——确认机器人行为正确后使用 `Ctrl+C` 或 kill 进程。
+
+**7.4 最终 diff 审查**
+
+提交之前，审查策略 commit 的完整 diff，确保仅包含：
+
+1. 新策略文件（`robojudo/policy/{snake_case}_policy.py`、配置文件、模型资产）
+2. `__init__.py` 和 `policy_cfgs.py` 中的最小注册
+3. `g1_custom_cfg.py` 中的 pipeline 配置
+4. 更新的 README（如适用）
+
+除非按 7.1 明确说明，否则不应出现对共享基础设施文件的更改。
+
 ---
 
 ## 架构速查
