@@ -150,14 +150,15 @@ After setup, the listener will automatically start and monitor for joystick comm
 
 ## 📋 New Policies
 
-| Policy | Simulation | Real Robot | Project Link | Description |
-|--------|-----------|------------|--------------|-------------|
-| **BFMZero** | 🖥️ | - | [BFMZero](https://github.com/LeCAR-Lab/BFM-Zero) | Multi-mode policy with Tracking, Reward, and Goal modes |
-| **GentleHumanoid** | 🖥️ | - | [GentleHumanoid](https://github.com/Axellwppr/gentle-humanoid) | Motion tracking with compliance control |
-| **UnitreeMJLab** | 🖥️ | 🤖 | [UnitreeMJLab](https://github.com/unitreerobotics/unitree_rl_mjlab) | Unitree robot velocity control policy |
-| **BeyondMimic (GVHMR2GMR)** | 🖥️ | 🤖 | [BeyondMimic](https://github.com/HybridRobotics/whole_body_tracking) | Multiple motion tracking policies (see [Video2Mimic](https://github.com/Kennyp-Chen/Video2Mimic) for GVHMR+GMR workflow) |
-| **KungFuAthlete** | 🖥️ | - | [KungFuAthleteBot](https://github.com/NPCLEI/KungFuAthleteBot) | Martial arts motion tracking dataset & policy (Tai Chi, fist, saber, acrobatics) with fall recovery |
-| **GMR-AMP** | 🖥️ | - | [legged_lab](https://github.com/zitongbai/legged_lab) | AMP-based walking policy for GMR (walk & run variants, currently poor performance in both sim & real) |
+| Policy | Simulation | Real Robot | Robot Type | Project Link | Description |
+|--------|-----------|------------|------------|--------------|-------------|
+| **BFMZero** | 🖥️ | - | G1 29DoF and G1 23DoF | [BFMZero](https://github.com/LeCAR-Lab/BFM-Zero) | Multi-mode policy with Tracking, Reward, and Goal modes |
+| **UnitreeMJLab** | 🖥️ | 🤖 | G1 29DoF and G1 23DoF | [UnitreeMJLab](https://github.com/unitreerobotics/unitree_rl_mjlab) | Unitree robot velocity control policy |
+| **BeyondMimic (GVHMR2GMR)** | 🖥️ | 🤖 | G1 29DoF and G1 23DoF | [BeyondMimic](https://github.com/HybridRobotics/whole_body_tracking) | Multiple motion tracking policies (see [Video2Mimic](https://github.com/Kennyp-Chen/Video2Mimic) for GVHMR+GMR workflow) |
+| **KungFuAthlete** | 🖥️ | - | G1 29DoF | [KungFuAthleteBot](https://github.com/NPCLEI/KungFuAthleteBot) | Martial arts motion tracking dataset & policy (Tai Chi, fist, saber, acrobatics) with fall recovery |
+| **GMR-AMP** | 🖥️ | - | G1 29DoF | [legged_lab](https://github.com/zitongbai/legged_lab) | AMP-based walking policy for GMR (walk & run variants, currently poor performance in both sim & real) |
+| **WBC FSM (AMP Loco)** | 🖥️ | - | G1 29DoF | [wbc_fsm](https://github.com/ccrpRepo/wbc_fsm) | WBC FSM AMP locomotion policy with 4-frame history, with fall recovery, simulation tested |
+| **WBC FSM (Dance)** | 🖥️ | - | G1 29DoF | [wbc_fsm](https://github.com/ccrpRepo/wbc_fsm) | WBC FSM Dance motion tracking policy with LAFAN1 reference motion data, with fall recovery, simulation tested |
 
 🖥️ means policy is ready for simulation, while 🤖 means policy has been tested on real robot.
 
@@ -173,6 +174,8 @@ All new policy configurations are located in `robojudo/config/g1/g1_custom_cfg.p
 - `g1_unitree_mjlab_velocity` - UnitreeMJLab velocity control
 - `g1_kungfuathlete` - KungFuAthlete motion tracking
 - `g1_amp` - GMR-AMP walk policy (experimental)
+- `g1_wbc_amp` - WBC FSM AMP Loco locomotion policy (4-frame history, with fall recovery)
+- `g1_wbc_dance` - WBC FSM Dance motion tracking policy (requires LAFAN1 reference motion, with fall recovery)
 
 ## 📚 Documentation
 

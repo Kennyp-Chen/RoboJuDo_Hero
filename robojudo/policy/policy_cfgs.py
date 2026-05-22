@@ -667,5 +667,127 @@ class KungFuAthletePolicyCfg(PolicyCfg):
         actions: float = 1.0
     
     obs_scales: ObsScalesCfg = ObsScalesCfg()
+
+
+class WbcAmpPolicyCfg(PolicyCfg):
+    """
+    WBC_FSM AMP Policy Configuration
+    Source: /home/hero/Projects/Robotics/Sim2Real/wbc_fsm
+    Model: model/loco/amp_0309_1.onnx
+    """
+    class ObsScalesCfg(Config):
+        gravity: float = 1.0
+        dof_pos: float = 1.0
+        dof_vel: float = 1.0
+        ang_vel: float = 1.0
+        command: float = 1.0
+
+    policy_type: str = "WbcAmpPolicy"
+    model_dir: str = "wbc_amp"
+
+    @property
+    def policy_file(self) -> str:
+        from robojudo.config import ASSETS_DIR
+        policy_file = ASSETS_DIR / f"models/{self.robot}/{self.model_dir}/policy.onnx"
+        return policy_file.as_posix()
+
+    action_scale: float = 0.25
+    action_clip: float = 100.0
+    action_beta: float = 1.0
+    freq: int = 50
+
+    history_length: int = 4
+    history_obs_dims: dict[str, int] = {}
+    robot_state_dim: int = 96
+    obs_scales: ObsScalesCfg = ObsScalesCfg()
+    dt: float = 0.02
+
+    max_cmd: list[float] = [3.0, 0.01, 1.57]
+    commands_map: list[list[float]] = [
+        [-1.5, 0.0, 3.0],
+        [-0.01, 0.0, 0.01],
+        [-1.57, 0.0, 1.57],
+    ]
+
+
+class WbcLocoPolicyCfg(PolicyCfg):
+    """
+    WBC_FSM Loco Policy Configuration (LSTM-based)
+    Source: /home/hero/Projects/Robotics/Sim2Real/wbc_fsm
+    Model: model/loco/loco_0731.onnx
+    """
+    class ObsScalesCfg(Config):
+        gravity: float = 1.0
+        dof_pos: float = 1.0
+        dof_vel: float = 1.0
+        ang_vel: float = 1.0
+        command: float = 1.0
+
+    policy_type: str = "WbcLocoPolicy"
+    model_dir: str = "wbc_loco"
+
+    @property
+    def policy_file(self) -> str:
+        from robojudo.config import ASSETS_DIR
+        policy_file = ASSETS_DIR / f"models/{self.robot}/{self.model_dir}/policy.onnx"
+        return policy_file.as_posix()
+
+    action_scale: float = 0.25
+    action_clip: float = 100.0
+    action_beta: float = 1.0
+    freq: int = 50
+
+    obs_scales: ObsScalesCfg = ObsScalesCfg()
+    dt: float = 0.02
+
+    max_cmd: list[float] = [0.85, 0.4, 1.0]
+    commands_map: list[list[float]] = [
+        [-0.6, 0.0, 0.85],
+        [-0.4, 0.0, 0.4],
+        [-1.0, 0.0, 1.0],
+    ]
+
+
+class WbcDancePolicyCfg(PolicyCfg):
+    """
+    WBC_FSM Dance Policy Configuration (motion tracking WBC)
+    Source: /home/hero/Projects/Robotics/Sim2Real/wbc_fsm
+    Model: model/wbc/dance12_0207_1.onnx
+    """
+    class ObsScalesCfg(Config):
+        dof_pos: float = 1.0
+        dof_vel: float = 1.0
+        ang_vel: float = 1.0
+
+    policy_type: str = "WbcDancePolicy"
+    model_dir: str = "wbc_dance"
+
+    @property
+    def policy_file(self) -> str:
+        from robojudo.config import ASSETS_DIR
+        policy_file = ASSETS_DIR / f"models/{self.robot}/{self.model_dir}/policy.onnx"
+        return policy_file.as_posix()
+
+    action_scale: float = 0.25
+    action_clip: float = 100.0
+    action_beta: float = 1.0
+    freq: int = 50
+
+    history_length: int = 4
+    obs_scales: ObsScalesCfg = ObsScalesCfg()
+    dt: float = 0.02
+
+    # WBC-specific: reference motion observation dimensions
+    robot_state_dim: int = 93
+    reference_dim: int = 67
+    mimic_obs_predictive_horizon: int = 1
+
+    # Motion data path (relative to wbc_fsm project root)
+    motion_path: str = "motion_data/lafan1/dance12"
+    start_idx: int = 0
+    end_idx: int = -1
+    pause_idx: int = 350
+    frame_interval: int = 5
+    anchor_idx: int = 0  # 0=root, 9=torso_link
     
 

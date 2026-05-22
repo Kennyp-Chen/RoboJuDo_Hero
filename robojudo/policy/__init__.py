@@ -44,4 +44,7 @@ policy_registry.add("KungfuBotGeneralPolicy", ".kungfubot_policy")
 policy_registry.add("TwistPolicy", ".twist_policy")
 policy_registry.add("GentlePolicy", ".gentle_policy")
 policy_registry.add("KungFuAthletePolicy", ".kungfuathlete_policy")
+policy_registry.add("WbcAmpPolicy", ".wbc_amp_policy")
+policy_registry.add("WbcLocoPolicy", ".wbc_loco_policy")
+policy_registry.add("WbcDancePolicy", ".wbc_dance_policy")
 

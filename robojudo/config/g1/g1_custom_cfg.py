@@ -44,6 +44,9 @@ from .policy.g1_bfmzero_policy_cfg import (
 )
 from .policy.g1_gentle_policy_cfg import G1GentlePolicyCfg
 from .policy.g1_kungfuathlete_policy_cfg import G1KungFuAthletePolicyCfg
+from .policy.g1_wbc_amp_policy_cfg import G1WbcAmpPolicyCfg
+from .policy.g1_wbc_loco_policy_cfg import G1WbcLocoPolicyCfg
+from .policy.g1_wbc_dance_policy_cfg import G1WbcDancePolicyCfg
 
 
 # ======================== Custom Configs ======================== #
@@ -60,9 +63,9 @@ class g1_locomimic_sim(RlLocoMimicSimPipelineCfg):
     """
 
     robot: str = "g1"
-    # env: G1MujocoEnvCfg = G1MujocoEnvCfg()
+    env: G1MujocoEnvCfg = G1MujocoEnvCfg()
 
-    env: G1_23MujocoEnvCfg = G1_23MujocoEnvCfg()
+    # env: G1_23MujocoEnvCfg = G1_23MujocoEnvCfg()
 
     ctrl: list[KeyboardCtrlCfg | JoystickCtrlCfg ] = [
         KeyboardCtrlCfg(
@@ -120,7 +123,6 @@ class g1_locomimic_sim(RlLocoMimicSimPipelineCfg):
         # G1BFMZeroRewardPolicyCfg(),
         ##################BeyondMimic Policies######################
         # G1BeyondMimicPolicyCfg(policy_name="29dof_50fps/OldTownRoad_v1",),
-
         G1BeyondMimicPolicyCfg(policy_name="23dof_50fps/eva_angel_dance",),
         G1BeyondMimicPolicyCfg(policy_name="23dof_50fps/goodness_dance",),
         G1BeyondMimicPolicyCfg(policy_name="23dof_50fps/gangster_dance",),
@@ -176,3 +178,57 @@ class g1_locomimic_sim(RlLocoMimicSimPipelineCfg):
             max_timestep=14900,        
         ),
         ]
+@cfg_registry.register
+class g1_wbc_amp(RlPipelineCfg):
+    """
+    G1 robot with WBC_FSM AMP locomotion policy.
+    Source: /home/hero/Projects/Robotics/Sim2Real/wbc_fsm
+    """
+    robot: str = "g1"
+    env: G1MujocoEnvCfg = G1MujocoEnvCfg()
+    ctrl: list[KeyboardCtrlCfg | JoystickCtrlCfg] = [
+        KeyboardCtrlCfg(
+            triggers_extra={
+                "w": "[POLICY_LOCO]",
+                "s": "[POLICY_LOCO]",
+            }
+        ),
+        JoystickCtrlCfg(),
+    ]
+    policy: G1WbcAmpPolicyCfg = G1WbcAmpPolicyCfg()
+
+
+@cfg_registry.register
+class g1_wbc_loco(RlPipelineCfg):
+    """
+    G1 robot with WBC_FSM Loco policy (LSTM-based).
+    Source: /home/hero/Projects/Robotics/Sim2Real/wbc_fsm
+    """
+    robot: str = "g1"
+    env: G1MujocoEnvCfg = G1MujocoEnvCfg()
+    ctrl: list[KeyboardCtrlCfg | JoystickCtrlCfg] = [
+        KeyboardCtrlCfg(
+            triggers_extra={
+                "w": "[POLICY_LOCO]",
+                "s": "[POLICY_LOCO]",
+            }
+        ),
+        JoystickCtrlCfg(),
+    ]
+    policy: G1WbcLocoPolicyCfg = G1WbcLocoPolicyCfg()
+
+
+@cfg_registry.register
+class g1_wbc_dance(RlPipelineCfg):
+    """
+    G1 robot with WBC_FSM Dance policy (motion tracking WBC).
+    Source: /home/hero/Projects/Robotics/Sim2Real/wbc_fsm
+    Note: Requires reference motion binary data for full functionality.
+    """
+    robot: str = "g1"
+    env: G1MujocoEnvCfg = G1MujocoEnvCfg()
+    ctrl: list[KeyboardCtrlCfg | JoystickCtrlCfg] = [
+        KeyboardCtrlCfg(),
+        JoystickCtrlCfg(),
+    ]
+    policy: G1WbcDancePolicyCfg = G1WbcDancePolicyCfg()
