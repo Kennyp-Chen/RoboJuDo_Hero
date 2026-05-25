@@ -19,7 +19,9 @@
 | `DOF_COUNT` | 自由度数量 | `23` 或 `29` |
 | `MODEL_DIR` | 模型子目录名 | `my_awesome` |
 | `MODEL_FILENAME` | 模型文件名（无后缀） | `policy` |
-
+| `CREATE_BRANCH` | 是否创建独立的 Git 分支用于调试新策略 | `yes`（建议） |
+| `UPLOAD_GITHUB` | 验证通过后是否上传到 GitHub | `no`（最后询问用户确认） |
+ 
 ## 命名约定（强制）
 
 根据 `POLICY_NAME`（例如 `MyAwesome`）自动推导：
@@ -35,7 +37,18 @@ pipeline配置名:   g1_my_awesome
 snake_case名:     my_awesome
 ```
 
-## 执行流程（6步）
+## 执行流程（7步）
+
+开始实施前，根据 `CREATE_BRANCH` 参数决定是否创建独立分支：
+
+```bash
+# 需要时创建新分支（仅本地，不上传）
+git checkout -b feat/{snake_case}-policy
+```
+
+所有步骤完成并验证通过后，询问用户是否将本地分支合并回主分支，以及是否上传到 GitHub（根据 `UPLOAD_GITHUB` 参数）。
+
+---
 
 ### 前置：阅读参考文件
 
@@ -472,7 +485,7 @@ python -c "from robojudo.policy import policy_registry; print('{POLICY_NAME}Poli
 python scripts/run_pipeline_sim.py -c g1_{snake_case}
 ```
 
-### 第 7 步（清理后）：主干文件 & 死代码验证
+### Step 7（清理后）：主干文件 & 死代码验证
 
 所有策略文件就位并验证通过后，执行最终清理检查。
 
@@ -514,6 +527,7 @@ git diff BASE_REF..HEAD -- \
 - **未使用的配置字段**：搜索添加到共享配置类中的新字段，确认没有在任何地方被读取（`git show HEAD -- <file>` 后交叉引用 `grep -rn`）
 - **被注释掉的代码块**：搜索大量被注释掉但无用途的代码
 - **未使用的导入 / 注册**：验证每个 `policy_registry.add()` 条目都有对应的策略文件，每个 `@cfg_registry.register` 条目都有实际定义
+- **硬编码的绝对路径**：搜索新代码中是否存在机器特定的绝对路径（如 `/home/`、`/Users/`、`C:\`），所有文件路径应使用项目相对路径或 `ASSETS_DIR`。这是代码可移植性的关键检查。
 
 ```bash
 # 示例：找出定义但从未读取的字段
@@ -523,6 +537,11 @@ grep -rn "FIELD_NAME" --include="*.py" robojudo/
 ```
 
 删除找到的死代码。文件应**仅包含**策略运行所需的代码。
+
+```bash
+# 检查新增代码中的硬编码绝对路径
+git diff BASE_REF..HEAD -- robojudo/ | grep -n '/home/\|/Users/\|C:\\'
+```
 
 **7.3 清理后重新运行仿真**
 

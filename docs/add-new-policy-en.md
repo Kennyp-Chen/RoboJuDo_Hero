@@ -19,7 +19,9 @@ Confirm the following before starting (ask if not provided):
 | `DOF_COUNT` | Degrees of freedom | `23` or `29` |
 | `MODEL_DIR` | Model subdirectory name | `my_awesome` |
 | `MODEL_FILENAME` | Model filename (without extension) | `policy` |
-
+| `CREATE_BRANCH` | Whether to create a separate Git branch for debugging the new policy | `yes` (recommended) |
+| `UPLOAD_GITHUB` | Whether to upload to GitHub after verification | `no` (ask user at the end) |
+ 
 ## Naming Conventions (Mandatory)
 
 All names are derived from `POLICY_NAME` (e.g. `MyAwesome`):
@@ -35,7 +37,18 @@ Pipeline config name:  g1_my_awesome
 snake_case name:       my_awesome
 ```
 
-## Workflow (6 Steps)
+## Workflow (7 Steps)
+
+Before implementation begins, decide whether to create a separate branch per `CREATE_BRANCH`:
+
+```bash
+# Create new branch when needed (local only, no upload)
+git checkout -b feat/{snake_case}-policy
+```
+
+After all steps are complete and verified, ask the user whether to merge the local branch back into the main branch, and whether to upload to GitHub (per `UPLOAD_GITHUB` parameter).
+
+---
 
 ### Prerequisite: Read Reference Files
 
@@ -514,6 +527,7 @@ Identify and remove any code that was added for this policy but has no effect:
 - **Unused config fields**: Search for new fields added to shared config classes that are never read anywhere (`git show HEAD -- <file>` then cross-reference usage with `grep -rn`)
 - **Commented-out code blocks**: Search for large blocks left commented that serve no purpose
 - **Unused imports / registrations**: Verify every `policy_registry.add()` entry has a corresponding policy file, and every `@cfg_registry.register` entry is actually defined
+- **Hardcoded absolute paths**: Search for machine-specific absolute paths (e.g., `/home/`, `/Users/`, `C:\`) in newly added code. All file paths should be project-relative or use `ASSETS_DIR`. This is critical for code portability.
 
 ```bash
 # Example: find fields defined but never read
@@ -523,6 +537,11 @@ grep -rn "FIELD_NAME" --include="*.py" robojudo/
 ```
 
 Remove any dead code found. Files that should contain **only** the code needed for the policy to function.
+
+```bash
+# Check for hardcoded absolute paths in the diff
+git diff BASE_REF..HEAD -- robojudo/ | grep -n '/home/\|/Users/\|C:\\'
+```
 
 **7.3 Re-run simulation after cleanup**
 
