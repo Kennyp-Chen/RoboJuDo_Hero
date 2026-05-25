@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 @policy_registry.register
 class WbcLocoPolicy(Policy):
     """WBC_FSM Loco Policy implementation (LSTM-based).
-    Source: /home/hero/Projects/Robotics/Sim2Real/wbc_fsm
+    Source: https://github.com/ccrpRepo/wbc_fsm
     Model: model/loco/loco_0731.onnx
     """
 

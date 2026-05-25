@@ -62,6 +62,13 @@ conda activate robojudo_sar
 pip install -e .
 ```
 
+> **关于 conda 环境名称**：项目默认期望 conda 环境名为 `robojudo_sar`。导入 `robojudo` 时，会通过 `CONDA_DEFAULT_ENV` 环境变量检查当前激活的环境。如果使用了不同的环境名称，会显示一条警告。
+>
+> 如需使用其他环境名称并消除警告，请修改 `robojudo/__init__.py` 中的 `_REQUIRED_CONDA_ENV` 变量：
+> ```python
+> _REQUIRED_CONDA_ENV = "your_env_name"
+> ```
+
 ### 运行仿真
 
 ```bash

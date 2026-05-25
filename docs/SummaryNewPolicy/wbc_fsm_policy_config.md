@@ -1,6 +1,6 @@
 # wbc_fsm - RoboJuDo Deployment Config
 
-> Source: /home/hero/Projects/Robotics/Sim2Real/wbc_fsm
+> Source: https://github.com/ccrpRepo/wbc_fsm
 > Extracted: 2026-05-21
 > Target platform: Unitree G1
 > Sub-policies: AMP, Loco (LSTM), Dance (WBC motion tracking)

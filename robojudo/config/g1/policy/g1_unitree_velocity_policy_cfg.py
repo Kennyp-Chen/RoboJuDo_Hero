@@ -68,8 +68,8 @@ class G1UnitreeMjlabVelocityPolicyCfg(UnitreeMjlabVelocityPolicyCfg):
     """
     参考 UnitreeWoGaitPolicyCfg
     将UnitreeWoGaitPolicyCfg+G1UnitreeWoGaitPolicyCfg合并
-    /home/hero/Projects/Robotics/Sim2Real/RoboJuDo/robojudo/policy/policy_cfgs.py
-    /home/hero/Projects/Robotics/Sim2Real/RoboJuDo/robojudo/config/g1/policy/g1_unitree_policy_cfg.py
+    Referenced from: robojudo/policy/policy_cfgs.py
+                      robojudo/config/g1/policy/g1_unitree_policy_cfg.py
     
     Unitree Velocity policy configuration from unitree_rl_mjlab.
     

@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 @policy_registry.register
 class WbcAmpPolicy(Policy):
     """WBC_FSM AMP Policy implementation.
-    Source: /home/hero/Projects/Robotics/Sim2Real/wbc_fsm
+    Source: https://github.com/ccrpRepo/wbc_fsm
     Model: model/loco/amp_0309_1.onnx
     """
 

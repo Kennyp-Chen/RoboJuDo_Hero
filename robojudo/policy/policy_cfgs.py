@@ -672,7 +672,7 @@ class KungFuAthletePolicyCfg(PolicyCfg):
 class WbcAmpPolicyCfg(PolicyCfg):
     """
     WBC_FSM AMP Policy Configuration
-    Source: /home/hero/Projects/Robotics/Sim2Real/wbc_fsm
+    Source: https://github.com/ccrpRepo/wbc_fsm
     Model: model/loco/amp_0309_1.onnx
     """
     class ObsScalesCfg(Config):
@@ -702,18 +702,18 @@ class WbcAmpPolicyCfg(PolicyCfg):
     obs_scales: ObsScalesCfg = ObsScalesCfg()
     dt: float = 0.02
 
-    max_cmd: list[float] = [3.0, 0.01, 1.57]
+    max_cmd: list[float] = [3.0, 1.5, 2.]
     commands_map: list[list[float]] = [
         [-1.5, 0.0, 3.0],
-        [-0.01, 0.0, 0.01],
-        [-1.57, 0.0, 1.57],
+        [-1.5, 0.0, 1.5],
+        [-2., 0.0, 2.],
     ]
 
 
 class WbcLocoPolicyCfg(PolicyCfg):
     """
     WBC_FSM Loco Policy Configuration (LSTM-based)
-    Source: /home/hero/Projects/Robotics/Sim2Real/wbc_fsm
+    Source: https://github.com/ccrpRepo/wbc_fsm
     Model: model/loco/loco_0731.onnx
     """
     class ObsScalesCfg(Config):
@@ -751,7 +751,7 @@ class WbcLocoPolicyCfg(PolicyCfg):
 class WbcDancePolicyCfg(PolicyCfg):
     """
     WBC_FSM Dance Policy Configuration (motion tracking WBC)
-    Source: /home/hero/Projects/Robotics/Sim2Real/wbc_fsm
+    Source: https://github.com/ccrpRepo/wbc_fsm
     Model: model/wbc/dance12_0207_1.onnx
     """
     class ObsScalesCfg(Config):

@@ -62,6 +62,13 @@ conda activate robojudo_sar
 pip install -e .
 ```
 
+> **Note on conda environment name**: The project expects the conda environment to be named `robojudo_sar`. Upon import, `robojudo` checks the active conda environment via the `CONDA_DEFAULT_ENV` environment variable. If a different environment is active, a warning will be printed.
+>
+> To suppress this warning when using a different environment name, modify the `_REQUIRED_CONDA_ENV` variable in `robojudo/__init__.py`:
+> ```python
+> _REQUIRED_CONDA_ENV = "your_env_name"
+> ```
+
 ### Running Simulations
 
 ```bash

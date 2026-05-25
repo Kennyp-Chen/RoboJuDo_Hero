@@ -182,10 +182,12 @@ class g1_locomimic_sim(RlLocoMimicSimPipelineCfg):
 class g1_wbc_amp(RlPipelineCfg):
     """
     G1 robot with WBC_FSM AMP locomotion policy.
-    Source: /home/hero/Projects/Robotics/Sim2Real/wbc_fsm
+    Source: https://github.com/ccrpRepo/wbc_fsm
     """
     robot: str = "g1"
-    env: G1MujocoEnvCfg = G1MujocoEnvCfg()
+    # env: G1MujocoEnvCfg = G1MujocoEnvCfg()
+    env: G1_23MujocoEnvCfg = G1_23MujocoEnvCfg()
+
     ctrl: list[KeyboardCtrlCfg | JoystickCtrlCfg] = [
         KeyboardCtrlCfg(
             triggers_extra={
@@ -202,7 +204,7 @@ class g1_wbc_amp(RlPipelineCfg):
 class g1_wbc_loco(RlPipelineCfg):
     """
     G1 robot with WBC_FSM Loco policy (LSTM-based).
-    Source: /home/hero/Projects/Robotics/Sim2Real/wbc_fsm
+    Source: https://github.com/ccrpRepo/wbc_fsm
     """
     robot: str = "g1"
     env: G1MujocoEnvCfg = G1MujocoEnvCfg()
@@ -222,11 +224,13 @@ class g1_wbc_loco(RlPipelineCfg):
 class g1_wbc_dance(RlPipelineCfg):
     """
     G1 robot with WBC_FSM Dance policy (motion tracking WBC).
-    Source: /home/hero/Projects/Robotics/Sim2Real/wbc_fsm
+    Source: https://github.com/ccrpRepo/wbc_fsm
     Note: Requires reference motion binary data for full functionality.
     """
     robot: str = "g1"
     env: G1MujocoEnvCfg = G1MujocoEnvCfg()
+    # env: G1_23MujocoEnvCfg = G1_23MujocoEnvCfg()
+
     ctrl: list[KeyboardCtrlCfg | JoystickCtrlCfg] = [
         KeyboardCtrlCfg(),
         JoystickCtrlCfg(),

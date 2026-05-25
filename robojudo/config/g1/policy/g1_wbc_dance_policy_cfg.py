@@ -70,7 +70,7 @@ class G1WbcDancePolicyCfg(WbcDancePolicyCfg):
     robot: str = "g1"
     obs_dof: DoFConfig = G1WbcDanceDoF()
     action_dof: DoFConfig = G1WbcDanceDoF()
-    motion_path: str = "/home/hero/Projects/Robotics/Sim2Real/wbc_fsm/motion_data/lafan1/dance12"
+    motion_path: str = "assets/motions/g1/wbc_dance"
 
     history_obs_dims: dict[str, int] = {
         "ang_vel": 3,
