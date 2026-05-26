@@ -99,14 +99,21 @@ python scripts/run_pipeline_sim.py -c g1_amp
 
 ### 在真机上运行
 
-**安装**
+**安装（在 Unitree G1 PC2 上）**
 
-UnitreeCpp 已安装在 `packages` 目录中，无需再次克隆。安装方式：
+UnitreeCpp 已安装在 `packages` 目录中，无需再次克隆。安装前，请确保 PC2 上已安装以下依赖：
+
+- **Unitree SDK2**（参见 [unitree_sdk2](https://github.com/unitreerobotics/unitree_sdk2)）
+- **Cyclone DDS**（ddsc / ddscxx）
+
+然后进入 `unitree_cpp` 目录，编译并安装 Python 绑定：
 
 ```bash
 cd packages/unitree_cpp
 pip install -e .
 ```
+
+> `pip install` 命令会通过 `scikit-build-core` **触发 CMake 编译**，构建 C++ pybind11 模块，确保与机器人通信时的实时性能。
 
 **配置**
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 使用robojudo相同架构的G1手柄控制器
-通过Unitree机器人获取手柄数据，与run_pipeline_serv.py使用相同的机制
+通过Unitree机器人获取手柄数据，与run_pipeline_real.py使用相同的机制
 """
 
 import os
@@ -26,13 +26,10 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # 配置
-WORK_DIR = os.path.expanduser("~/chenyupeng/sim2real/RoboJuDo")
+WORK_DIR = os.path.dirname(os.path.abspath(__file__))
 CONDA_ENV = "robojudo"
-SCRIPT_PATH = "scripts/run_pipline_real.py"
+SCRIPT_PATH = "scripts/run_pipeline_real.py"
 LOG_FILE = "run.log"
-
-# 切换工作目录
-os.chdir(WORK_DIR)
 
 # 全局状态
 is_running_task = False
@@ -134,9 +131,12 @@ def start_task():
     logger.info("启动任务脚本...")
 
     try:
-        # 启动命令：使用conda run确保环境正确
-        full_cmd = "conda run -n robojudo nohup python scripts/run_pipline_real.py > run.log 2>&1 & echo $!"
-        result = subprocess.check_output(full_cmd, shell=True, text=True)
+        # 使用当前 python 解释器（监听器自身在 robojudo conda 环境中运行，sys.executable 自动指向正确路径）
+        conda_python = sys.executable
+        script_path = os.path.join(WORK_DIR, "scripts/run_pipeline_real.py")
+        log_path = os.path.join(WORK_DIR, "run.log")
+        full_cmd = f"nohup {conda_python} {script_path} > {log_path} 2>&1 & echo $!"
+        result = subprocess.check_output(full_cmd, shell=True, text=True, executable="/bin/bash", cwd=WORK_DIR)
         pid = int(result.strip())
 
         task_process = pid

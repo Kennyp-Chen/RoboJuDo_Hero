@@ -351,7 +351,39 @@ class g1_real_locomimic(RlLocoMimicPipelineCfg):
     '''
     # Mimic policies: Dance + ASAP CR7
     mimic_policies: list[G1BeyondMimicPolicyCfg | G1AmoPolicyCfg|G1AmpWalkPolicyCfg] = [
-        # Index 0: Dance motion
+       
+       
+        ## 260428test
+        ### gvhmr dance
+        # G1BeyondMimicPolicyCfg(policy_name="23dof_50fps/baicai",),# 效果可以
+        # # G1BeyondMimicPolicyCfg(policy_name="23dof_50fps/slide",), 效果不佳
+        # G1BeyondMimicPolicyCfg(policy_name="23dof_50fps/go_james",), # 最后动作有点僵硬
+        # G1BeyondMimicPolicyCfg(policy_name="23dof_50fps/gangster_dance",),
+        # G1BeyondMimicPolicyCfg(policy_name="23dof_50fps/goodness_dance",),
+        G1BeyondMimicPolicyCfg(policy_name="23dof_50fps/eva_angel_dance",),
+        G1BeyondMimicPolicyCfg(policy_name="23dof_50fps/go_woman",),# 效果更好
+
+        # G1BeyondMimicPolicyCfg(policy_name="23dof_50fps/OldTownRoad_v1",),
+        ### kungfu
+        # G1BeyondMimicPolicyCfg(# KUNGFU KICK 蹲下后结束
+        #     policy_name="23dof_50fps/fight1_subject2",
+        #     start_timestep = 850,
+        #     max_timestep=1250,        
+        # ),
+        # G1BeyondMimicPolicyCfg(# KUNGFU KICK 上钩拳后结束
+        #     policy_name="23dof_50fps/fight1_subject2",
+        #     start_timestep = 850,
+        #     max_timestep=1350,        
+        # ),
+        # G1BeyondMimicPolicyCfg(# 旋转踢腿成功
+        #     policy_name="23dof_50fps/fightAndSports1_subject1",
+        #     start_timestep = 5200,
+        #     max_timestep=6300,        
+        # ),
+
+        ## 260428test
+        
+        # # Index 0: Dance motion
         G1BeyondMimicPolicyCfg(
             policy_name="23dof_65fps/Take102",           
             start_timestep = 100,
@@ -359,7 +391,7 @@ class g1_real_locomimic(RlLocoMimicPipelineCfg):
         ),
 
         G1BeyondMimicPolicyCfg(# 扭扭 swing
-            policy_name="23dof_50fps/dance2_subject4",
+            policy_name="23dof_50fps/WoHandTrack/dance2_subject4",
             start_timestep = 6800,
             max_timestep= 8760,        
         ),
@@ -369,149 +401,11 @@ class g1_real_locomimic(RlLocoMimicPipelineCfg):
             max_timestep=2000,        
         ),
         G1BeyondMimicPolicyCfg(# 遮眼舞蹈
-            policy_name="23dof_50fps/dance2_subject4",
+            policy_name="23dof_50fps/WoHandTrack/dance2_subject4",
             start_timestep = 4500,
             max_timestep=6900,        
         ),
 
-        ## dance1_subject1
-        G1BeyondMimicPolicyCfg(
-            policy_name="23dof_50fps/dance1_subject1",           
-            start_timestep = 1850,
-            max_timestep = 3500,
-        ),
-        G1BeyondMimicPolicyCfg(
-            policy_name="23dof_50fps/dance1_subject1",           
-            start_timestep = 3750,
-            max_timestep=5000,        
-        ),
-        # 翻一个跟斗后跳舞
-        G1BeyondMimicPolicyCfg(
-            policy_name="23dof_50fps/dance1_subject1",           
-            start_timestep = 5700,
-            max_timestep=6500,        
-        ),
-        # dance1_subject2
-        G1BeyondMimicPolicyCfg(
-            policy_name="23dof_50fps/dance1_subject2",
-            start_timestep = 200,
-            max_timestep=1850,        
-        ),
-        G1BeyondMimicPolicyCfg(
-            policy_name="23dof_50fps/dance1_subject2",
-            start_timestep = 1800,
-            max_timestep=3130,        
-        ),
-        G1BeyondMimicPolicyCfg(
-            policy_name="23dof_50fps/dance1_subject2",
-            start_timestep = 3000,
-            max_timestep=4900,        
-        ),
-        G1BeyondMimicPolicyCfg(
-            policy_name="23dof_50fps/dance1_subject2",
-            start_timestep = 4900,
-            max_timestep=6700,        
-        ),
-
-        #dance2_subject1 
-        #转圈 后仰抖肩 单脚跳舞 空中转圈 第一次失败了
-
-        G1BeyondMimicPolicyCfg(# 甩脚舞
-            policy_name="23dof_50fps/dance2_subject1",
-            start_timestep = 1800,
-            max_timestep=2800,        
-        ),
-        G1BeyondMimicPolicyCfg(# 抖肩
-            policy_name="23dof_50fps/dance2_subject1",
-            start_timestep = 2800,
-            max_timestep=3335,        
-        ),
-        G1BeyondMimicPolicyCfg(# 双手渐进抬手
-            policy_name="23dof_50fps/dance2_subject1",
-            start_timestep = 3300,
-            max_timestep=4260,        
-        ),
-        G1BeyondMimicPolicyCfg(# 转圈 低重心有难
-            policy_name="23dof_50fps/dance2_subject1",
-            start_timestep = 4260,
-            max_timestep=6300,        
-        ),
-        G1BeyondMimicPolicyCfg(# 上下摆手转圈后倾斜搓碟
-            policy_name="23dof_50fps/dance2_subject1",
-            start_timestep = 6300,
-            max_timestep=7600,        
-        ),
-        G1BeyondMimicPolicyCfg( # 单脚小跳 后仰倒退 后仰摇手
-            policy_name="23dof_50fps/dance2_subject1",
-            start_timestep = 7600,
-            max_timestep=9630,        
-        ),
-
-        ## dance2_subject4
-        G1BeyondMimicPolicyCfg(
-            policy_name="23dof_50fps/dance2_subject4",
-            start_timestep = 1500,
-            max_timestep=2900,        
-        ),
-
-        G1BeyondMimicPolicyCfg(
-            policy_name="23dof_50fps/dance2_subject4",
-            start_timestep = 3100,
-            max_timestep=4500,        
-        ),
-        G1BeyondMimicPolicyCfg(
-            policy_name="23dof_50fps/dance2_subject4",
-            start_timestep = 4500,
-            max_timestep=5130 ,    
-        ),
-        G1BeyondMimicPolicyCfg(# 遮眼舞蹈
-            policy_name="23dof_50fps/dance2_subject4",
-            start_timestep = 4500,
-            max_timestep=6900,        
-        ),
-        G1BeyondMimicPolicyCfg(# 扭扭
-            policy_name="23dof_50fps/dance2_subject4",
-            start_timestep = 7500,
-            max_timestep= 8760,  # 7595 
-        ),
-        # fight1_subject2 长序列
-        G1BeyondMimicPolicyCfg( # 1800-2000上钩拳
-            policy_name="23dof_50fps/fight1_subject2",
-            start_timestep = 1590,
-            max_timestep=2000,        
-        ),
-        G1BeyondMimicPolicyCfg( # 5000-5100 双踢腿 
-            policy_name="23dof_50fps/fight1_subject2",
-            start_timestep = 4800,
-            max_timestep=5250,        
-        ),
-        G1BeyondMimicPolicyCfg( # 三连双踢腿 
-            policy_name="23dof_50fps/fight1_subject2",
-            start_timestep = 14300,
-            max_timestep=14900,        
-        ),
-
-        # fightAndSports1_subject1
-        G1BeyondMimicPolicyCfg(# KUNGFU KICK
-            policy_name="23dof_50fps/fightAndSports1_subject1",
-            start_timestep = 850,
-            max_timestep=1300,        
-        ),
-        G1BeyondMimicPolicyCfg(# BOX
-            policy_name="23dof_50fps/fightAndSports1_subject1",
-            start_timestep = 3800,
-            max_timestep=4900,        
-        ),
-        G1BeyondMimicPolicyCfg(# 踢腿
-            policy_name="23dof_50fps/fightAndSports1_subject1",
-            start_timestep = 5200,
-            max_timestep=6300,        
-        ),
-        G1BeyondMimicPolicyCfg(# 
-            policy_name="23dof_50fps/fightAndSports1_subject1",
-            start_timestep = 6200,
-            max_timestep=8390,        
-        ),
         ####23dof 65fps start####
         # G1BeyondMimicPolicyCfg( # 4
         #     policy_name="23dof_65fps/dance1_subject1",

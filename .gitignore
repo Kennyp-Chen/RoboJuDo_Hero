@@ -133,4 +133,10 @@ logs
 MUJOCO_LOG.TXT
 assets/resources
 .opencode
+.omo/
+
+# Runtime files
+*.pid
+run.log
+gamepad_listener.log
 

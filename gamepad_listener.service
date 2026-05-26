@@ -4,17 +4,13 @@ After=network.target
 Wants=network.target
 
 [Service]
-Type=forking
-User=unitree
-Group=unitree
-WorkingDirectory=/home/unitree/chenyupeng/sim2real/RoboJuDo
-Environment=PATH=/home/unitree/miniconda3/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
-ExecStart=/home/unitree/chenyupeng/sim2real/RoboJuDo/start_gamepad_listener.sh start
-ExecStop=/home/unitree/chenyupeng/sim2real/RoboJuDo/start_gamepad_listener.sh stop
-ExecReload=/home/unitree/chenyupeng/sim2real/RoboJuDo/start_gamepad_listener.sh restart
-PIDFile=/home/unitree/chenyupeng/sim2real/RoboJuDo/gamepad_listener.pid
+Type=simple
+User=__USER__
+Group=__USER__
+WorkingDirectory=__PROJECT_DIR__
+ExecStart=__CONDA_PYTHON__ __PROJECT_DIR__/robojudo_listener.py
 Restart=always
-RestartSec=10
+RestartSec=5
 StandardOutput=journal
 StandardError=journal
 
