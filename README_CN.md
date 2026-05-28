@@ -162,6 +162,36 @@ unitree ALL=(ALL) NOPASSWD: /bin/systemctl stop gamepad_listener, /bin/systemctl
 - `L1 + R1 + A`：启动 `run_pipeline_real`
 - `L1 + R1 + B`：退出 PC2 控制，返回 PC1 控制
 
+**新增策略的真机部署配置**
+
+以下真机配置已添加至 `robojudo/config/g1/g1_cfg.py`：
+
+| 配置名 | 策略 | 控制器支持 |
+|--------|------|-----------|
+| `g1_bfmzero_real` | BFMZero Tracking | Unitree 手柄 + SSH 键盘 |
+| `g1_kungfuathlete_real` | KungFuAthlete | Unitree 手柄 + SSH 键盘 |
+| `g1_amp_real` | GMR-AMP Walk | Unitree 手柄（摇杆）+ SSH 键盘 |
+| `g1_wbc_amp_real` | WBC FSM AMP Loco | Unitree 手柄（摇杆）+ SSH 键盘 |
+| `g1_wbc_dance_real` | WBC FSM Dance | Unitree 手柄 + SSH 键盘 |
+
+**Unitree 手柄操作指南**
+
+所有配置使用相同的按键约定。按住 **L1 + R1 + L2** 进入命令模式，然后按对应按钮触发功能：
+
+| 按钮 | BFMZero | KungFuAthlete | AMP / WBC AMP | WBC Dance |
+|------|---------|---------------|---------------|-----------|
+| **A** | 🛑 紧急停止 | 🛑 紧急停止 | 🛑 紧急停止 | 🛑 紧急停止 |
+| **B** | ▶ 开始动作 | ⏸ 暂停动作 | — | ⏹ 停止动作 |
+| **X** | 🔄 重置停止状态 | ▶ 开始/恢复动作 | — | ▶ 开始动作 |
+| **Y** | ⏭ 下一个 Reward/Goal | 🔄 重置动作进度 | — | 🔄 重置动作 |
+| **R2** | ⏹ 动作归零（安全用） | — | — | — |
+| **上 (↑)** | — | ⏭ 加载下一个动作 | — | — |
+| **下 (↓)** | — | ⏮ 加载上一个动作 | — | — |
+| **左摇杆** | — | — | 前后/左右移动速度 | — |
+| **右摇杆** | — | — | 转向速度 | — |
+
+> **⚠️ 安全提醒**：以上策略（BFMZero、KungFuAthlete、GMR-AMP、WBC FSM）均仅在**仿真中测试过**，**尚未在真机上验证**。请谨慎使用，确保随时可触发急停（A 按钮或 Esc 键）。
+
 ## 📋 新策略一览
 
 | 策略 | 仿真 | 真机 | 项目链接 | 描述 |
@@ -172,13 +202,16 @@ unitree ALL=(ALL) NOPASSWD: /bin/systemctl stop gamepad_listener, /bin/systemctl
 | **BeyondMimic (GVHMR2GMR)** | 🖥️ | 🤖 | [BeyondMimic](https://github.com/HybridRobotics/whole_body_tracking) | 多种运动跟踪策略（查看 [Video2Mimic](https://github.com/Kennyp-Chen/Video2Mimic) 了解 GVHMR+GMR 工作流） |
 | **KungFuAthlete** | 🖥️ | - | [KungFuAthleteBot](https://github.com/NPCLEI/KungFuAthleteBot) | 武术动作运动跟踪数据集与策略（太极拳、拳术、刀剑、技巧翻跃），支持跌倒恢复 |
 | **GMR-AMP** | 🖥️ | - | [legged_lab](https://github.com/zitongbai/legged_lab) | 基于 AMP 的 GMR 行走策略（含 walk 与 run 变体，目前在仿真和真机上效果均不佳） |
+| **WBC FSM (AMP Loco)** | 🖥️ | - | [wbc_fsm](https://github.com/ccrpRepo/wbc_fsm) | WBC FSM AMP 行走策略，4 帧历史输入，支持跌倒恢复，仿真已验证 |
+| **WBC FSM (Dance)** | 🖥️ | - | [wbc_fsm](https://github.com/ccrpRepo/wbc_fsm) | WBC FSM 舞蹈动作跟踪策略，使用 LAFAN1 参考动作数据，支持跌倒恢复，仿真已验证 |
 
 🖥️ 表示策略已准备好用于仿真，🤖 表示已在真机上测试过。
 
 ## 🔧 配置
 
-所有新策略配置位于 `robojudo/config/g1/g1_custom_cfg.py`：
+所有新策略配置位于 `robojudo/config/g1/`：
 
+仿真配置（位于 `g1_custom_cfg.py` 和 `g1_cfg.py`）：
 - `g1_bfmzero_tracking` — BFMZero tracking 模式
 - `g1_bfmzero_reward` — BFMZero reward 模式
 - `g1_bfmzero_goal` — BFMZero goal 模式
@@ -187,6 +220,15 @@ unitree ALL=(ALL) NOPASSWD: /bin/systemctl stop gamepad_listener, /bin/systemctl
 - `g1_unitree_mjlab_velocity` — UnitreeMJLab 速度控制
 - `g1_kungfuathlete` — KungFuAthlete 运动跟踪
 - `g1_amp` — GMR-AMP 行走策略（实验性）
+- `g1_wbc_amp` — WBC FSM AMP Loco 行走策略（4 帧历史，支持跌倒恢复）
+- `g1_wbc_dance` — WBC FSM Dance 舞蹈动作跟踪策略（需 LAFAN1 参考动作数据）
+
+真机部署配置（位于 `g1_cfg.py`）：
+- `g1_bfmzero_real` — BFMZero 真机部署
+- `g1_kungfuathlete_real` — KungFuAthlete 真机部署
+- `g1_amp_real` — GMR-AMP 真机部署
+- `g1_wbc_amp_real` — WBC FSM AMP Loco 真机部署
+- `g1_wbc_dance_real` — WBC FSM Dance 真机部署
 
 ## 📚 文档
 
@@ -218,9 +260,10 @@ unitree ALL=(ALL) NOPASSWD: /bin/systemctl stop gamepad_listener, /bin/systemctl
 ## 🙏 致谢
 
 - [RoboJuDo](https://github.com/HansZ8/RoboJuDo) — 原始模块化机器人仿真框架
-- [BFMZero](https://github.com/OpenBMB/BFMZero) — BFMZero 项目
+- [BFMZero](https://github.com/LeCAR-Lab/BFM-Zero) — BFMZero 项目（LeCAR-Lab）
 - [GentleHumanoid](https://github.com/GentleHumanoid/gentleHum) — GentleHumanoid 项目
 - [UnitreeRlMjLab](https://github.com/unitreerobotics/unitree_rl_mjlab) — Unitree 机器人学习实验室
 - [BeyondMimic](https://github.com/HybridRobotics/whole_body_tracking) — 全身运动跟踪
 - [KungFuAthleteBot](https://github.com/NPCLEI/KungFuAthleteBot) — KungFuAthlete 运动跟踪项目
 - [legged_lab](https://github.com/zitongbai/legged_lab) — GMR-AMP 行走策略
+- [wbc_fsm](https://github.com/ccrpRepo/wbc_fsm) — WBC FSM 行走与舞蹈策略

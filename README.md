@@ -163,6 +163,36 @@ After setup, the listener will automatically start and monitor for joystick comm
 - `L1 + R1 + A`: Start `run_pipeline_real`
 - `L1 + R1 + B`: Exit PC2 control and return to PC1 control
 
+**Real Robot Configurations for New Policies**
+
+The following real robot configs are now available in `robojudo/config/g1/g1_cfg.py`:
+
+| Config | Policy | Controller Support |
+|--------|--------|-------------------|
+| `g1_bfmzero_real` | BFMZero Tracking | Unitree Controller + SSH Keyboard |
+| `g1_kungfuathlete_real` | KungFuAthlete | Unitree Controller + SSH Keyboard |
+| `g1_amp_real` | GMR-AMP Walk | Unitree Controller (analog sticks) + SSH Keyboard |
+| `g1_wbc_amp_real` | WBC FSM AMP Loco | Unitree Controller (analog sticks) + SSH Keyboard |
+| `g1_wbc_dance_real` | WBC FSM Dance | Unitree Controller + SSH Keyboard |
+
+**Unitree Controller Operation Guide**
+
+All configs use the same button convention. Hold **L1 + R1 + L2** simultaneously to enter command mode, then press the desired button:
+
+| Button | BFMZero | KungFuAthlete | AMP / WBC AMP | WBC Dance |
+|--------|---------|---------------|---------------|-----------|
+| **A** | 🛑 Emergency Stop | 🛑 Emergency Stop | 🛑 Emergency Stop | 🛑 Emergency Stop |
+| **B** | ▶ Start Motion | ⏸ Pause Motion | — | ⏸ Stop Motion |
+| **X** | 🔄 Reset Stop State | ▶ Start/Resume Motion | — | ▶ Start Motion |
+| **Y** | ⏭ Next Reward/Goal | 🔄 Reset Motion Progress | — | 🔄 Reset Motion |
+| **R2** | ⏹ Zero Actions (safety) | — | — | — |
+| **Up (↑)** | — | ⏭ Load Next Motion | — | — |
+| **Down (↓)** | — | ⏮ Load Previous Motion | — | — |
+| **Left Stick** | — | — | Forward/Back/Strafe velocity | — |
+| **Right Stick** | — | — | Turn velocity (left/right) | — |
+
+> **⚠️ Safety Note**: All policies above (BFMZero, KungFuAthlete, GMR-AMP, WBC FSM) have been tested in **simulation only** and are **NOT yet validated on real hardware**. Proceed with caution and ensure emergency stop (A button or Esc key) is always accessible.
+
 ## 📋 New Policies
 
 | Policy | Simulation | Real Robot | Robot Type | Project Link | Description |
@@ -179,8 +209,9 @@ After setup, the listener will automatically start and monitor for joystick comm
 
 ## 🔧 Configuration
 
-All new policy configurations are located in `robojudo/config/g1/g1_custom_cfg.py`:
+All new policy configurations are located in `robojudo/config/g1/`:
 
+Simulation configs (in `g1_custom_cfg.py` and `g1_cfg.py`):
 - `g1_bfmzero_tracking` - BFMZero tracking mode
 - `g1_bfmzero_reward` - BFMZero reward mode
 - `g1_bfmzero_goal` - BFMZero goal mode
@@ -191,6 +222,13 @@ All new policy configurations are located in `robojudo/config/g1/g1_custom_cfg.p
 - `g1_amp` - GMR-AMP walk policy (experimental)
 - `g1_wbc_amp` - WBC FSM AMP Loco locomotion policy (4-frame history, with fall recovery)
 - `g1_wbc_dance` - WBC FSM Dance motion tracking policy (requires LAFAN1 reference motion, with fall recovery)
+
+Real robot configs (in `g1_cfg.py`):
+- `g1_bfmzero_real` - BFMZero real robot deployment
+- `g1_kungfuathlete_real` - KungFuAthlete real robot deployment
+- `g1_amp_real` - GMR-AMP real robot deployment
+- `g1_wbc_amp_real` - WBC FSM AMP Loco real robot deployment
+- `g1_wbc_dance_real` - WBC FSM Dance real robot deployment
 
 ## 📚 Documentation
 
@@ -222,9 +260,10 @@ This project inherits the CC BY 4.0 license from the original RoboJuDo project. 
 ## 🙏 Acknowledgments
 
 - [RoboJuDo](https://github.com/HansZ8/RoboJuDo) - The original modular robotics simulation framework
-- [BFMZero](https://github.com/OpenBMB/BFMZero) - BFMZero project
+- [BFMZero](https://github.com/LeCAR-Lab/BFM-Zero) - BFMZero project (LeCAR-Lab)
 - [GentleHumanoid](https://github.com/GentleHumanoid/gentleHum) - GentleHumanoid project
 - [UnitreeRlMjLab](https://github.com/unitreerobotics/unitree_rl_mjlab) - Unitree robot learning lab
 - [BeyondMimic](https://github.com/HybridRobotics/whole_body_tracking) - Whole body motion tracking
 - [KungFuAthleteBot](https://github.com/NPCLEI/KungFuAthleteBot) - KungFuAthlete motion tracking project
 - [legged_lab](https://github.com/zitongbai/legged_lab) - GMR-AMP walking policy
+- [wbc_fsm](https://github.com/ccrpRepo/wbc_fsm) - WBC FSM locomotion and dance policies

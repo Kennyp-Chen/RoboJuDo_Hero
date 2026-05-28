@@ -181,10 +181,12 @@ class BeyondMimicCtrlCfg(CtrlCfg):
     # ==== motion config ====
     robot: str
     motion_name: str
+    motion_subdir: str = "beyondmimic"
+    """subdirectory under motions/{robot}/ where motion files are stored"""
 
     @property
     def motion_path(self) -> str:
-        motion_path = ASSETS_DIR / f"motions/{self.robot}/beyondmimic/{self.motion_name}.npz"
+        motion_path = ASSETS_DIR / f"motions/{self.robot}/{self.motion_subdir}/{self.motion_name}.npz"
         return motion_path.as_posix()
 
     # ==== from beyondmimic ====

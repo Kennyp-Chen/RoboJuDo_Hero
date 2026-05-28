@@ -39,6 +39,8 @@ from .policy.g1_bfmzero_policy_cfg import (  # noqa: F401
 )
 from .policy.g1_gentle_policy_cfg import G1GentlePolicyCfg  # noqa: F401
 from .policy.g1_kungfuathlete_policy_cfg import G1KungFuAthletePolicyCfg  # noqa: F401
+from .policy.g1_wbc_amp_policy_cfg import G1WbcAmpPolicyCfg  # noqa: F401
+from .policy.g1_wbc_dance_policy_cfg import G1WbcDancePolicyCfg  # noqa: F401
 
 
 # ======================== Basic Configs ======================== #
@@ -282,8 +284,6 @@ class g1_real_locomimic(RlLocoMimicPipelineCfg):
         *[-1.2, 0.0, 0.0, 1.5, -0.2, 0.0],  # 左腿
         *[-1.2, 0.0, 0.0, 1.5, -0.2, 0.0],  # 右腿
         *[0, 0, 0],  # 腰部
-        # *[-0.4, 0, 0, 0, -1.5, 0, 0],# 左臂
-        # *[-0.4, 0, 0, 0, 1.5, 0, 0], # 右臂
         *[0.35,0.18,0.,0.87,0.,0.,0.],
         *[0.35,-0.18,0.,0.87,0.,0.,0.]
     ]
@@ -293,31 +293,12 @@ class g1_real_locomimic(RlLocoMimicPipelineCfg):
         *[-0.1, 0.0, 0.0, 0.3, -0.2, 0.0],  # 左腿
         *[-0.1, 0.0, 0.0, 0.3, -0.2, 0.0],  # 右腿
         *[0, 0, 0],  # 腰部
-        # *[0, 0, 0, 0, 0, 0, 0],  # 左臂
-        # *[0, 0, 0, 0, 0, 0, 0],  # 右臂
         *[0.35,0.18,0.,0.87,0.,0.,0.],
         *[0.35,-0.18,0.,0.87,0.,0.,0.]
     ]
 
     # Keyboard and controller with policy switching
     ctrl: list[UnitreeCtrlCfg] = [
-    # ctrl: list[KeyboardCtrlCfg | UnitreeCtrlCfg] = [
-        # KeyboardCtrlCfg(
-        #     ctrl_type="KeyboardStdinCtrl",
-        #     triggers_extra={
-        #         "]": "[POLICY_LOCO]",       # Switch to LOCO
-        #         "[": "[POLICY_MIMIC]",      # Switch to current MIMIC
-        #         # "Key.tab": "[POLICY_TOGGLE]",
-
-        #         "1": "[POLICY_SWITCH],0",   #  Index0 motion
-        #         "2": "[POLICY_SWITCH],1",   #  Index1 motion
-        #         "3": "[POLICY_SWITCH],2",   #  Index2 motion
-        #         "4": "[POLICY_SWITCH],3",   #  Index3 motion
-        #         "5": "[SITTING_POSE]",      # Switch to sitting pose
-        #         "6": "[STANDING_POSE]",      # Switch to standing pose
-
-        #     }
-        # ),
         UnitreeCtrlCfg(
             combination_init_buttons=["L1", "R1", "L2"],  # Add L2 for combination keys
             triggers_extra={
@@ -333,14 +314,8 @@ class g1_real_locomimic(RlLocoMimicPipelineCfg):
         ),
     ]
 
-    # Locomotion policy (WASD control)
-    # loco_policy: G1UnitreeWoGaitPolicyCfg = G1UnitreeWoGaitPolicyCfg()
-    # loco_policy: G1UnitreePolicyCfg = G1UnitreePolicyCfg()
-    # loco_policy: G1AsapLocoPolicyCfg = G1AsapLocoPolicyCfg()
     loco_policy: G1UnitreeMjlabVelocityPolicyCfg = G1UnitreeMjlabVelocityPolicyCfg()
-    # loco_policy: G1AmpWalkPolicyCfg = G1AmpWalkPolicyCfg()
-    # loco_policy: G1AmoPolicyCfg() = G1AmoPolicyCfg(),
-    # 
+
 
     '''
         policies: list[G1UnitreePolicyCfg | G1AmoPolicyCfg] = [
@@ -349,41 +324,9 @@ class g1_real_locomimic(RlLocoMimicPipelineCfg):
     ]
 
     '''
-    # Mimic policies: Dance + ASAP CR7
     mimic_policies: list[G1BeyondMimicPolicyCfg | G1AmoPolicyCfg|G1AmpWalkPolicyCfg] = [
-       
-       
-        ## 260428test
-        ### gvhmr dance
-        # G1BeyondMimicPolicyCfg(policy_name="23dof_50fps/baicai",),# 效果可以
-        # # G1BeyondMimicPolicyCfg(policy_name="23dof_50fps/slide",), 效果不佳
-        # G1BeyondMimicPolicyCfg(policy_name="23dof_50fps/go_james",), # 最后动作有点僵硬
-        # G1BeyondMimicPolicyCfg(policy_name="23dof_50fps/gangster_dance",),
-        # G1BeyondMimicPolicyCfg(policy_name="23dof_50fps/goodness_dance",),
         G1BeyondMimicPolicyCfg(policy_name="23dof_50fps/eva_angel_dance",),
         G1BeyondMimicPolicyCfg(policy_name="23dof_50fps/go_woman",),# 效果更好
-
-        # G1BeyondMimicPolicyCfg(policy_name="23dof_50fps/OldTownRoad_v1",),
-        ### kungfu
-        # G1BeyondMimicPolicyCfg(# KUNGFU KICK 蹲下后结束
-        #     policy_name="23dof_50fps/fight1_subject2",
-        #     start_timestep = 850,
-        #     max_timestep=1250,        
-        # ),
-        # G1BeyondMimicPolicyCfg(# KUNGFU KICK 上钩拳后结束
-        #     policy_name="23dof_50fps/fight1_subject2",
-        #     start_timestep = 850,
-        #     max_timestep=1350,        
-        # ),
-        # G1BeyondMimicPolicyCfg(# 旋转踢腿成功
-        #     policy_name="23dof_50fps/fightAndSports1_subject1",
-        #     start_timestep = 5200,
-        #     max_timestep=6300,        
-        # ),
-
-        ## 260428test
-        
-        # # Index 0: Dance motion
         G1BeyondMimicPolicyCfg(
             policy_name="23dof_65fps/Take102",           
             start_timestep = 100,
@@ -405,228 +348,6 @@ class g1_real_locomimic(RlLocoMimicPipelineCfg):
             start_timestep = 4500,
             max_timestep=6900,        
         ),
-
-        ####23dof 65fps start####
-        # G1BeyondMimicPolicyCfg( # 4
-        #     policy_name="23dof_65fps/dance1_subject1",
-        #     start_timestep = 3000,# 3400
-        #     max_timestep=4300,        
-        # ),
-
-        # G1BeyondMimicPolicyCfg( # 5
-        #     policy_name="23dof_65fps/dance1_subject1",
-        #     start_timestep = 3380,
-        #     max_timestep=4158,        
-        # ),
-        # # G1BeyondMimicPolicyCfg( # 6
-        # #     policy_name="23dof_65fps/dance1_subject1",
-        # #     start_timestep = 5800,# 适合运动开始
-        # #     max_timestep=6400,        
-        # # ),
-        # G1BeyondMimicPolicyCfg( # 6
-        #     policy_name="23dof_65fps/dance1_subject1",
-        #     start_timestep = 5950,# 适合静止开始 更好
-        #     max_timestep=6400,        
-        # ),
-        # G1BeyondMimicPolicyCfg( # 0
-        #     policy_name="23dof_65fps/dance2_subject4",
-        #     start_timestep = 9000,
-        #     max_timestep=10600,       
-        # ),
-        # G1BeyondMimicPolicyCfg( # 1 不太稳定
-        #     policy_name="23dof_65fps/dance2_subject4",
-        #     start_timestep = 10100,
-        #     max_timestep=11300,      
-        # ),
-        # # G1BeyondMimicPolicyCfg(
-        # #     policy_name="23dof_65fps/dance2_subject4",
-        # #     start_timestep = 6000,
-        # #     max_timestep=6720,        
-        # # ),
-        # G1BeyondMimicPolicyCfg( # 2
-        #     policy_name="23dof_65fps/dance2_subject4",
-        #     start_timestep = 4300, 
-        #     max_timestep=5700,        
-        # ),
-        # G1BeyondMimicPolicyCfg( # swing 结束些许不稳
-        #     policy_name="23dof_65fps/dance2_subject4",
-        #     start_timestep = 8800,
-        #     max_timestep=10100,       
-        # ),
-        # G1BeyondMimicPolicyCfg(# 3
-        #     policy_name="23dof_65fps/dance2_subject4",
-        #     start_timestep = 5990, # 在往前10 试试 5990
-        #     max_timestep=7400,   # 6720   
-        # ),
-
-        ####23dof 65fps end####
-
-
-
-        ####23dof 80fps start####
-        # G1BeyondMimicPolicyCfg(
-        #     policy_name="Take102_23dof_80fps",
-        #     start_timestep = 100,
-        #     max_timestep=-1,),
-        # G1BeyondMimicPolicyCfg(
-        #     policy_name="horse_23dof_80fps",
-        #     start_timestep = 100,
-        #     max_timestep=-1,),
-        # G1BeyondMimicPolicyCfg(
-        #     policy_name="dance12_23dof",
-        #     start_timestep = 100,
-        #     max_timestep=-1,) ,
-        # G1BeyondMimicPolicyCfg(
-        #     policy_name="dance12_wose",
-        #     start_timestep = 100,
-        #     max_timestep=-1,) ,
-        ####23dof 80fps end####
-            
-        # # G1BeyondMimicPolicyCfg(
-        # #     policy_name="dance24_wose",
-        # #     start_timestep = 1500,
-        # #     max_timestep=2900,  
-        # #     # max_timestep=2300,      1800  
-        # #     # max_timestep= 1800 aa
-
-        # # ),
-        # # G1BeyondMimicPolicyCfg(
-        # #     policy_name="dance24_wose",
-        # #     start_timestep = 3100,
-        # #     # max_timestep=4500,   
-        # #     # max_timestep=4100,    # 4200 4100    
-        # #     max_timestep=4000,   
-
-        # # ),
-        # # # G1BeyondMimicPolicyCfg(
-        # # #     policy_name="dance24_wose",
-        # # #     start_timestep = 4500,
-        # # #     max_timestep=6800,        
-        # # # ),
-        # # G1BeyondMimicPolicyCfg(# 扭扭
-        # #     policy_name="dance24_wose",
-        # #     start_timestep = 6800,
-        # #     # max_timestep= 8700,  
-        # #     max_timestep= 7600,
-
-        # # ),
-        # # # G1BeyondMimicPolicyCfg(
-        # # #     policy_name="dance24_wose",
-        # # #     start_timestep = 8700,
-        # # #     max_timestep=10900,        
-        # # # ),
-        # # # G1BeyondMimicPolicyCfg(# 不美观
-        # # #     policy_name="dance24_wose",
-        # # #     start_timestep = 200,
-        # # #     max_timestep=1500,        
-        # # # ),
-        # # # FS11
-        # # # G1BeyondMimicPolicyCfg(# KUNGFU KICK
-        # # #     policy_name="fightSport11wose",
-        # # #     start_timestep = 850,
-        # # #     max_timestep=1740,        
-        # # # ),
-        # # G1BeyondMimicPolicyCfg(# BOX
-        # #     policy_name="fightSport11wose",
-        # #     start_timestep = 3800,
-        # #     max_timestep=4850,        
-        # # ),
-        # # # G1BeyondMimicPolicyCfg(# 踢腿
-        # # #     policy_name="fightSport11wose",
-        # # #     start_timestep = 5300,
-        # # #     max_timestep=-1,        
-        # # # ),
-        # # ## Dance12
-        # # # G1BeyondMimicPolicyCfg(
-        # # #     policy_name="dance12_wose",
-        # # #     start_timestep = 1800,
-        # # #     max_timestep=3000,        
-        # # # ),
-        # # # G1BeyondMimicPolicyCfg(# 有难度
-        # # #     policy_name="dance12_wose",
-        # # #     start_timestep = 3000,
-        # # #     max_timestep=4900,        
-        # # # ),
-        # # # G1BeyondMimicPolicyCfg(# 难
-        # # #     policy_name="dance12_wose",
-        # # #     start_timestep = 4900,
-        # # #     max_timestep=6500,        
-        # # # ),
-        # # ### Dance 11
-        # # G1BeyondMimicPolicyCfg(
-        # #     policy_name="Dance11_wose",           
-        # #     start_timestep = 1850,
-        # #     max_timestep = 3500,
-        # # ),
-        # # G1BeyondMimicPolicyCfg( # 会摔
-        # #     policy_name="Dance11_wose",           
-        # #     start_timestep = 3750,
-        # #     max_timestep=5000,        
-        # # ),
-        # # # 翻一个跟斗后跳舞
-        # # G1BeyondMimicPolicyCfg(
-        # #     policy_name="Dance11_wose",           
-        # #     start_timestep = 5700,
-        # #     max_timestep=6500,        
-        # # ),
-
-
-
-        # ## test
-        # # G1BeyondMimicPolicyCfg(
-        # #     policy_name="dance24_wose",
-        # #     start_timestep = 3230, 
-        # #     max_timestep=3845 ,    #可以再缩短？  会向后退，可能跌倒
-        # # ),
-        # # G1BeyondMimicPolicyCfg(
-        # #     policy_name="dance24_wose",
-        # #     start_timestep = 4500,
-        # #     max_timestep=5100 ,    
-        # # ),
-
-        # # G1BeyondMimicPolicyCfg(
-        # #     policy_name="dance24_wose",
-        # #     start_timestep = 4500,
-        # #     max_timestep=5190,      
-        # # ),
-
-        # # G1BeyondMimicPolicyCfg(# 扭扭  7600 
-        # #     policy_name="dance24_wose",
-        # #     start_timestep = 6800,
-        # #     max_timestep= 7510, #7600 ,  # 王厚一点      
-        # # ),
-        # # G1BeyondMimicPolicyCfg(# BOX
-        # #     policy_name="fightSport11wose",
-        # #     start_timestep = 3800, 
-        # #     max_timestep=4050 ,    
-        # # ),
-        # # G1BeyondMimicPolicyCfg(# BOX
-        # #     policy_name="fightSport11wose",
-        # #     start_timestep = 4330, 
-        # #     max_timestep=4830,    
-        # # ),
-
-        # G1BeyondMimicPolicyCfg(
-        #     policy_name="Gangnan_wose",           
-        #     start_timestep = 100,
-        #     max_timestep=896,        
-        # ),
-        # # G1BeyondMimicPolicyCfg(
-        # #     policy_name="Gangnan_wose",           
-        # #     start_timestep = 1000,
-        # #     max_timestep=1800,        
-        # # ),
-        # G1BeyondMimicPolicyCfg(
-        #     policy_name="Dance102_sar_wose",           
-        #     start_timestep = 0,
-        #     max_timestep=640,        
-        # ),
-        # G1BeyondMimicPolicyCfg(
-        #     policy_name="Dance102_sar_wose",           
-        #     start_timestep = 900,
-        #     max_timestep=1700,        
-        # ),
-    
     ]
 
     # Enable safety check for real robot
@@ -805,7 +526,8 @@ class g1_kungfuathlete(RlPipelineCfg):
             }
         ),
         G1BeyondmimicCtrlCfg(
-            motion_name="../KungFuAthlete/1307",
+            motion_subdir="KungFuAthlete",
+            motion_name="1307",
         ),
     ]
 
@@ -913,7 +635,7 @@ class g1_real_locomimic_multi(RlLocoMimicPipelineCfg):
     do_safety_check: bool = True
 
 @cfg_registry.register
-class g1_unitree_velocity(RlPipelineCfg):
+class g1_unitree_mjlab_velocity(RlPipelineCfg):
     """
     Unitree Velocity policy from unitree_rl_mjlab.
     
@@ -1032,6 +754,319 @@ class g1_amp(RlPipelineCfg):
     policy: G1AmpWalkPolicyCfg = G1AmpWalkPolicyCfg()
 
 
-# from .g1_real_servmimic_cfg import g1_real_servmimic  # noqa: F401
+# ======================== Real Robot Configs for New Policies ======================== #
+
+
+@cfg_registry.register
+class g1_bfmzero_real(RlPipelineCfg):
+    """
+    BFMZero Policy on Real G1 Robot.
+
+    ⚠️ Warning: BFMZero has NOT been validated on real hardware.
+    Use at your own risk. Ensure safety measures are in place.
+
+    Usage:
+        python scripts/run_pipeline.py -c g1_bfmzero_real
+
+    BFMZero tracking mode: follows reference motions using diffusion-based policy.
+    Available modes: tracking (default), reward, goal.
+    Switch mode by changing the policy cfg in this config.
+
+    Controls (Unitree Controller):
+        - L1+R1 (hold): Enter command mode
+        - A: Emergency stop (SHUTDOWN)
+        - B: Start motion playback (BFM_MOTION_START)
+        - X: Reset stop state (BFM_RESET_STOP_STATE)
+        - Y: Next reward/goal (BFM_NEXT_REWARD_GOAL)
+        - R2: Zero actions (safety, BFM_ACTIONS_ZERO)
+
+    Controls (SSH Keyboard):
+        - Ctrl held + `-`: Start motion
+        - Ctrl held + `n`: Next motion
+        - Ctrl held + `m`: Last motion
+        - Ctrl held + `o`: Zero actions
+        - Ctrl held + `p`: Reset stop state
+        - Esc: Emergency stop
+    """
+
+    robot: str = "g1"
+
+    env: G1RealEnvCfg = G1RealEnvCfg(
+        env_type="UnitreeCppEnv",
+        unitree=G1UnitreeCfg(net_if="eth0"),
+    )
+
+    ctrl: list[KeyboardCtrlCfg | UnitreeCtrlCfg] = [
+        KeyboardCtrlCfg(
+            ctrl_type="KeyboardStdinCtrl",
+            triggers_extra={
+                "-": "[BFM_MOTION_START]",
+                "n": "[BFM_NEXT]",
+                "m": "[BFM_LAST]",
+                "p": "[BFM_RESET_STOP_STATE]",
+                "o": "[BFM_ACTIONS_ZERO]",
+            }
+        ),
+        UnitreeCtrlCfg(
+            combination_init_buttons=["L1", "R1", "L2"],
+            triggers_extra={
+                "A": "[SHUTDOWN]",
+                "B": "[BFM_MOTION_START]",
+                "X": "[BFM_RESET_STOP_STATE]",
+                "Y": "[BFM_NEXT_REWARD_GOAL]",
+                "R2": "[BFM_ACTIONS_ZERO]",
+            }
+        ),
+    ]
+
+    policy: G1BFMZeroTracking23DoFPolicyCfg = G1BFMZeroTracking23DoFPolicyCfg()
+
+    do_safety_check: bool = True
+
+
+@cfg_registry.register
+class g1_kungfuathlete_real(RlPipelineCfg):
+    """
+    KungFuAthlete Policy on Real G1 Robot.
+
+    ⚠️ Warning: KungFuAthlete has NOT been validated on real hardware.
+    Use at your own risk. Ensure safety measures are in place.
+
+    Usage:
+        python scripts/run_pipeline.py -c g1_kungfuathlete_real
+
+    Motion tracking for martial arts motions (Tai Chi, fist, saber, acrobatics)
+    with fall recovery.
+
+    Controls (Unitree Controller):
+        - L1+R1 (hold): Enter command mode
+        - A: Emergency stop (SHUTDOWN)
+        - X: Start/resume motion (MOTION_FADE_IN)
+        - B: Pause motion (MOTION_FADE_OUT)
+        - Y: Reset motion progress (MOTION_RESET)
+        - Up: Load next motion (MOTION_LOAD_NEXT)
+        - Down: Load previous motion (MOTION_LOAD_PREV)
+
+    Controls (SSH Keyboard):
+        - Shift + `<`: Fade in motion
+        - Shift + `>`: Fade out motion
+        - Shift + `|`: Reset motion
+        - Shift + `{`: Previous motion
+        - Shift + `}`: Next motion
+        - Esc: Emergency stop
+    """
+
+    robot: str = "g1"
+
+    env: G1RealEnvCfg = G1RealEnvCfg(
+        env_type="UnitreeCppEnv",
+        unitree=G1UnitreeCfg(net_if="eth0"),
+    )
+
+    ctrl: list[KeyboardCtrlCfg | UnitreeCtrlCfg | G1BeyondmimicCtrlCfg] = [
+        KeyboardCtrlCfg(
+            ctrl_type="KeyboardStdinCtrl",
+            triggers_extra={
+                ">": "[MOTION_FADE_OUT]",
+                "<": "[MOTION_FADE_IN]",
+                "|": "[MOTION_RESET]",
+                "}": "[MOTION_LOAD_NEXT]",
+                "{": "[MOTION_LOAD_PREV]",
+            }
+        ),
+        UnitreeCtrlCfg(
+            combination_init_buttons=["L1", "R1", "L2"],
+            triggers_extra={
+                "A": "[SHUTDOWN]",
+                "X": "[MOTION_FADE_IN]",
+                "B": "[MOTION_FADE_OUT]",
+                "Y": "[MOTION_RESET]",
+                "Up": "[MOTION_LOAD_NEXT]",
+                "Down": "[MOTION_LOAD_PREV]",
+            }
+        ),
+        G1BeyondmimicCtrlCfg(
+            motion_subdir="KungFuAthlete",
+            motion_name="1307",
+        ),
+    ]
+
+    policy: G1KungFuAthletePolicyCfg = G1KungFuAthletePolicyCfg(
+        policy_name="1307Taichi",
+        use_onnx=True,
+    )
+
+    do_safety_check: bool = True
+
+
+@cfg_registry.register
+class g1_amp_real(RlPipelineCfg):
+    """
+    GMR-AMP Walk Policy on Real G1 Robot.
+
+    ⚠️ Warning: AMP has NOT been validated on real hardware.
+    Currently has poor performance in both sim and real (experimental).
+    Use at your own risk. Ensure safety measures are in place.
+
+    Usage:
+        python scripts/run_pipeline.py -c g1_amp_real
+
+    AMP-based walking policy with velocity control.
+    Walk and run variants available.
+
+    Controls (Unitree Controller):
+        - Left Stick: Forward/Backward/Strafe velocity
+        - Right Stick: Turn velocity (left/right)
+        - A: Emergency stop (SHUTDOWN)
+
+    Controls (SSH Keyboard):
+        - w/s: Forward/Backward
+        - a/d: Left/Right strafe
+        - q/e: Turn left/right
+        - Esc: Emergency stop
+    """
+
+    robot: str = "g1"
+
+    env: G1RealEnvCfg = G1RealEnvCfg(
+        env_type="UnitreeCppEnv",
+        unitree=G1UnitreeCfg(net_if="eth0"),
+    )
+
+    ctrl: list[KeyboardCtrlCfg | UnitreeCtrlCfg] = [
+        KeyboardCtrlCfg(
+            ctrl_type="KeyboardStdinCtrl",
+            triggers_extra={
+                "w": "[VELOCITY_FORWARD]",
+                "s": "[VELOCITY_BACKWARD]",
+                "a": "[VELOCITY_LEFT]",
+                "d": "[VELOCITY_RIGHT]",
+                "q": "[VELOCITY_TURN_LEFT]",
+                "e": "[VELOCITY_TURN_RIGHT]",
+            }
+        ),
+        UnitreeCtrlCfg(
+            combination_init_buttons=["L1", "R1", "L2"],
+            triggers_extra={
+                "A": "[SHUTDOWN]",
+            }
+        ),
+    ]
+
+    policy: G1AmpWalkPolicyCfg = G1AmpWalkPolicyCfg()
+
+    do_safety_check: bool = True
+
+
+@cfg_registry.register
+class g1_wbc_amp_real(RlPipelineCfg):
+    """
+    WBC FSM AMP Locomotion Policy on Real G1 Robot.
+
+    ⚠️ Warning: WBC FSM AMP has NOT been validated on real hardware.
+    Use at your own risk. Ensure safety measures are in place.
+
+    Usage:
+        python scripts/run_pipeline.py -c g1_wbc_amp_real
+
+    AMP locomotion policy with 4-frame history and fall recovery.
+
+    Controls (Unitree Controller):
+        - Left Stick: Forward/Backward/Strafe velocity
+        - Right Stick: Turn velocity
+        - A: Emergency stop (SHUTDOWN)
+
+    Controls (SSH Keyboard):
+        - w: Loco mode forward
+        - s: Loco mode backward
+        - Esc: Emergency stop
+    """
+
+    robot: str = "g1"
+
+    env: G1RealEnvCfg = G1RealEnvCfg(
+        env_type="UnitreeCppEnv",
+        unitree=G1UnitreeCfg(net_if="eth0"),
+    )
+
+    ctrl: list[KeyboardCtrlCfg | UnitreeCtrlCfg] = [
+        KeyboardCtrlCfg(
+            ctrl_type="KeyboardStdinCtrl",
+            triggers_extra={
+                "w": "[POLICY_LOCO]",
+                "s": "[POLICY_LOCO]",
+            }
+        ),
+        UnitreeCtrlCfg(
+            combination_init_buttons=["L1", "R1", "L2"],
+            triggers_extra={
+                "A": "[SHUTDOWN]",
+            }
+        ),
+    ]
+
+    policy: G1WbcAmpPolicyCfg = G1WbcAmpPolicyCfg()
+
+    do_safety_check: bool = True
+
+
+@cfg_registry.register
+class g1_wbc_dance_real(RlPipelineCfg):
+    """
+    WBC FSM Dance Motion Tracking Policy on Real G1 Robot.
+
+    ⚠️ Warning: WBC FSM Dance has NOT been validated on real hardware.
+    Requires LAFAN1 reference motion data for full functionality.
+    Use at your own risk. Ensure safety measures are in place.
+
+    Usage:
+        python scripts/run_pipeline.py -c g1_wbc_dance_real
+
+    Dance motion tracking policy with LAFAN1 reference motion data and fall recovery.
+
+    Controls (Unitree Controller):
+        - L1+R1 (hold): Enter command mode
+        - A: Emergency stop (SHUTDOWN)
+        - X: Start motion (MOTION_FADE_IN)
+        - B: Stop motion (MOTION_FADE_OUT)
+        - Y: Reset motion (MOTION_RESET)
+
+    Controls (SSH Keyboard):
+        - Shift + `<`: Fade in motion
+        - Shift + `>`: Fade out motion
+        - Shift + `|`: Reset motion
+        - Esc: Emergency stop
+    """
+
+    robot: str = "g1"
+
+    env: G1RealEnvCfg = G1RealEnvCfg(
+        env_type="UnitreeCppEnv",
+        unitree=G1UnitreeCfg(net_if="eth0"),
+    )
+
+    ctrl: list[KeyboardCtrlCfg | UnitreeCtrlCfg] = [
+        KeyboardCtrlCfg(
+            ctrl_type="KeyboardStdinCtrl",
+            triggers_extra={
+                ">": "[MOTION_FADE_OUT]",
+                "<": "[MOTION_FADE_IN]",
+                "|": "[MOTION_RESET]",
+            }
+        ),
+        UnitreeCtrlCfg(
+            combination_init_buttons=["L1", "R1", "L2"],
+            triggers_extra={
+                "A": "[SHUTDOWN]",
+                "X": "[MOTION_FADE_IN]",
+                "B": "[MOTION_FADE_OUT]",
+                "Y": "[MOTION_RESET]",
+            }
+        ),
+    ]
+
+    policy: G1WbcDancePolicyCfg = G1WbcDancePolicyCfg()
+
+    do_safety_check: bool = True
 
 
