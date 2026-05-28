@@ -168,7 +168,9 @@ unitree ALL=(ALL) NOPASSWD: /bin/systemctl stop gamepad_listener, /bin/systemctl
 
 | 配置名 | 策略 | 控制器支持 |
 |--------|------|-----------|
-| `g1_bfmzero_real` | BFMZero Tracking | Unitree 手柄 + SSH 键盘 |
+| `g1_bfmzero_tracking_real` | BFMZero Tracking | Unitree 手柄 + SSH 键盘 |
+| `g1_bfmzero_reward_real`   | BFMZero Reward   | Unitree 手柄 + SSH 键盘 |
+| `g1_bfmzero_goal_real`     | BFMZero Goal     | Unitree 手柄 + SSH 键盘 |
 | `g1_kungfuathlete_real` | KungFuAthlete | Unitree 手柄 + SSH 键盘 |
 | `g1_amp_real` | GMR-AMP Walk | Unitree 手柄（摇杆）+ SSH 键盘 |
 | `g1_wbc_amp_real` | WBC FSM AMP Loco | Unitree 手柄（摇杆）+ SSH 键盘 |
@@ -224,7 +226,9 @@ unitree ALL=(ALL) NOPASSWD: /bin/systemctl stop gamepad_listener, /bin/systemctl
 - `g1_wbc_dance` — WBC FSM Dance 舞蹈动作跟踪策略（需 LAFAN1 参考动作数据）
 
 真机部署配置（位于 `g1_cfg.py`）：
-- `g1_bfmzero_real` — BFMZero 真机部署
+- `g1_bfmzero_tracking_real` — BFMZero Tracking 真机部署
+- `g1_bfmzero_reward_real` — BFMZero Reward 真机部署
+- `g1_bfmzero_goal_real` — BFMZero Goal 真机部署
 - `g1_kungfuathlete_real` — KungFuAthlete 真机部署
 - `g1_amp_real` — GMR-AMP 真机部署
 - `g1_wbc_amp_real` — WBC FSM AMP Loco 真机部署

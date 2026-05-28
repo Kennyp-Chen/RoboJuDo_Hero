@@ -758,34 +758,34 @@ class g1_amp(RlPipelineCfg):
 
 
 @cfg_registry.register
-class g1_bfmzero_real(RlPipelineCfg):
+@cfg_registry.register
+class g1_bfmzero_tracking_real(RlPipelineCfg):
     """
-    BFMZero Policy on Real G1 Robot.
+    BFMZero Tracking Policy on Real G1 Robot.
 
     ⚠️ Warning: BFMZero has NOT been validated on real hardware.
     Use at your own risk. Ensure safety measures are in place.
 
     Usage:
-        python scripts/run_pipeline.py -c g1_bfmzero_real
+        python scripts/run_pipeline.py -c g1_bfmzero_tracking_real
 
     BFMZero tracking mode: follows reference motions using diffusion-based policy.
-    Available modes: tracking (default), reward, goal.
-    Switch mode by changing the policy cfg in this config.
 
     Controls (Unitree Controller):
-        - L1+R1 (hold): Enter command mode
+        - L1+R1+L2 (hold): Enter command mode
         - A: Emergency stop (SHUTDOWN)
         - B: Start motion playback (BFM_MOTION_START)
         - X: Reset stop state (BFM_RESET_STOP_STATE)
-        - Y: Next reward/goal (BFM_NEXT_REWARD_GOAL)
+        - Y: Next motion (BFM_NEXT)
         - R2: Zero actions (safety, BFM_ACTIONS_ZERO)
 
     Controls (SSH Keyboard):
-        - Ctrl held + `-`: Start motion
-        - Ctrl held + `n`: Next motion
-        - Ctrl held + `m`: Last motion
-        - Ctrl held + `o`: Zero actions
-        - Ctrl held + `p`: Reset stop state
+        - `-`: Start motion
+        - `n`: Next motion
+        - `m`: Last motion
+        - `o`: Zero actions
+        - `p`: Reset stop state
+        - `|`: Reset policy state (MOTION_RESET)
         - Esc: Emergency stop
     """
 
@@ -805,6 +805,7 @@ class g1_bfmzero_real(RlPipelineCfg):
                 "m": "[BFM_LAST]",
                 "p": "[BFM_RESET_STOP_STATE]",
                 "o": "[BFM_ACTIONS_ZERO]",
+                "|": "[MOTION_RESET]",
             }
         ),
         UnitreeCtrlCfg(
@@ -813,13 +814,157 @@ class g1_bfmzero_real(RlPipelineCfg):
                 "A": "[SHUTDOWN]",
                 "B": "[BFM_MOTION_START]",
                 "X": "[BFM_RESET_STOP_STATE]",
-                "Y": "[BFM_NEXT_REWARD_GOAL]",
+                "Y": "[BFM_NEXT]",
                 "R2": "[BFM_ACTIONS_ZERO]",
+                "RB": "[MOTION_RESET]",
             }
         ),
     ]
 
-    policy: G1BFMZeroTracking23DoFPolicyCfg = G1BFMZeroTracking23DoFPolicyCfg()
+    policy: G1BFMZeroTracking23DoFPolicyCfg = G1BFMZeroTracking23DoFPolicyCfg(
+        train_method="23dof_260411",
+        ctx_path="tracking_inference/zs_18.pkl"
+    )
+
+    do_safety_check: bool = True
+
+
+@cfg_registry.register
+class g1_bfmzero_reward_real(RlPipelineCfg):
+    """
+    BFMZero Reward Policy on Real G1 Robot.
+
+    ⚠️ Warning: BFMZero has NOT been validated on real hardware.
+    Use at your own risk. Ensure safety measures are in place.
+
+    Usage:
+        python scripts/run_pipeline.py -c g1_bfmzero_reward_real
+
+    BFMZero reward mode: learns reward-conditioned motions.
+
+    Controls (Unitree Controller):
+        - L1+R1+L2 (hold): Enter command mode
+        - A: Emergency stop (SHUTDOWN)
+        - B: Start motion (BFM_MOTION_START)
+        - X: Reset stop state (BFM_RESET_STOP_STATE)
+        - Y: Next reward (BFM_NEXT)
+        - R2: Zero actions (safety, BFM_ACTIONS_ZERO)
+
+    Controls (SSH Keyboard):
+        - `-`: Start motion
+        - `n`: Next reward
+        - `m`: Last reward
+        - `o`: Zero actions
+        - `p`: Reset stop state
+        - `|`: Reset policy state (MOTION_RESET)
+        - Esc: Emergency stop
+    """
+
+    robot: str = "g1"
+
+    env: G1RealEnvCfg = G1RealEnvCfg(
+        env_type="UnitreeCppEnv",
+        unitree=G1UnitreeCfg(net_if="eth0"),
+    )
+
+    ctrl: list[KeyboardCtrlCfg | UnitreeCtrlCfg] = [
+        KeyboardCtrlCfg(
+            ctrl_type="KeyboardStdinCtrl",
+            triggers_extra={
+                "-": "[BFM_MOTION_START]",
+                "n": "[BFM_NEXT]",
+                "m": "[BFM_LAST]",
+                "p": "[BFM_RESET_STOP_STATE]",
+                "o": "[BFM_ACTIONS_ZERO]",
+                "|": "[MOTION_RESET]",
+            }
+        ),
+        UnitreeCtrlCfg(
+            combination_init_buttons=["L1", "R1", "L2"],
+            triggers_extra={
+                "A": "[SHUTDOWN]",
+                "B": "[BFM_MOTION_START]",
+                "X": "[BFM_RESET_STOP_STATE]",
+                "Y": "[BFM_NEXT]",
+                "R2": "[BFM_ACTIONS_ZERO]",
+                "RB": "[MOTION_RESET]",
+            }
+        ),
+    ]
+
+    policy: G1BFMZeroReward23DoFPolicyCfg = G1BFMZeroReward23DoFPolicyCfg(
+        train_method="23dof_260411"
+    )
+
+    do_safety_check: bool = True
+
+
+@cfg_registry.register
+class g1_bfmzero_goal_real(RlPipelineCfg):
+    """
+    BFMZero Goal Policy on Real G1 Robot.
+
+    ⚠️ Warning: BFMZero has NOT been validated on real hardware.
+    Use at your own risk. Ensure safety measures are in place.
+
+    Usage:
+        python scripts/run_pipeline.py -c g1_bfmzero_goal_real
+
+    BFMZero goal mode: follows goal-conditioned motions (e.g. walking, squat).
+
+    Controls (Unitree Controller):
+        - L1+R1+L2 (hold): Enter command mode
+        - A: Emergency stop (SHUTDOWN)
+        - B: Start motion (BFM_MOTION_START)
+        - X: Reset stop state (BFM_RESET_STOP_STATE)
+        - Y: Next goal (BFM_NEXT)
+        - R2: Zero actions (safety, BFM_ACTIONS_ZERO)
+
+    Controls (SSH Keyboard):
+        - `-`: Start motion
+        - `n`: Next goal
+        - `m`: Last goal
+        - `o`: Zero actions
+        - `p`: Reset stop state
+        - `|`: Reset policy state (MOTION_RESET)
+        - Esc: Emergency stop
+    """
+
+    robot: str = "g1"
+
+    env: G1RealEnvCfg = G1RealEnvCfg(
+        env_type="UnitreeCppEnv",
+        unitree=G1UnitreeCfg(net_if="eth0"),
+    )
+
+    ctrl: list[KeyboardCtrlCfg | UnitreeCtrlCfg] = [
+        KeyboardCtrlCfg(
+            ctrl_type="KeyboardStdinCtrl",
+            triggers_extra={
+                "-": "[BFM_MOTION_START]",
+                "n": "[BFM_NEXT]",
+                "m": "[BFM_LAST]",
+                "p": "[BFM_RESET_STOP_STATE]",
+                "o": "[BFM_ACTIONS_ZERO]",
+                "|": "[MOTION_RESET]",
+            }
+        ),
+        UnitreeCtrlCfg(
+            combination_init_buttons=["L1", "R1", "L2"],
+            triggers_extra={
+                "A": "[SHUTDOWN]",
+                "B": "[BFM_MOTION_START]",
+                "X": "[BFM_RESET_STOP_STATE]",
+                "Y": "[BFM_NEXT]",
+                "R2": "[BFM_ACTIONS_ZERO]",
+                "RB": "[MOTION_RESET]",
+            }
+        ),
+    ]
+
+    policy: G1BFMZeroGoal23DoFPolicyCfg = G1BFMZeroGoal23DoFPolicyCfg(
+        train_method="23dof_260411"
+    )
 
     do_safety_check: bool = True
 

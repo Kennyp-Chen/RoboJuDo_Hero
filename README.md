@@ -169,7 +169,9 @@ The following real robot configs are now available in `robojudo/config/g1/g1_cfg
 
 | Config | Policy | Controller Support |
 |--------|--------|-------------------|
-| `g1_bfmzero_real` | BFMZero Tracking | Unitree Controller + SSH Keyboard |
+| `g1_bfmzero_tracking_real` | BFMZero Tracking | Unitree Controller + SSH Keyboard |
+| `g1_bfmzero_reward_real`   | BFMZero Reward   | Unitree Controller + SSH Keyboard |
+| `g1_bfmzero_goal_real`     | BFMZero Goal     | Unitree Controller + SSH Keyboard |
 | `g1_kungfuathlete_real` | KungFuAthlete | Unitree Controller + SSH Keyboard |
 | `g1_amp_real` | GMR-AMP Walk | Unitree Controller (analog sticks) + SSH Keyboard |
 | `g1_wbc_amp_real` | WBC FSM AMP Loco | Unitree Controller (analog sticks) + SSH Keyboard |
@@ -224,7 +226,9 @@ Simulation configs (in `g1_custom_cfg.py` and `g1_cfg.py`):
 - `g1_wbc_dance` - WBC FSM Dance motion tracking policy (requires LAFAN1 reference motion, with fall recovery)
 
 Real robot configs (in `g1_cfg.py`):
-- `g1_bfmzero_real` - BFMZero real robot deployment
+- `g1_bfmzero_tracking_real` - BFMZero Tracking real robot deployment
+- `g1_bfmzero_reward_real` - BFMZero Reward real robot deployment
+- `g1_bfmzero_goal_real` - BFMZero Goal real robot deployment
 - `g1_kungfuathlete_real` - KungFuAthlete real robot deployment
 - `g1_amp_real` - GMR-AMP real robot deployment
 - `g1_wbc_amp_real` - WBC FSM AMP Loco real robot deployment
