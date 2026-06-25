@@ -325,33 +325,23 @@ class g1_real_locomimic(RlLocoMimicPipelineCfg):
 
     '''
     mimic_policies: list[G1BeyondMimicPolicyCfg | G1AmoPolicyCfg|G1AmpWalkPolicyCfg] = [
-        G1BeyondMimicPolicyCfg(policy_name="23dof_50fps/eva_angel_dance",),
-        G1BeyondMimicPolicyCfg(policy_name="23dof_50fps/go_woman",),# 效果更好
-        G1BeyondMimicPolicyCfg(
-            policy_name="23dof_65fps/Take102",           
-            start_timestep = 100,
-            max_timestep=1800,        
-        ),
-
-        G1BeyondMimicPolicyCfg(# 扭扭 swing
-            policy_name="23dof_50fps/WoHandTrack/dance2_subject4",
-            start_timestep = 6800,
-            max_timestep= 8760,        
-        ),
-        G1BeyondMimicPolicyCfg(
-            policy_name="23dof_65fps/GangnamStyle",           
-            start_timestep = 300,
-            max_timestep=2000,        
-        ),
-        G1BeyondMimicPolicyCfg(# 遮眼舞蹈
-            policy_name="23dof_50fps/WoHandTrack/dance2_subject4",
-            start_timestep = 4500,
-            max_timestep=6900,        
+        # v260625 
+        G1WbcDancePolicyCfg(),#1 
+        G1BeyondMimicPolicyCfg(policy_name="23dof_50fps/go_woman",), # 2
+        G1BeyondMimicPolicyCfg(policy_name="23dof_50fps/fightAndSports1_subject4", # 3踢腿两次后转身踢腿一次
+            # start_timestep = 100, # 可以
+            start_timestep = 2500,
+            max_timestep=2850,       
+                               ),
+        G1BeyondMimicPolicyCfg(# 旋转踢腿 前方预留5米以上 4
+            policy_name="23dof_50fps/fightAndSports1_subject1",
+            start_timestep = 5200,
+            max_timestep=6300,        
         ),
     ]
 
     # Enable safety check for real robot
-    do_safety_check: bool = True
+    do_safety_check: bool = False
 
 
 @cfg_registry.register
@@ -541,100 +531,6 @@ class g1_kungfuathlete(RlPipelineCfg):
 
 
 @cfg_registry.register
-class g1_real_locomimic_multi(RlLocoMimicPipelineCfg):
-    """
-    Real G1 Robot with multiple Mimic policies.
-    Example configuration showing how to add multiple mimic policies and switch between them.
-    
-    Usage:
-        python scripts/run_pipeline.py -c g1_real_locomimic_multi
-    
-    Controls (Keyboard via SSH):
-        - WASD/QE: Movement control (when in LOCO mode)
-        - ]: Switch to LOCO mode
-        - [: Switch to current MIMIC policy
-        - 1: Switch to Jump motion (index 0)
-        - 2: Switch to Dance motion (index 1)
-        - 3: Switch to ASAP CR7 motion (index 2)
-        - ESC: Emergency stop
-    
-    Controls (Unitree Controller):
-        - Left/Right Stick: Movement control (when in LOCO mode)
-        - Y: Switch to LOCO mode
-        - X: Switch to current MIMIC policy
-        - up: Switch to Jump motion
-        - down: Switch to Dance motion
-        - left: Switch to ASAP CR7 motion
-        - right: Next MIMIC policy
-        - A: Emergency stop
-    
-    Note: You can only switch between mimic policies when in LOCO mode.
-          See docs/G1_REAL_LOCOMIMIC_GUIDE.md for more details.
-    """
-
-    robot: str = "g1"
-    
-    env: G1RealEnvCfg = G1RealEnvCfg(
-        env_type="UnitreeCppEnv",
-        unitree=G1UnitreeCfg(net_if="eth0"),
-    )
-
-    ctrl: list[KeyboardCtrlCfg | UnitreeCtrlCfg] = [
-        # SSH keyboard control
-        KeyboardCtrlCfg(
-            ctrl_type="KeyboardStdinCtrl",
-            triggers_extra={
-                "]": "[POLICY_LOCO]",       # Switch to LOCO
-                "[": "[POLICY_MIMIC]",      # Switch to current MIMIC
-                "1": "[POLICY_SWITCH],0",   # Jump
-                "2": "[POLICY_SWITCH],1",   # Dance
-                "3": "[POLICY_SWITCH],2",   # ASAP CR7
-            }
-        ),
-        # Unitree controller
-        UnitreeCtrlCfg(
-            triggers_extra={
-                "Y": "[POLICY_LOCO]",       # Y button -> LOCO
-                "X": "[POLICY_MIMIC]",      # X button -> MIMIC
-                "Up": "[POLICY_SWITCH],0",     # Up -> Jump
-                "Down": "[POLICY_SWITCH],1",   # Down -> Dance
-                "Left": "[POLICY_SWITCH],2",   # Left -> ASAP
-                "Right": "[POLICY_SWITCH],NEXT",  # Right -> Next policy
-            }
-        ),
-    ]
-
-    loco_policy: G1UnitreePolicyCfg = G1UnitreePolicyCfg()
-    
-    # Multiple mimic policies
-    mimic_policies: list[G1BeyondMimicPolicyCfg | G1AsapPolicyCfg] = [
-        # Index 0: Jump motion
-        G1BeyondMimicPolicyCfg(
-            policy_name="Jump_wose",
-            without_state_estimator=True,
-            use_modelmeta_config=True,
-            use_motion_from_model=True,
-            max_timestep=140,
-        ),
-        # Index 1: Dance motion
-        G1BeyondMimicPolicyCfg(
-            policy_name="Dance_wose",
-            without_state_estimator=True,
-            use_modelmeta_config=True,
-            use_motion_from_model=True,
-            max_timestep=200,
-        ),
-        # Index 2: ASAP CR7 motion
-        G1AsapPolicyCfg(
-            policy_name="CR7_level1",
-            relative_path="model_191500.onnx",
-            motion_length_s=3.967,
-        ),
-    ]
-
-    do_safety_check: bool = True
-
-@cfg_registry.register
 class g1_unitree_mjlab_velocity(RlPipelineCfg):
     """
     Unitree Velocity policy from unitree_rl_mjlab.
@@ -758,7 +654,6 @@ class g1_amp(RlPipelineCfg):
 
 
 @cfg_registry.register
-@cfg_registry.register
 class g1_bfmzero_tracking_real(RlPipelineCfg):
     """
     BFMZero Tracking Policy on Real G1 Robot.
@@ -774,19 +669,20 @@ class g1_bfmzero_tracking_real(RlPipelineCfg):
     Controls (Unitree Controller):
         - L1+R1+L2 (hold): Enter command mode
         - A: Emergency stop (SHUTDOWN)
-        - B: Start motion playback (BFM_MOTION_START)
-        - X: Reset stop state (BFM_RESET_STOP_STATE)
-        - Y: Next motion (BFM_NEXT)
-        - R2: Zero actions (safety, BFM_ACTIONS_ZERO)
+        - B: Zero actions (safety stop, BFM_ACTIONS_ZERO)
+        - X: Start motion (BFM_MOTION_START)
+        - Y: Reset policy state (MOTION_RESET)
+        - Right: Next motion (BFM_NEXT)
+        - Left: Previous motion (BFM_LAST)
 
     Controls (SSH Keyboard):
-        - `-`: Start motion
-        - `n`: Next motion
-        - `m`: Last motion
-        - `o`: Zero actions
-        - `p`: Reset stop state
+        - `-`: Start motion (BFM_MOTION_START)
+        - `n`: Next motion (BFM_NEXT)
+        - `m`: Last motion (BFM_LAST)
+        - `p`: Reset stop state (BFM_RESET_STOP_STATE)
+        - `o`: Zero actions (BFM_ACTIONS_ZERO)
         - `|`: Reset policy state (MOTION_RESET)
-        - Esc: Emergency stop
+        - Esc: Emergency stop (SHUTDOWN)
     """
 
     robot: str = "g1"
@@ -812,11 +708,11 @@ class g1_bfmzero_tracking_real(RlPipelineCfg):
             combination_init_buttons=["L1", "R1", "L2"],
             triggers_extra={
                 "A": "[SHUTDOWN]",
-                "B": "[BFM_MOTION_START]",
-                "X": "[BFM_RESET_STOP_STATE]",
-                "Y": "[BFM_NEXT]",
-                "R2": "[BFM_ACTIONS_ZERO]",
-                "RB": "[MOTION_RESET]",
+                "B": "[BFM_ACTIONS_ZERO]",
+                "X": "[BFM_MOTION_START]",
+                "Y": "[MOTION_RESET]",
+                "Right": "[BFM_NEXT]",
+                "Left": "[BFM_LAST]",
             }
         ),
     ]
@@ -845,19 +741,20 @@ class g1_bfmzero_reward_real(RlPipelineCfg):
     Controls (Unitree Controller):
         - L1+R1+L2 (hold): Enter command mode
         - A: Emergency stop (SHUTDOWN)
-        - B: Start motion (BFM_MOTION_START)
-        - X: Reset stop state (BFM_RESET_STOP_STATE)
-        - Y: Next reward (BFM_NEXT)
-        - R2: Zero actions (safety, BFM_ACTIONS_ZERO)
+        - B: Zero actions (safety stop, BFM_ACTIONS_ZERO)
+        - X: Start motion (BFM_MOTION_START)
+        - Y: Reset policy state (MOTION_RESET)
+        - Right: Next reward (BFM_NEXT)
+        - Left: Previous reward (BFM_LAST)
 
     Controls (SSH Keyboard):
-        - `-`: Start motion
-        - `n`: Next reward
-        - `m`: Last reward
-        - `o`: Zero actions
-        - `p`: Reset stop state
+        - `-`: Start motion (BFM_MOTION_START)
+        - `n`: Next reward (BFM_NEXT)
+        - `m`: Last reward (BFM_LAST)
+        - `p`: Reset stop state (BFM_RESET_STOP_STATE)
+        - `o`: Zero actions (BFM_ACTIONS_ZERO)
         - `|`: Reset policy state (MOTION_RESET)
-        - Esc: Emergency stop
+        - Esc: Emergency stop (SHUTDOWN)
     """
 
     robot: str = "g1"
@@ -883,11 +780,11 @@ class g1_bfmzero_reward_real(RlPipelineCfg):
             combination_init_buttons=["L1", "R1", "L2"],
             triggers_extra={
                 "A": "[SHUTDOWN]",
-                "B": "[BFM_MOTION_START]",
-                "X": "[BFM_RESET_STOP_STATE]",
-                "Y": "[BFM_NEXT]",
-                "R2": "[BFM_ACTIONS_ZERO]",
-                "RB": "[MOTION_RESET]",
+                "B": "[BFM_ACTIONS_ZERO]",
+                "X": "[BFM_MOTION_START]",
+                "Y": "[MOTION_RESET]",
+                "Right": "[BFM_NEXT]",
+                "Left": "[BFM_LAST]",
             }
         ),
     ]
@@ -915,19 +812,20 @@ class g1_bfmzero_goal_real(RlPipelineCfg):
     Controls (Unitree Controller):
         - L1+R1+L2 (hold): Enter command mode
         - A: Emergency stop (SHUTDOWN)
-        - B: Start motion (BFM_MOTION_START)
-        - X: Reset stop state (BFM_RESET_STOP_STATE)
-        - Y: Next goal (BFM_NEXT)
-        - R2: Zero actions (safety, BFM_ACTIONS_ZERO)
+        - B: Zero actions (safety stop, BFM_ACTIONS_ZERO)
+        - X: Start motion (BFM_MOTION_START)
+        - Y: Reset policy state (MOTION_RESET)
+        - Right: Next goal (BFM_NEXT)
+        - Left: Previous goal (BFM_LAST)
 
     Controls (SSH Keyboard):
-        - `-`: Start motion
-        - `n`: Next goal
-        - `m`: Last goal
-        - `o`: Zero actions
-        - `p`: Reset stop state
+        - `-`: Start motion (BFM_MOTION_START)
+        - `n`: Next goal (BFM_NEXT)
+        - `m`: Last goal (BFM_LAST)
+        - `p`: Reset stop state (BFM_RESET_STOP_STATE)
+        - `o`: Zero actions (BFM_ACTIONS_ZERO)
         - `|`: Reset policy state (MOTION_RESET)
-        - Esc: Emergency stop
+        - Esc: Emergency stop (SHUTDOWN)
     """
 
     robot: str = "g1"
@@ -953,11 +851,11 @@ class g1_bfmzero_goal_real(RlPipelineCfg):
             combination_init_buttons=["L1", "R1", "L2"],
             triggers_extra={
                 "A": "[SHUTDOWN]",
-                "B": "[BFM_MOTION_START]",
-                "X": "[BFM_RESET_STOP_STATE]",
-                "Y": "[BFM_NEXT]",
-                "R2": "[BFM_ACTIONS_ZERO]",
-                "RB": "[MOTION_RESET]",
+                "B": "[BFM_ACTIONS_ZERO]",
+                "X": "[BFM_MOTION_START]",
+                "Y": "[MOTION_RESET]",
+                "Right": "[BFM_NEXT]",
+                "Left": "[BFM_LAST]",
             }
         ),
     ]

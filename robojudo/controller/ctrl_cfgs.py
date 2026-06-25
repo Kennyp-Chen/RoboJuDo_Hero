@@ -84,7 +84,7 @@ class BFMJoystickCtrlCfg(CtrlCfg):
         "A": "[BFM_INIT_STATE]",
         "B": "[BFM_MOTION_START]",
         "X": "[BFM_RESET_STOP_STATE]",
-        "Y": "[BFM_NEXT_REWARD_GOAL]",
+        "Y": "[BFM_NEXT]",
         "LB": "[SHUTDOWN]",
         "RB": "[MOTION_RESET]",
         # Note: combo keys supported: "LB+RB+A": "[TEST]",

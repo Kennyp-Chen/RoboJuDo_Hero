@@ -184,10 +184,11 @@ All configs use the same button convention. Hold **L1 + R1 + L2** simultaneously
 | Button | BFMZero | KungFuAthlete | AMP / WBC AMP | WBC Dance |
 |--------|---------|---------------|---------------|-----------|
 | **A** | 🛑 Emergency Stop | 🛑 Emergency Stop | 🛑 Emergency Stop | 🛑 Emergency Stop |
-| **B** | ▶ Start Motion | ⏸ Pause Motion | — | ⏸ Stop Motion |
-| **X** | 🔄 Reset Stop State | ▶ Start/Resume Motion | — | ▶ Start Motion |
-| **Y** | ⏭ Next Reward/Goal | 🔄 Reset Motion Progress | — | 🔄 Reset Motion |
-| **R2** | ⏹ Zero Actions (safety) | — | — | — |
+| **B** | ⏹ Zero Actions | ⏸ Pause Motion | — | ⏸ Stop Motion |
+| **X** | ▶ Start Motion | ▶ Start/Resume Motion | — | ▶ Start Motion |
+| **Y** | 🔄 Reset Policy State | 🔄 Reset Motion Progress | — | 🔄 Reset Motion |
+| **Right (→)** | ⏭ Next Motion/Reward/Goal | — | — | — |
+| **Left (←)** | ⏮ Previous Motion/Reward/Goal | — | — | — |
 | **Up (↑)** | — | ⏭ Load Next Motion | — | — |
 | **Down (↓)** | — | ⏮ Load Previous Motion | — | — |
 | **Left Stick** | — | — | Forward/Back/Strafe velocity | — |

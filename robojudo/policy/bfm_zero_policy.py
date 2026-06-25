@@ -1,3 +1,4 @@
+import json
 import logging
 import copy
 import joblib
@@ -63,15 +64,31 @@ class BFMZeroPolicy(Policy):
                 tracking_dir = Path(self.model_path).parent / "tracking_inference"
                 self.available_ctx_files = sorted(tracking_dir.glob("*.pkl"))
                 self.current_ctx_index = 0
+
+                self.motion_name_map = {}
+                names_path = tracking_dir / "motion_names.json"
+                if names_path.exists():
+                    with open(names_path) as f:
+                        self.motion_name_map = json.load(f)
+                    logger.info(f"Loaded motion name mapping from {names_path}")
                 
-                # Find current file index
                 for i, ctx_file in enumerate(self.available_ctx_files):
                     if ctx_file.name == ctx_path:
                         self.current_ctx_index = i
                         break
-                
-                logger.info(f"Available tracking prompts: {[f.name for f in self.available_ctx_files]}")
-                logger.info(f"Current prompt: {self.available_ctx_files[self.current_ctx_index].name}")
+
+                logger.info("=" * 60)
+                logger.info("Available tracking motions:")
+                for i, ctx_file in enumerate(self.available_ctx_files):
+                    motion_id = ctx_file.stem
+                    readable = self.motion_name_map.get(motion_id, "")
+                    if readable:
+                        logger.info(f"  [{i:2d}] {ctx_file.name}  ->  {readable}")
+                    else:
+                        logger.info(f"  [{i:2d}] {ctx_file.name}")
+                logger.info("=" * 60)
+                current_name = self._get_readable_motion_name(self.available_ctx_files[self.current_ctx_index].name)
+                logger.info(f"Current prompt: {self.available_ctx_files[self.current_ctx_index].name}  ->  {current_name}")
             else:
                 raise ValueError("ctx_path must be provided for tracking task")
             
@@ -165,11 +182,16 @@ class BFMZeroPolicy(Policy):
             if self.num_selected_goals == 1:
                 logger.info("Only one goal is selected, make sure that is what you want")
 
+    def _get_readable_motion_name(self, ctx_file_name: str) -> str:
+        motion_id = Path(ctx_file_name).stem
+        return self.motion_name_map.get(motion_id, ctx_file_name)
+
     def reset(self):
         self.timestep: float = self.cfg_policy.start_timestep
         self.pbar = None
         self.play_speed: float = 1.0
         self.flag_motion_done = False
+        self.zero_actions = False
         self._prepare_policy()
         
         # Reset task-specific variables
@@ -216,6 +238,7 @@ class BFMZeroPolicy(Policy):
                 case "[BFM_MOTION_START]":
                     # Start tracking motion (triggered by "[" key)
                     self.flag_motion_done = False
+                    self.zero_actions = False
 
                     if self.task_type == "tracking":
                         self.start_motion = True
@@ -223,12 +246,12 @@ class BFMZeroPolicy(Policy):
                         logger.info("Starting tracking motion")
                         
                 case "[BFM_NEXT]":
-                    # Switch to next prompt/reward/goal (triggered by "n" key)
                     if self.task_type == "tracking":
                         if hasattr(self, 'available_ctx_files') and len(self.available_ctx_files) > 0:
                             self.current_ctx_index = (self.current_ctx_index + 1) % len(self.available_ctx_files)
                             new_ctx_file = self.available_ctx_files[self.current_ctx_index]
-                            logger.info(f"Loading new tracking context: {new_ctx_file.name}")
+                            motion_name = self._get_readable_motion_name(new_ctx_file.name)
+                            logger.info(f"Loading next tracking context: {new_ctx_file.name}  ->  {motion_name}")
                             self.ctx = joblib.load(new_ctx_file)
                             # Reset tracking state
                             self.t = self.t_stop
@@ -244,12 +267,12 @@ class BFMZeroPolicy(Policy):
                             logger.info(f"Switched to goal '{current_goal}' (z_index={self.z_index})")
                             
                 case "[BFM_LAST]":
-                    # Switch to last prompt/reward/goal (triggered by "m" key)
                     if self.task_type == "tracking":
                         if hasattr(self, 'available_ctx_files') and len(self.available_ctx_files) > 0:
                             self.current_ctx_index = (self.current_ctx_index - 1) % len(self.available_ctx_files)
                             new_ctx_file = self.available_ctx_files[self.current_ctx_index]
-                            logger.info(f"Loading new tracking context: {new_ctx_file.name}")
+                            motion_name = self._get_readable_motion_name(new_ctx_file.name)
+                            logger.info(f"Loading previous tracking context: {new_ctx_file.name}  ->  {motion_name}")
                             self.ctx = joblib.load(new_ctx_file)
                             # Reset tracking state
                             self.t = self.t_stop
@@ -262,8 +285,12 @@ class BFMZeroPolicy(Policy):
                         if hasattr(self, 'num_selected_goals') and self.num_selected_goals > 0:
                             self.z_index = (self.z_index - 1) % self.num_selected_goals
                             current_goal = list(self.z_dict.keys())[self.z_index]
-                            logger.info(f"Switched to goal '{current_goal}' (z_index={self.z_index})")
+                            logger.info(f"Switched to goal '{current_goal}' (z_index={self.z_index}")
 
+                case "[BFM_ACTIONS_ZERO]":
+                    self.zero_actions = True
+                    self.start_motion = False
+                    logger.info("Actions set to zero - robot will hold position")
 
 
     def _apply_task_specific_obs(self, obs):
@@ -398,9 +425,12 @@ class BFMZeroPolicy(Policy):
 
 
     def get_action(self, obs: np.ndarray) -> np.ndarray:
-        # Check what inputs the model expects
-        # input_names = [inp.name for inp in self.onnx_policy_session.get_inputs()]
-        # obs is already 2D [1, N] from get_observation, so no need to expand_dims
+        if self.zero_actions:
+            num_actions = len(self.action_scales)
+            zero_action = np.zeros(num_actions)
+            self.last_action = zero_action.copy()
+            return zero_action
+
         ort_inputs = {"actor_obs": obs.astype(np.float32)}
 
         action = self.onnx_policy_session.run(None, ort_inputs)[0]

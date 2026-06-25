@@ -214,6 +214,9 @@ class BFMJoystickCtrl(JoystickCtrl):
             logger.info("Resetting to stop state")
             self.start_motion = False
             
-        elif command == "[BFM_NEXT_REWARD_GOAL]":
-            logger.info("Switch to next reward/goal")
+        elif command == "[BFM_NEXT]" or command == "[BFM_NEXT_REWARD_GOAL]":
+            logger.info("Switch to next motion/reward/goal")
             # This would need to be connected to the policy
+
+        elif command == "[BFM_LAST]":
+            logger.info("Switch to last motion/reward/goal")

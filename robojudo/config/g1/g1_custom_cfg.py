@@ -65,9 +65,9 @@ class g1_locomimic_sim(RlLocoMimicSimPipelineCfg):
     """
 
     robot: str = "g1"
-    env: G1MujocoEnvCfg = G1MujocoEnvCfg()
+    # env: G1MujocoEnvCfg = G1MujocoEnvCfg()
 
-    # env: G1_23MujocoEnvCfg = G1_23MujocoEnvCfg()
+    env: G1_23MujocoEnvCfg = G1_23MujocoEnvCfg()
 
     ctrl: list[KeyboardCtrlCfg | JoystickCtrlCfg ] = [
         KeyboardCtrlCfg(
@@ -124,61 +124,65 @@ class g1_locomimic_sim(RlLocoMimicSimPipelineCfg):
         # G1BFMZeroReward23DoFPolicyCfg(),
         # G1BFMZeroRewardPolicyCfg(),
         ##################BeyondMimic Policies######################
-        # G1BeyondMimicPolicyCfg(policy_name="29dof_50fps/OldTownRoad_v1",),
-        G1BeyondMimicPolicyCfg(policy_name="23dof_50fps/eva_angel_dance",),
-        G1BeyondMimicPolicyCfg(policy_name="23dof_50fps/goodness_dance",),
-        G1BeyondMimicPolicyCfg(policy_name="23dof_50fps/gangster_dance",),
-        G1BeyondMimicPolicyCfg(policy_name="23dof_50fps/baicai",),
-        G1BeyondMimicPolicyCfg(policy_name="23dof_50fps/slide",),
-        G1BeyondMimicPolicyCfg(policy_name="23dof_50fps/go_james",),
-        G1BeyondMimicPolicyCfg(policy_name="23dof_50fps/go_woman",),
-        G1BeyondMimicPolicyCfg(policy_name="23dof_50fps/OldTownRoad_v1",),
+        # G1BeyondMimicPolicyCfg(# 扭扭 swing
+        #     policy_name="23dof_50fps/WoHandTrack/dance2_subject4",
+        #     start_timestep = 6800,
+        #     max_timestep= 8760,        
+        G1WbcDancePolicyCfg(),
+
+        G1WbcDancePolicyCfg(),
+        # G1BeyondMimicPolicyCfg(policy_name="23dof_50fps/Take102",),
+        # G1BeyondMimicPolicyCfg(policy_name="23dof_50fps/eva_angel_dance",),
+        # G1BeyondMimicPolicyCfg(policy_name="23dof_50fps/goodness_dance",),
+        # G1BeyondMimicPolicyCfg(policy_name="23dof_50fps/gangster_dance",),
+        # G1BeyondMimicPolicyCfg(policy_name="23dof_50fps/baicai",),
+        # G1BeyondMimicPolicyCfg(policy_name="23dof_50fps/slide",),
+        # G1BeyondMimicPolicyCfg(policy_name="23dof_50fps/go_james",),
+        G1BeyondMimicPolicyCfg(policy_name="23dof_50fps/go_woman",), # 1
+        # G1BeyondMimicPolicyCfg(policy_name="23dof_50fps/OldTownRoad_v1",),
 
         # 23dof_50fps start####################################
-        # # # fightAndSports1_subject1
-        # G1BeyondMimicPolicyCfg(# KUNGFU HighKICK 蹲下后结束
-        #     policy_name="23dof_50fps/fight1_subject2",
-        #     start_timestep = 850,
-        #     max_timestep=1250,        
-        # ),
-        # G1BeyondMimicPolicyCfg(# KUNGFU HighKICK 上钩拳后结束
-        #     policy_name="23dof_50fps/fight1_subject2",
-        #     start_timestep = 850,
-        #     max_timestep=1350,        
-        # ),
+        # # fightAndSports1_subject1
+        G1BeyondMimicPolicyCfg(policy_name="23dof_50fps/fightAndSports1_subject1",),
+        G1BeyondMimicPolicyCfg(policy_name="23dof_50fps/fightAndSports1_subject4", # 踢腿两次后转身踢腿一次
+            # start_timestep = 100, # 可以
+            start_timestep = 2500,
+            max_timestep=2850,       
+                               ),
 
-        # G1BeyondMimicPolicyCfg(# BOX
+        # G1BeyondMimicPolicyCfg(# BOX 结束不稳
         #     policy_name="23dof_50fps/fightAndSports1_subject1",
         #     start_timestep = 3800,
         #     max_timestep=4900,        
         # ),
-        G1BeyondMimicPolicyCfg(# 旋转踢腿
+        G1BeyondMimicPolicyCfg(# KUNGFU HighKICK 上钩拳后结束 2
+            policy_name="23dof_50fps/fight1_subject2",
+            start_timestep = 850,
+            max_timestep=1350,   
+        ),
+        G1BeyondMimicPolicyCfg(# 旋转踢腿 前方预留5米以上 3
             policy_name="23dof_50fps/fightAndSports1_subject1",
             start_timestep = 5200,
             max_timestep=6300,        
         ),
-        # G1BeyondMimicPolicyCfg(# 
+        # G1BeyondMimicPolicyCfg(# 拳击步伐 没有很激烈
         #     policy_name="23dof_50fps/fightAndSports1_subject1",
         #     start_timestep = 6200,
         #     max_timestep=8390,        
         # ),
 
         # fight1_subject2 上钩拳 长序列 双踢腿 ；保龄球；篮球接球传球
-        # G1BeyondMimicPolicyCfg( # 1800-2000上钩拳
+        # G1BeyondMimicPolicyCfg( # 5000-5100 双踢腿 
         #     policy_name="23dof_50fps//WoHandTrack/fight1_subject2",
-        #     start_timestep = 1590,
-        #     max_timestep=2000,        
+        #     start_timestep = 4800,
+        #     max_timestep=5250,        
         # ),
-        G1BeyondMimicPolicyCfg( # 5000-5100 双踢腿 
-            policy_name="23dof_50fps//WoHandTrack/fight1_subject2",
-            start_timestep = 4800,
-            max_timestep=5250,        
-        ),
-        G1BeyondMimicPolicyCfg( # 三连双踢腿 
-            policy_name="23dof_50fps/WoHandTrack/fight1_subject2",
-            start_timestep = 14300,
-            max_timestep=14900,        
-        ),
+        # G1BeyondMimicPolicyCfg( # 三连双踢腿 危险，未测试
+        #     policy_name="23dof_50fps/WoHandTrack/fight1_subject2",
+        #     start_timestep = 14300,
+        #     max_timestep=14900,        
+        # ),
+        
         ]
 @cfg_registry.register
 class g1_wbc_amp(RlPipelineCfg):
@@ -187,8 +191,8 @@ class g1_wbc_amp(RlPipelineCfg):
     Source: https://github.com/ccrpRepo/wbc_fsm
     """
     robot: str = "g1"
-    # env: G1MujocoEnvCfg = G1MujocoEnvCfg()
-    env: G1_23MujocoEnvCfg = G1_23MujocoEnvCfg()
+    env: G1MujocoEnvCfg = G1MujocoEnvCfg()
+    # env: G1_23MujocoEnvCfg = G1_23MujocoEnvCfg()
 
     ctrl: list[KeyboardCtrlCfg | JoystickCtrlCfg] = [
         KeyboardCtrlCfg(
@@ -230,8 +234,8 @@ class g1_wbc_dance(RlPipelineCfg):
     Note: Requires reference motion binary data for full functionality.
     """
     robot: str = "g1"
-    env: G1MujocoEnvCfg = G1MujocoEnvCfg()
-    # env: G1_23MujocoEnvCfg = G1_23MujocoEnvCfg()
+    # env: G1MujocoEnvCfg = G1MujocoEnvCfg()
+    env: G1_23MujocoEnvCfg = G1_23MujocoEnvCfg()
 
     ctrl: list[KeyboardCtrlCfg | JoystickCtrlCfg] = [
         KeyboardCtrlCfg(),
