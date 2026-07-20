@@ -46,7 +46,7 @@ from .policy.g1_bfmzero_policy_cfg import (
 )
 from .policy.g1_gentle_policy_cfg import G1GentlePolicyCfg
 from .policy.g1_kungfuathlete_policy_cfg import G1KungFuAthletePolicyCfg
-from .policy.g1_wbc_amp_policy_cfg import G1WbcAmpPolicyCfg
+from .policy.g1_wbc_amp_policy_cfg import G1WbcAmp23PolicyCfg, G1WbcAmpPolicyCfg
 from .policy.g1_wbc_loco_policy_cfg import G1WbcLocoPolicyCfg
 from .policy.g1_wbc_dance_policy_cfg import G1WbcDancePolicyCfg
 
@@ -187,12 +187,11 @@ class g1_locomimic_sim(RlLocoMimicSimPipelineCfg):
 @cfg_registry.register
 class g1_wbc_amp(RlPipelineCfg):
     """
-    G1 robot with WBC_FSM AMP locomotion policy.
+    G1 robot with WBC_FSM AMP locomotion policy (29-DoF).
     Source: https://github.com/ccrpRepo/wbc_fsm
     """
     robot: str = "g1"
     env: G1MujocoEnvCfg = G1MujocoEnvCfg()
-    # env: G1_23MujocoEnvCfg = G1_23MujocoEnvCfg()
 
     ctrl: list[KeyboardCtrlCfg | JoystickCtrlCfg] = [
         KeyboardCtrlCfg(
@@ -204,6 +203,37 @@ class g1_wbc_amp(RlPipelineCfg):
         JoystickCtrlCfg(),
     ]
     policy: G1WbcAmpPolicyCfg = G1WbcAmpPolicyCfg()
+
+
+@cfg_registry.register
+class g1_wbc_amp_23(RlPipelineCfg):
+    """
+    G1 robot with WBC_FSM AMP locomotion policy (23-DoF).
+
+    Uses 23-DoF ONNX model from G1_23dof training output.
+    4-frame history with per-frame observation: 3+3+3+23+23+23 = 78, total 312.
+
+    Usage:
+        python scripts/run_pipeline_sim.py -c g1_wbc_amp_23
+
+    Controls:
+        - Keyboard: w/s forward/backward, a/d strafe, q/e turn
+        - Joystick: Left stick movement, Right stick turn
+        - ESC: Emergency stop (sim reborn)
+    """
+    robot: str = "g1"
+    env: G1_23MujocoEnvCfg = G1_23MujocoEnvCfg()
+
+    ctrl: list[KeyboardCtrlCfg | JoystickCtrlCfg] = [
+        KeyboardCtrlCfg(
+            triggers_extra={
+                "w": "[POLICY_LOCO]",
+                "s": "[POLICY_LOCO]",
+            }
+        ),
+        JoystickCtrlCfg(),
+    ]
+    policy: G1WbcAmp23PolicyCfg = G1WbcAmp23PolicyCfg()
 
 
 @cfg_registry.register

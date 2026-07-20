@@ -39,7 +39,7 @@ from .policy.g1_bfmzero_policy_cfg import (  # noqa: F401
 )
 from .policy.g1_gentle_policy_cfg import G1GentlePolicyCfg  # noqa: F401
 from .policy.g1_kungfuathlete_policy_cfg import G1KungFuAthletePolicyCfg  # noqa: F401
-from .policy.g1_wbc_amp_policy_cfg import G1WbcAmpPolicyCfg  # noqa: F401
+from .policy.g1_wbc_amp_policy_cfg import G1WbcAmp23PolicyCfg, G1WbcAmpPolicyCfg  # noqa: F401
 from .policy.g1_wbc_dance_policy_cfg import G1WbcDancePolicyCfg  # noqa: F401
 
 
@@ -1049,6 +1049,49 @@ class g1_wbc_amp_real(RlPipelineCfg):
     ]
 
     policy: G1WbcAmpPolicyCfg = G1WbcAmpPolicyCfg()
+
+    do_safety_check: bool = True
+
+
+@cfg_registry.register
+class g1_wbc_amp_23_real(RlPipelineCfg):
+    """
+    WBC FSM AMP Locomotion Policy (23-DoF) on Real G1 Robot.
+
+    ⚠️ Warning: 23-DoF WBC FSM AMP has NOT been validated on real hardware.
+    Use at your own risk. Ensure safety measures are in place.
+
+    Usage:
+        python scripts/run_pipeline.py -c g1_wbc_amp_23_real
+
+    23-DoF ONNX model: Unitree-G1-23DOF-AMP-Flat-HeightReward2x_model_9700.onnx
+    Observation per frame: 78 dims (3+3+3+23+23+23), 4-frame history = 312.
+    """
+
+    robot: str = "g1"
+
+    env: G1RealEnvCfg = G1RealEnvCfg(
+        env_type="UnitreeCppEnv",
+        unitree=G1UnitreeCfg(net_if="eth0"),
+    )
+
+    ctrl: list[KeyboardCtrlCfg | UnitreeCtrlCfg] = [
+        KeyboardCtrlCfg(
+            ctrl_type="KeyboardStdinCtrl",
+            triggers_extra={
+                "w": "[POLICY_LOCO]",
+                "s": "[POLICY_LOCO]",
+            }
+        ),
+        UnitreeCtrlCfg(
+            combination_init_buttons=["L1", "R1", "L2"],
+            triggers_extra={
+                "A": "[SHUTDOWN]",
+            }
+        ),
+    ]
+
+    policy: G1WbcAmp23PolicyCfg = G1WbcAmp23PolicyCfg()
 
     do_safety_check: bool = True
 
