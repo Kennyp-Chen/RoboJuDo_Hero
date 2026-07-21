@@ -196,6 +196,19 @@ class G1{POLICY_NAME}PolicyCfg({POLICY_NAME}PolicyCfg):
 - 关节名必须与 MuJoCo 模型中的关节名完全一致
 - `default_pos`、`stiffness`、`damping` 长度必须与 `joint_names` 一致（DoFConfig 的 model_validator 会检查）
 
+⚠️ **关节顺序必须匹配训练模型顺序（关键）**
+策略的 `joint_names` 顺序必须**严格等于训练模型使用的关节顺序**。训练顺序通常由训练环境的 MuJoCo XML 文件树遍历顺序决定，**不一定等于 G1 的标准硬件顺序**。
+- 如果策略 DoF 顺序与训练顺序不匹配，`DoFAdapter` 会**静默重排**观测和动作数据
+- 模型会接收到乱序的观测值 → 输出无效动作 → 机器人立即摔倒
+- 即使所有关节名都正确匹配（只是顺序不同），数据仍会被错误地打乱重排
+- 此错误难以调试，因为所有名称都正确、无报错，但机器人就是站不稳
+
+**验证方法：**
+1. 读取训练项目的 MuJoCo XML 文件，确认关节的定义顺序
+2. 读取训练项目的 observation 构建代码，确认 `dof_pos` 等观测项的读取顺序
+3. 确保 `obs_dof.joint_names` 的顺序与训练读取顺序**完全一致**
+4. `action_scale`、`stiffness`、`damping`、`default_pos` 等参数列表也必须按照同样的顺序排列
+
 ---
 
 ### Step 3: 创建策略推理实现
@@ -433,6 +446,9 @@ class g1_{snake_case}(RlPipelineCfg):
 - `BFMKeyboardCtrlCfg` — BFM 专用键盘控制
 - `G1BeyondmimicCtrlCfg` — BeyondMimic 动作源控制
 
+**安全验证：**
+确保 pipeline 配置中设置 `do_safety_check: bool = True`（在环境配置的类中）。仿真运行时若弹出 `[ERROR] [robojudo.pipeline.rl_pipeline] Robot fallen! Shutdown for safety.` 则说明部署失败——机器人无法稳定站立。**成功部署的条件之一是 `do_safety_check=True` 下仿真无此错误。**
+
 **如果需要加入 locomimic 多策略系统**（可选）：
 
 在 `g1_locomimic_sim` 类中的 `mimic_policies` 列表添加，需同时更新类型注解：
@@ -482,6 +498,32 @@ python -c "from robojudo.config import cfg_registry; print('g1_{snake_case}' in 
 python -c "from robojudo.policy import policy_registry; print('{POLICY_NAME}Policy' in policy_registry.types)"
 
 # 6. 仿真运行测试
+python scripts/run_pipeline_sim.py -c g1_{snake_case}
+
+# 7. 关节顺序对齐验证（关键）
+#    确认 policy DoF 顺序与 env 顺序一致，或按预期进行重排
+#    理想状态：所有适配器索引为恒等映射 (i == j)
+python -c "
+from robojudo.tools.dof import DoFAdapter
+from robojudo.config.g1.env.g1_env_cfg import G1_23DoF
+from robojudo.config.g1.policy.g1_{snake_case}_policy_cfg import G1{POLICY_NAME}DoF
+adapter = DoFAdapter(G1{POLICY_NAME}DoF().joint_names, G1_23DoF().joint_names)
+print(f'Matched {len(adapter.src_indices)}/{len(G1_23DoF().joint_names)} joints')
+if len(adapter.src_indices) > 0 and all(i == j for i, j in zip(adapter.src_indices, adapter.tar_indices)):
+    print('✓ DoFAdapter is identity — joint order matches env order')
+    print('  Observations/actions will NOT be shuffled.')
+else:
+    print('⚠ DoFAdapter performs remapping!')
+    for s, t in zip(adapter.src_indices, adapter.tar_indices):
+        if s != t:
+            print(f'  Joint {s} (policy) -> Joint {t} (env) — REMAPPED')
+    print('  Verify this remapping matches training joint order.')
+"
+
+# 8. 安全检查验证
+#    仿真运行时不应出现:
+#    [ERROR] [robojudo.pipeline.rl_pipeline] Robot fallen! Shutdown for safety.
+#    如果出现该错误，说明机器人站立不稳，需排查关节顺序/PD增益/action_scale等问题
 python scripts/run_pipeline_sim.py -c g1_{snake_case}
 ```
 
@@ -626,7 +668,8 @@ from robojudo.tools.tool_cfgs import convert_29dof_to_23dof   # 29DoF → 23DoF 
 
 1. **observation 顺序不对** — 最常见问题。必须与训练时完全一致，包括缩放系数
 2. **四元数格式不对** — `env_data.base_quat` 是 `[x,y,z,w]`，有些项目用 `[w,x,y,z]`
-3. **关节顺序不对** — 源项目的关节顺序可能与 G1 标准顺序不同
+3. **关节顺序不对（难排查）** — `joint_names` 必须匹配**训练模型使用的关节顺序**（由训练项目的 MuJoCo XML 树遍历顺序决定），而非假设的 G1 标准顺序。顺序不匹配时，`DoFAdapter` 会静默重排观测和动作数据，模型接收乱序值 → 输出无效动作 → 机器人摔倒。所有参数列表（`stiffness`、`damping`、`default_pos`、`action_scale`）也必须按此顺序排列。此错误无报错、无声响，难以排查。
 4. **忘记注册** — `policy_registry.add()` 和 `@cfg_registry.register` 缺一不可
 5. **ONNX 输出索引错误** — 某些模型有多个输出，需确认哪个是 action（打印 output_names 检查）
 6. **action_scale 维度不匹配** — 如果用 `list[float]`，长度必须等于 action DoF 数量
+7. **DoFAdapter 掩盖顺序问题** — DoFAdapter 的 `template` 参数会使未匹配关节静默保留模板值。如果政策 DoF 与 env DoF 的关节名集合有差异（如 23DoF 政策在 29DoF 环境中运行），未匹配关节会取模板值而不是报错。务必在部署前验证 `DoFAdapter` 的映射结果是否符合预期。

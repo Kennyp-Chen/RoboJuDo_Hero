@@ -196,6 +196,19 @@ class G1{POLICY_NAME}PolicyCfg({POLICY_NAME}PolicyCfg):
 - Joint names must exactly match MuJoCo model joint names
 - `default_pos`, `stiffness`, `damping` lengths must match `joint_names` (DoFConfig's model_validator enforces this)
 
+⚠️ **Policy joint order MUST match training model order (CRITICAL)**
+The policy's `joint_names` order must **exactly match the joint order used by the training model**. The training order is determined by the MuJoCo XML file's tree traversal order in the training project, and is **not necessarily** the G1 standard hardware order.
+- If the policy DoF order differs from the training order, `DoFAdapter` will **silently remap** observation and action data
+- The model receives shuffled observations → produces invalid actions → robot falls immediately
+- This holds true even if all joint names match correctly — only the order differs
+- This bug is difficult to debug because nothing errors — the robot just cannot stand
+
+**Verification:**
+1. Read the training project's MuJoCo XML file to confirm joint definition order
+2. Read the training project's observation construction code to confirm `dof_pos` read order
+3. Ensure `obs_dof.joint_names` order matches the training read order **exactly**
+4. All parameter lists (`action_scale`, `stiffness`, `damping`, `default_pos`) must follow the same order
+
 ---
 
 ### Step 3: Create Policy Inference Implementation
@@ -433,6 +446,9 @@ class g1_{snake_case}(RlPipelineCfg):
 - `BFMKeyboardCtrlCfg` — BFM-specific keyboard control
 - `G1BeyondmimicCtrlCfg` — BeyondMimic motion source control
 
+**Safety verification:**
+Set `do_safety_check: bool = True` in the pipeline config class. During simulation, if `[ERROR] [robojudo.pipeline.rl_pipeline] Robot fallen! Shutdown for safety.` appears, deployment has failed — the robot cannot stand stably. **A successful deployment must run without this error under `do_safety_check=True`.**
+
 **To add to the locomimic multi-policy system** (optional):
 
 Add to the `mimic_policies` list in `g1_locomimic_sim` class, updating the type annotation:
@@ -482,6 +498,32 @@ python -c "from robojudo.config import cfg_registry; print('g1_{snake_case}' in 
 python -c "from robojudo.policy import policy_registry; print('{POLICY_NAME}Policy' in policy_registry.types)"
 
 # 6. Simulation run test
+python scripts/run_pipeline_sim.py -c g1_{snake_case}
+
+# 7. Joint order alignment verification (CRITICAL)
+#    Confirm policy DoF order matches env order, or remapping is as expected
+#    Ideal: adapter indices are identity (i == j)
+python -c "
+from robojudo.tools.dof import DoFAdapter
+from robojudo.config.g1.env.g1_env_cfg import G1_23DoF
+from robojudo.config.g1.policy.g1_{snake_case}_policy_cfg import G1{POLICY_NAME}DoF
+adapter = DoFAdapter(G1{POLICY_NAME}DoF().joint_names, G1_23DoF().joint_names)
+print(f'Matched {len(adapter.src_indices)}/{len(G1_23DoF().joint_names)} joints')
+if len(adapter.src_indices) > 0 and all(i == j for i, j in zip(adapter.src_indices, adapter.tar_indices)):
+    print('✓ DoFAdapter is identity — joint order matches env order')
+    print('  Observations/actions will NOT be shuffled.')
+else:
+    print('⚠ DoFAdapter performs remapping!')
+    for s, t in zip(adapter.src_indices, adapter.tar_indices):
+        if s != t:
+            print(f'  Joint {s} (policy) -> Joint {t} (env) — REMAPPED')
+    print('  Verify this remapping matches training joint order.')
+"
+
+# 8. Safety check verification
+#    Simulation must NOT produce:
+#    [ERROR] [robojudo.pipeline.rl_pipeline] Robot fallen! Shutdown for safety.
+#    If this error appears, the robot cannot stand — check joint order, PD gains, action_scale, etc.
 python scripts/run_pipeline_sim.py -c g1_{snake_case}
 ```
 
@@ -626,7 +668,8 @@ from robojudo.tools.tool_cfgs import convert_29dof_to_23dof   # 29DoF -> 23DoF c
 
 1. **Wrong observation order** — Most common issue. Must exactly match training, including scaling coefficients
 2. **Wrong quaternion format** — `env_data.base_quat` is `[x,y,z,w]`, some projects use `[w,x,y,z]`
-3. **Wrong joint order** — Source project joint order may differ from G1 standard order
+3. **Wrong joint order (hard to debug)** — `joint_names` must match the **joint order used by the training model** (determined by the training project's MuJoCo XML tree traversal), not an assumed G1 standard order. When the order mismatches, `DoFAdapter` silently remaps observations and actions — the model receives shuffled values → produces invalid actions → robot falls. All parameter lists (`stiffness`, `damping`, `default_pos`, `action_scale`) must follow this same order. This bug is silent — no errors, no warnings, the robot just cannot stand.
 4. **Forgot to register** — Both `policy_registry.add()` and `@cfg_registry.register` are required
 5. **Wrong ONNX output index** — Some models have multiple outputs, confirm which one is the action (print output_names to check)
 6. **action_scale dimension mismatch** — If using `list[float]`, length must equal action DoF count
+7. **DoFAdapter masks order issues** — DoFAdapter's `template` parameter silently fills unmatched joints with template values. If the policy DoF and env DoF joint name sets differ (e.g., 23DoF policy running in 29DoF env), unmatched joints take template values without any error. Always verify `DoFAdapter` mapping results match expectations before deployment.
