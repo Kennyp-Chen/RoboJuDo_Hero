@@ -697,7 +697,7 @@ class WbcAmpPolicyCfg(PolicyCfg):
         return policy_file.as_posix()
 
     action_scale: float = 0.25
-    action_clip: float = 100.0
+    action_clip: float | None = None
     action_beta: float = 1.0
     freq: int = 50
 
