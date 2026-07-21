@@ -39,9 +39,14 @@ class PolicyCfg(Config):
         return 0
 
     @field_validator("action_scale", "action_clip")
-    def check_action_scale(cls, v):
-        if v is not None and v <= 0:
-            raise ValueError("action_scale must be positive")
+    def check_action_scale(cls, v: float | list[float] | None):
+        if v is not None:
+            if isinstance(v, (list, tuple)):
+                for val in v:
+                    if val <= 0:
+                        raise ValueError("All action_scale values must be positive")
+            elif v <= 0:  # pyright: ignore[reportUnnecessaryIsInstance]
+                raise ValueError("action_scale must be positive")
         return v
 
     @model_validator(mode="after")
