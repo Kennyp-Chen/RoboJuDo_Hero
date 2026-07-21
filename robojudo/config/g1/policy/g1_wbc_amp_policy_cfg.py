@@ -167,6 +167,15 @@ class G1WbcAmp23PolicyCfg(G1WbcAmpPolicyCfg):
         0.438577, 0.438577, 0.438577, 0.438577, 0.438577,
     ]
 
+    # Velocity command map [min, dead_center, max], matching training UniformVelocityCommand ranges.
+    # Training: vx=(-1.5, 3.0), vy=(-1.0, 1.0), wz=(-pi/2, pi/2)
+    # Sign convention: vx>0=forward, vy>0=right, joystick rx>0 → negative wz (right turn)
+    commands_map: list[list[float]] = [
+        [-1.5, 0.0, 3.0],
+        [-1.0, 0.0, 1.0],
+        [1.57, 0.0, -1.57],
+    ]
+
     robot_state_dim: int = 78  # 3+3+3+23+23+23
     history_obs_dims: dict[str, int] = {
         "ang_vel": 3,

@@ -35,10 +35,6 @@ class WbcAmpPolicy(Policy):
         self.cfg_action_dof = cfg_policy.action_dof
         self.default_pos = self.default_dof_pos
 
-        self.max_linear_vel = self.cfg_policy.max_cmd[0]
-        self.max_lateral_vel = self.cfg_policy.max_cmd[1]
-        self.max_angular_vel = self.cfg_policy.max_cmd[2]
-
         self.reset()
 
     def reset(self):

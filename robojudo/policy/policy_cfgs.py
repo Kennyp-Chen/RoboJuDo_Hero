@@ -707,12 +707,12 @@ class WbcAmpPolicyCfg(PolicyCfg):
     obs_scales: ObsScalesCfg = ObsScalesCfg()
     dt: float = 0.02
 
-    max_cmd: list[float] = [3.0, 1.5, 2.]
     commands_map: list[list[float]] = [
-        [-1.5, 0.0, 3.0],
-        [-1.5, 0.0, 1.5],
-        [-2., 0.0, 2.],
+        [-1.5, 0.0, 3.0],# 前后
+        [-1.5, 0.0, 1.5],# 横移
+        [2., 0.0, -2.], # 转向
     ]
+
 
 
 class WbcLocoPolicyCfg(PolicyCfg):
