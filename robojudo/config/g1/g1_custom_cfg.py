@@ -196,8 +196,6 @@ class g1_wbc_amp(RlPipelineCfg):
     ctrl: list[KeyboardCtrlCfg | JoystickCtrlCfg] = [
         KeyboardCtrlCfg(
             triggers_extra={
-                "w": "[POLICY_LOCO]",
-                "s": "[POLICY_LOCO]",
             }
         ),
         JoystickCtrlCfg(),
@@ -227,14 +225,12 @@ class g1_wbc_amp_23(RlPipelineCfg):
     ctrl: list[KeyboardCtrlCfg | JoystickCtrlCfg] = [
         KeyboardCtrlCfg(
             triggers_extra={
-                "w": "[POLICY_LOCO]",
-                "s": "[POLICY_LOCO]",
             }
         ),
         JoystickCtrlCfg(),
     ]
     policy: G1WbcAmp23PolicyCfg = G1WbcAmp23PolicyCfg()
-
+    do_safety_check: bool = True
 
 @cfg_registry.register
 class g1_wbc_loco(RlPipelineCfg):
@@ -247,8 +243,6 @@ class g1_wbc_loco(RlPipelineCfg):
     ctrl: list[KeyboardCtrlCfg | JoystickCtrlCfg] = [
         KeyboardCtrlCfg(
             triggers_extra={
-                "w": "[POLICY_LOCO]",
-                "s": "[POLICY_LOCO]",
             }
         ),
         JoystickCtrlCfg(),

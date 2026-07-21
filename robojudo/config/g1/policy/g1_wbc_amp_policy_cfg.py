@@ -66,59 +66,58 @@ class G1WbcAmpDoF(DoFConfig):
 
 
 class G1WbcAmp23DoF(DoFConfig):
-    """G1 23-DoF joint config for WBC AMP policy (policy order, left-right grouped).
+    """G1 23-DoF joint config for WBC AMP policy.
 
-    23 DoF removes 6 joints from 29 DoF:
-    - waist_roll_joint, waist_pitch_joint
-    - left_wrist_pitch_joint, left_wrist_yaw_joint
-    - right_wrist_pitch_joint, right_wrist_yaw_joint
-
-    Keeps: 12 leg + 1 waist_yaw + 10 arms (5 each side) = 23
+    Joint order matches env hardware order (G1_23DoF), so DoFAdapter is identity.
+    This is essential: the 23-DoF ONNX model was trained with MuJoCo hardware order
+    (left leg → right leg → waist → left arm → right arm), NOT left-right grouped.
 
     Stiffness/damping from g1_23dof_constants motor groups:
       7520_14 (hip_pitch/hip_yaw/waist_yaw): stiffness=40.179, damping=2.558
       7520_22 (hip_roll/knee):              stiffness=99.098, damping=6.309
-      5020×2 (ankle_pitch/ankle_roll):      stiffness=28.501, damping=1.814
+      5020x2 (ankle_pitch/ankle_roll):      stiffness=28.501, damping=1.814
       5020 (shoulder/elbow/wrist):          stiffness=14.251, damping=0.907
     """
 
     joint_names: list[str] = [
         'left_hip_pitch_joint',
-        'right_hip_pitch_joint',
-        'waist_yaw_joint',
         'left_hip_roll_joint',
-        'right_hip_roll_joint',
         'left_hip_yaw_joint',
-        'right_hip_yaw_joint',
         'left_knee_joint',
-        'right_knee_joint',
-        'left_shoulder_pitch_joint',
-        'right_shoulder_pitch_joint',
         'left_ankle_pitch_joint',
-        'right_ankle_pitch_joint',
-        'left_shoulder_roll_joint',
-        'right_shoulder_roll_joint',
         'left_ankle_roll_joint',
+        'right_hip_pitch_joint',
+        'right_hip_roll_joint',
+        'right_hip_yaw_joint',
+        'right_knee_joint',
+        'right_ankle_pitch_joint',
         'right_ankle_roll_joint',
+        'waist_yaw_joint',
+        'left_shoulder_pitch_joint',
+        'left_shoulder_roll_joint',
         'left_shoulder_yaw_joint',
-        'right_shoulder_yaw_joint',
         'left_elbow_joint',
-        'right_elbow_joint',
         'left_wrist_roll_joint',
+        'right_shoulder_pitch_joint',
+        'right_shoulder_roll_joint',
+        'right_shoulder_yaw_joint',
+        'right_elbow_joint',
         'right_wrist_roll_joint',
     ]
 
     default_pos: list[float] | None = [0.0] * 23
     stiffness: list[float] | None = [
-        40.179, 40.179, 40.179, 99.098, 99.098, 40.179,
-        40.179, 99.098, 99.098, 14.251, 14.251, 28.501,
-        28.501, 14.251, 14.251, 28.501, 28.501, 14.251,
+        40.179, 99.098, 40.179, 99.098, 28.501, 28.501,
+        40.179, 99.098, 40.179, 99.098, 28.501, 28.501,
+        40.179,
+        14.251, 14.251, 14.251, 14.251, 14.251,
         14.251, 14.251, 14.251, 14.251, 14.251,
     ]
     damping: list[float] | None = [
-        2.558, 2.558, 2.558, 6.309, 6.309, 2.558,
-        2.558, 6.309, 6.309, 0.907, 0.907, 1.814,
-        1.814, 0.907, 0.907, 1.814, 1.814, 0.907,
+        2.558, 6.309, 2.558, 6.309, 1.814, 1.814,
+        2.558, 6.309, 2.558, 6.309, 1.814, 1.814,
+        2.558,
+        0.907, 0.907, 0.907, 0.907, 0.907,
         0.907, 0.907, 0.907, 0.907, 0.907,
     ]
 
@@ -158,14 +157,14 @@ class G1WbcAmp23PolicyCfg(G1WbcAmpPolicyCfg):
     obs_dof: DoFConfig = G1WbcAmp23DoF()
     action_dof: DoFConfig = G1WbcAmp23DoF()
 
-    # Per-joint action_scale = 0.25 * effort_limit / stiffness (from training env.yaml)
+    # Per-joint action_scale in hardware order (matching training env.yaml)
+    # Groups: hip_pitch/yaw/waist_yaw=0.5475, hip_roll/knee=0.3507, rest=0.4386
     action_scale: list[float] = [
-        0.547546, 0.547546, 0.547546,  0.350661, 0.350661,
-        0.547546, 0.547546,  0.350661, 0.350661,
-        0.438577, 0.438577,  0.438577, 0.438577,
-        0.438577, 0.438577,  0.438577, 0.438577,
-        0.438577, 0.438577,  0.438577, 0.438577,
-        0.438577, 0.438577,
+        0.547546, 0.350661, 0.547546, 0.350661, 0.438577, 0.438577,
+        0.547546, 0.350661, 0.547546, 0.350661, 0.438577, 0.438577,
+        0.547546,
+        0.438577, 0.438577, 0.438577, 0.438577, 0.438577,
+        0.438577, 0.438577, 0.438577, 0.438577, 0.438577,
     ]
 
     robot_state_dim: int = 78  # 3+3+3+23+23+23
