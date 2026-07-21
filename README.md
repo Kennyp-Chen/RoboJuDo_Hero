@@ -49,10 +49,11 @@ The **RoboJuDo_SAR** (SimAndReal) branch includes the following new features:
 git clone https://github.com/Kennyp-Chen/RoboJuDo_Hero.git
 cd RoboJuDo_Hero/
 
-# Pull model files managed by Git LFS
-# (Required: model .onnx, .pt, .pkl files are stored via Git LFS)
-git lfs install
-git lfs pull
+# Download model files from HuggingFace
+# (Model files are offloaded to HuggingFace due to size)
+# Download to assets/ so the final structure is:
+#   assets/models/  (from HuggingFace)
+huggingface-cli download Kennyp-Chen/robojudo_sar-assets --local-dir assets/ --repo-type dataset
 
 # Create a Python environment
 conda create -n robojudo_sar python=3.11 -y

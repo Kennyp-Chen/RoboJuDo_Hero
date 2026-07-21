@@ -127,6 +127,8 @@ profile_output*
 # Project-specific files
 .vscode
 *.wbproj
+# assets/models  -- offloaded to HuggingFace
+assets/models/
 # assets/motions  -- removed: motion files now tracked via LFS
 .gr1t2.jpg
 logs

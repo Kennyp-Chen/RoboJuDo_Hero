@@ -49,10 +49,11 @@ RoboJuDo_Hero 是基于 [RoboJuDo](https://github.com/HansZ8/RoboJuDo) (作者 H
 git clone https://github.com/Kennyp-Chen/RoboJuDo_Hero.git
 cd RoboJuDo_Hero/
 
-# 拉取 Git LFS 管理的模型文件
-# （必需：模型 .onnx、.pt、.pkl 等文件通过 Git LFS 存储）
-git lfs install
-git lfs pull
+# 从 HuggingFace 下载模型文件
+# （模型文件因体积过大已迁移至 HuggingFace）
+# 下载到 assets/ 目录，最终结构为：
+#   assets/models/  （来自 HuggingFace）
+huggingface-cli download Kennyp-Chen/robojudo_sar-assets --local-dir assets/ --repo-type dataset
 
 # 创建 Python 环境
 conda create -n robojudo_sar python=3.11 -y
